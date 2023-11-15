@@ -1,0 +1,9 @@
+RewriteEngine on
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ index.php?path=$1 [NC,L,QSA]
+#RewriteCond %{HTTP_HOST} ^saharertebat\.com
+#RewriteRule (.*) http://www.saharertebat.com/home$1 [R=301]
+#redirect domain to /index.php
+#RewriteCond %{HTTP_HOST} ^domain\.com
+#RewriteRule (.*) http://www.domain.com/index.php$1 [R=301]

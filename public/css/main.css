@@ -1,0 +1,241 @@
+@font-face {
+    font-family: 'BYekan' !important;
+    src: url('fonts/BYekan.eot') format('eot'), url('fonts/Byekan.ttf') format('truetype'), url('fonts/BYekan.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+}
+
+.select2-selection {
+    height: 2.50002em;
+}
+
+textarea:focus,
+input[type="text"]:focus,
+input[type="password"]:focus,
+input[type="datetime"]:focus,
+input[type="datetime-local"]:focus,
+input[type="date"]:focus,
+input[type="month"]:focus,
+input[type="time"]:focus,
+input[type="week"]:focus,
+input[type="number"]:focus,
+input[type="email"]:focus,
+input[type="url"]:focus,
+input[type="search"]:focus,
+input[type="tel"]:focus,
+input[type="color"]:focus,
+.uneditable-input:focus {
+    border-color: rgba(47, 255, 28, 0.8);
+    box-shadow: 0 1px 1px rgba(47, 255, 28, 0.8) inset, 0 0 8px rgba(47, 255, 28, 0.8);
+    outline: 0 none;
+}
+
+
+/* Stop Line Break inside Cell */
+
+.dataTable tr.child .dtr-data {
+    overflow: auto !important;
+}
+
+
+/* * {
+    font-size: 14px !important;
+} */
+
+
+/* @media print {
+    .myDivToPrint {
+        background-color: white;
+        height: 100%;
+        width: 100%;
+        position: fixed;
+        top: 0;
+        left: 0;
+        margin: 0;
+        padding: 15px;
+        font-size: 14px;
+        line-height: 18px;
+    }
+} */
+
+.factors_tab1 {
+    text-align: center;
+}
+
+.init_boxes {
+    display: inline-block;
+    height: 60px;
+    width: 120px;
+    margin: 10px;
+    border-radius: 5px;
+    text-align: center;
+    padding-top: 15px;
+    padding-right: 5px;
+    padding-left: 5px;
+    vertical-align: middle;
+}
+
+.init_boxes:hover {
+    cursor: pointer;
+}
+
+#ekhtesase_emkanat_box {
+    background: #e0e0e0;
+}
+
+#sefareshe_jadid_box {
+    background: #e0e0e0;
+}
+
+#faktorha_box {
+    background: #e0e0e0;
+}
+
+#pardakhtha {
+    background: #e0e0e0;
+}
+
+#connection_log {
+    background: #e0e0e0;
+}
+
+#online_user {
+    background: #e0e0e0;
+}
+
+#moshkelat_box {
+    background: #e0e0e0;
+}
+
+#tamasha_box {
+    background: #e0e0e0;
+}
+
+.sefareshe_jadid_serviceslist {
+    text-align: right;
+    max-height: 355px;
+    background: #fafafa;
+    border: 1px solid #d5d5d5;
+    border-radius: 4px;
+    text-decoration: none;
+    list-style-type: none;
+    overflow: auto;
+    padding: 5px 5px 5px 5px;
+}
+
+.sefareshe_jadid_serviceslist_li:hover {
+    cursor: pointer;
+}
+
+
+/* .ektesase_emkanat_slist {
+    text-align: right;
+    height: auto;
+    background: #fafafa;
+    border: 1px solid #d5d5d5;
+    border-radius: 4px;
+    text-decoration: none;
+    list-style-type: none;
+    padding: 5px 5px 5px 5px;
+}
+
+.ektesase_emkanat_slist:hover {
+    cursor: pointer;
+} */
+
+.ekhtesas_emkanat_serviceslist {
+    text-align: right;
+    height: auto;
+    background: #fafafa;
+    border: 1px solid #d5d5d5;
+    border-radius: 4px;
+    text-decoration: none;
+    list-style-type: none;
+    padding: 5px 5px 5px 5px;
+}
+
+.ekhtesas_emkanat_serviceslist:hover {
+    cursor: pointer;
+}
+
+
+/* .loading-text{
+    position: absolute;
+    z-index: 9999;
+    height: 100px;
+    width: 130px;
+    text-align: center;
+    padding: 33px 0 0 0;
+    border-radius: 10px;
+    background-color: #117cc4;
+} */
+
+
+/*narengi:ff6606*/
+
+
+/*dashboard clock*/
+
+
+/*@font-face {*/
+
+
+/*    font-family: 'DIGITAL';*/
+
+
+/*    src: url('https://cssdeck.com/uploads/resources/fonts/digii/DS-DIGII.TTF');*/
+
+
+/*}*/
+
+
+/*html {*/
+
+
+/*    height: 100%;*/
+
+
+/*    background: radial-gradient(#000, #555);*/
+
+
+/*}*/
+
+form .col-form-label {
+    margin-top: 6px;
+}
+
+.digital-clock {
+    margin: auto;
+    position: relative;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    color: #ffffff;
+    border: 2px solid #999;
+    border-radius: 4px;
+    text-align: center;
+    /*font: 50px/60px 'DIGITAL', Helvetica;*/
+    background: linear-gradient(90deg, #000, #555);
+}
+
+.mceToolbar td {
+    display: table-row;
+    float: left;
+}
+
+.mceToolbar td:nth-of-type(11) {
+    clear: left;
+}
+
+.select2-selection--multiple {
+    overflow: hidden !important;
+    height: auto !important;
+}
+
+.ltrallexceptfirstcolumn td:not(:first-child) {
+    direction: ltr;
+}
+
+
+/*dashboard clock*/
