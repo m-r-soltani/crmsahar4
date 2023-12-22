@@ -7,35 +7,139 @@ class Bootstrap
     {
         $_SESSION['dashboard_menu_names'] = Helper::get_all_dashboard_menu_names();
         // Helper::cLog($_SESSION);
-        if(isset($_POST['GetAdminOperatorRestrictions'])){
-            $_POST=Helper::reformAjaxRequest($_POST);
-            $_POST = Helper::xss_check_array($_POST);
-            if(! $_POST['operator']) die(Helper::Custom_Msg('اپراتور پیدا نشد'));
 
-            $macc=Db::secure_fetchall("SELECT * FROM bnm_dashboard_menu_access macc
+        if (isset($_POST['send_pre_asiatech_bitstream_emkansanji'])) {
+            parse_str($_POST[key($_POST)], $_POST);
+            $_POST['noe_service']       = Helper::str_trim($_POST['noe_service']);
+            $_POST['baresie_dayeri']    = Helper::str_trim($_POST['baresie_dayeri']);
+            $_POST['telephone']         = Helper::str_trim($_POST['telephone']);
+            $tel = $_POST['telephone'];
+            $tel = Helper::regulateNumber($tel, 1);
+            $noe_service = false;
+            $baresie_dayeri = false;
+            if ($_POST['noe_service'] === "1") $noe_service = "adsl";
+            if ($_POST['noe_service'] === "2") $noe_service = "vdsl";
+            if ($_POST['baresie_dayeri'] === "1") $baresie_dayeri = true;
+            if ($_POST['baresie_dayeri'] === "2") $baresie_dayeri = false;
+            $res = Helper::asiatechEmkanSanji($tel, $noe_service, $baresie_dayeri);
+            if (!$res) die(Helper::Custom_Msg("خطا در برنامه", 3));
+            if ($res['hasError']) {
+                die(Helper::Custom_Msg($res['msg'], 1));
+            } else {
+                die(Helper::Custom_Msg($res['msg'], 3));
+            }
+
+
+
+            // die(json_encode($res));
+        }
+
+        if (isset($_POST['send_pre_realsubscribers'])) {
+            parse_str($_POST[key($_POST)], $_POST);
+            $ip = Helper::getClientIp();
+            $_POST['confirmstatus'] = 2;
+            $_POST['noe_moshtarak'] = 'real';
+            $_POST['ipaddress'] = $ip;
+            $_POST['tarikhe_tavalod'] = Helper::regulateNumber($_POST['tarikhe_tavalod']);
+            $_POST['tarikhe_tavalod'] = Helper::TabdileTarikh($_POST['tarikhe_tavalod'], 2, '/', '-', false);
+            $tozihat = Helper::str_trim($_POST['tozihat']);
+            unset($_POST['tozihat']);
+
+            foreach ($_POST as $k => $v) {
+                $_POST[$k] = Helper::str_trim($v);
+                $_POST[$k] = Helper::regulateNumber($v, 1);
+                if ($v === '') {
+                    $msg = "پر کردن مقادیر ستاره دار اجباریست";
+                    die(Helper::Custom_Msg($msg, 2));
+                }
+            }
+            $_POST['tozihat'] = $tozihat;
+            $sql = Helper::Insert_Generator($_POST, 'bnm_presubscribers');
+            $res = Db::secure_insert_array($sql, $_POST);
+            if (!$res) die(Helper::Custom_Msg('خطا در برنامه', 2));
+            die(Helper::Custom_Msg('درخواست با موفقیت انجام شد و بزودی همکاران ما با شما تماس خواهند گرفت', 1));
+        }
+
+        if (isset($_POST['send_pre_legalsubscribers'])) {
+            parse_str($_POST[key($_POST)], $_POST);
+            $ip = Helper::getClientIp();
+            $_POST['confirmstatus'] = 2;
+            $_POST['noe_moshtarak'] = 'legal';
+            $_POST['ipaddress'] = $ip;
+
+            // $_POST['tarikhe_tavalod']=Helper::regulateNumber($_POST['tarikhe_tavalod']);
+            // $_POST['tarikhe_tavalod']=Helper::TabdileTarikh($_POST['tarikhe_tavalod'], 2, '/', '-', false);
+            // $tozihat=Helper::str_trim($_POST['tozihat']);
+            // unset($_POST['tozihat']);
+
+            foreach ($_POST as $k => $v) {
+                $_POST[$k] = Helper::str_trim($v);
+                $_POST[$k] = Helper::regulateNumber($v, 1);
+                if ($v === '') {
+                    $msg = "پر کردن مقادیر ستاره دار اجباریست";
+                    die(Helper::Custom_Msg($msg, 2));
+                }
+            }
+            // $_POST['tozihat']=$tozihat;
+            $sql = Helper::Insert_Generator($_POST, 'bnm_presubscribers');
+            $res = Db::secure_insert_array($sql, $_POST);
+            if (!$res) die(Helper::Custom_Msg('خطا در برنامه', 2));
+            die(Helper::Custom_Msg('درخواست با موفقیت انجام شد و بزودی همکاران ما با شما تماس خواهند گرفت', 1));
+        }
+
+        if (isset($_POST['send_pre_branch'])) {
+
+            parse_str($_POST[key($_POST)], $_POST);
+            $ip = Helper::getClientIp();
+            $_POST['confirmstatus'] = 2;
+            $_POST['ipaddress'] = $ip;
+            $_POST['tarikhe_sabt'] = Helper::regulateNumber($_POST['tarikhe_sabt']);
+            $_POST['tarikhe_sabt'] = Helper::TabdileTarikh($_POST['tarikhe_sabt'], 2, '/', '-', false);
+            $required = ['name_sherkat', 'tarikhe_sabt', 'telephone1', 'telephone_hamrah', 'ostan', 'shahr', 'address'];
+            foreach ($_POST as $k => $v) {
+                $_POST[$k] = Helper::str_trim($v);
+                $_POST[$k] = Helper::regulateNumber($v, 1);
+                if (in_array($k, $required) && $v === '') {
+                    $msg = "پر کردن مقادیر ستاره دار اجباریست";
+                    die(Helper::Custom_Msg($msg, 2));
+                }
+            }
+            $sql = Helper::Insert_Generator($_POST, 'bnm_prebranch');
+            $res = Db::secure_insert_array($sql, $_POST);
+            if (!$res) die(Helper::Custom_Msg('خطا در برنامه', 2));
+            die(Helper::Custom_Msg('درخواست با موفقیت انجام شد و بزودی همکاران ما با شما تماس خواهند گرفت', 1));
+        }
+
+        if (isset($_POST['GetAdminOperatorRestrictions'])) {
+            $_POST = Helper::reformAjaxRequest($_POST);
+            $_POST = Helper::xss_check_array($_POST);
+            if (!$_POST['operator']) die(Helper::Custom_Msg('اپراتور پیدا نشد'));
+
+            $macc = Db::secure_fetchall("SELECT * FROM bnm_dashboard_menu_access macc
             WHERE macc.operator_id = ? AND macc.user_type = ?", [$_POST['operator'], __ADMINOPERATORUSERTYPE__]);
-            
-            $madd=Db::secure_fetchall("SELECT * FROM bnm_dashboard_menu_add madd
+
+            $madd = Db::secure_fetchall("SELECT * FROM bnm_dashboard_menu_add madd
             WHERE madd.operator_id = ? AND madd.user_type = ?", [$_POST['operator'], __ADMINOPERATORUSERTYPE__]);
 
-            $med=Db::secure_fetchall("SELECT * FROM bnm_dashboard_menu_edit med
+            $med = Db::secure_fetchall("SELECT * FROM bnm_dashboard_menu_edit med
             WHERE med.operator_id = ? AND med.user_type = ?", [$_POST['operator'], __ADMINOPERATORUSERTYPE__]);
 
-            $mdel=Db::secure_fetchall("SELECT * FROM bnm_dashboard_menu_delete mdel
+            $mdel = Db::secure_fetchall("SELECT * FROM bnm_dashboard_menu_delete mdel
             WHERE mdel.operator_id = ? AND mdel.user_type = ?", [$_POST['operator'], __ADMINOPERATORUSERTYPE__]);
-            $arr=[];
-            $arr['access']=[];
-            $arr['add']=[];
-            $arr['edit']=[];
-            $arr['delete']=[];
-            if($macc) $arr['access']=$macc;
-            if($madd) $arr['add']=$madd;
-            if($med) $arr['edit']=$med;
-            if($mdel) $arr['delete']=$mdel;
+            $arr = [];
+            $arr['access'] = [];
+            $arr['add'] = [];
+            $arr['edit'] = [];
+            $arr['delete'] = [];
+            if ($macc) $arr['access'] = $macc;
+            if ($madd) $arr['add'] = $madd;
+            if ($med) $arr['edit'] = $med;
+            if ($mdel) $arr['delete'] = $mdel;
             die(json_encode($arr));
         }
-        if(isset($_POST['GetAllDashboardMenusForAdminOperator'])){
-            $arr=[];
+
+        if (isset($_POST['GetAllDashboardMenusForAdminOperator'])) {
+            $arr = [];
             // $sql="SELECT
             //         DISTINCT ( c.id ) cid,
             //         c.`name`
@@ -58,95 +162,96 @@ class Bootstrap
             //         }
             //     }
             // }
-            
+
             die(json_encode($dm));
         }
-        if(isset($_POST['GetAllAdminOperators'])){
-            $sql="SELECT * FROM bnm_users u WHERE u.user_type = ?";
-            $res=Db::secure_fetchall($sql, [__ADMINOPERATORUSERTYPE__]);
-            if(! $res) die(Helper::Json_Message('e'));
+
+        if (isset($_POST['GetAllAdminOperators'])) {
+            $sql = "SELECT * FROM bnm_users u WHERE u.user_type = ?";
+            $res = Db::secure_fetchall($sql, [__ADMINOPERATORUSERTYPE__]);
+            if (!$res) die(Helper::Json_Message('e'));
             die(json_encode($res));
         }
-        if(isset($_POST['send_adminoperator_restrictions'])){
+        if (isset($_POST['send_adminoperator_restrictions'])) {
             parse_str($_POST[key($_POST)], $_POST);
-            $sql="SELECT * FROM bnm_users WHERE id = ? AND user_type = ?";
-            $res=Db::secure_fetchall($sql,[$_POST['operator'], __ADMINOPERATORUSERTYPE__]);
-            if(! $res) die(Helper::Custom_Msg("اطلاعات اپراتور در پایگاه داده یافت نشد.",2));
-            $dmenu=Db::secure_fetchall("DELETE FROM bnm_dashboard_menu_access WHERE operator_id =? AND user_type =?", [$res[0]['id'], $res[0]['user_type']]);
-            $dadd=Db::secure_fetchall("DELETE FROM bnm_dashboard_menu_add WHERE operator_id =? AND user_type =?", [$res[0]['id'], $res[0]['user_type']]);
-            $dedit=Db::secure_fetchall("DELETE FROM bnm_dashboard_menu_edit WHERE operator_id =? AND user_type =?", [$res[0]['id'], $res[0]['user_type']]);
-            $ddel=Db::secure_fetchall("DELETE FROM bnm_dashboard_menu_delete WHERE operator_id =? AND user_type =?", [$res[0]['id'], $res[0]['user_type']]);
+            $sql = "SELECT * FROM bnm_users WHERE id = ? AND user_type = ?";
+            $res = Db::secure_fetchall($sql, [$_POST['operator'], __ADMINOPERATORUSERTYPE__]);
+            if (!$res) die(Helper::Custom_Msg("اطلاعات اپراتور در پایگاه داده یافت نشد.", 2));
+            $dmenu = Db::secure_fetchall("DELETE FROM bnm_dashboard_menu_access WHERE operator_id =? AND user_type =?", [$res[0]['id'], $res[0]['user_type']]);
+            $dadd = Db::secure_fetchall("DELETE FROM bnm_dashboard_menu_add WHERE operator_id =? AND user_type =?", [$res[0]['id'], $res[0]['user_type']]);
+            $dedit = Db::secure_fetchall("DELETE FROM bnm_dashboard_menu_edit WHERE operator_id =? AND user_type =?", [$res[0]['id'], $res[0]['user_type']]);
+            $ddel = Db::secure_fetchall("DELETE FROM bnm_dashboard_menu_delete WHERE operator_id =? AND user_type =?", [$res[0]['id'], $res[0]['user_type']]);
             if (isset($_POST['menu'])) {
-                if($_POST['menu']){
-                    for ($i=0; $i <count($_POST['menu']) ; $i++) { 
-                        $sql    = Helper::Insert_Generator(     array('menu_id' => $_POST['menu'][$i], 'operator_id' => $res[0]['id'],'user_type'=>$res[0]['user_type']), 'bnm_dashboard_menu_access');
-                        $result = Db::secure_insert_array($sql, array('menu_id' => $_POST['menu'][$i], 'operator_id' => $res[0]['id'],'user_type'=>$res[0]['user_type']));
+                if ($_POST['menu']) {
+                    for ($i = 0; $i < count($_POST['menu']); $i++) {
+                        $sql    = Helper::Insert_Generator(array('menu_id' => $_POST['menu'][$i], 'operator_id' => $res[0]['id'], 'user_type' => $res[0]['user_type']), 'bnm_dashboard_menu_access');
+                        $result = Db::secure_insert_array($sql, array('menu_id' => $_POST['menu'][$i], 'operator_id' => $res[0]['id'], 'user_type' => $res[0]['user_type']));
                     }
-                }                
+                }
             }
             if (isset($_POST['add'])) {
-                if($_POST['add']){
-                    for ($i=0; $i <count($_POST['add']) ; $i++) { 
-                        $sql    = Helper::Insert_Generator(     array('menu_id' => $_POST['add'][$i], 'operator_id' => $res[0]['id'],'user_type'=>$res[0]['user_type']), 'bnm_dashboard_menu_add');
-                        $result = Db::secure_insert_array($sql, array('menu_id' => $_POST['add'][$i], 'operator_id' => $res[0]['id'],'user_type'=>$res[0]['user_type']));
+                if ($_POST['add']) {
+                    for ($i = 0; $i < count($_POST['add']); $i++) {
+                        $sql    = Helper::Insert_Generator(array('menu_id' => $_POST['add'][$i], 'operator_id' => $res[0]['id'], 'user_type' => $res[0]['user_type']), 'bnm_dashboard_menu_add');
+                        $result = Db::secure_insert_array($sql, array('menu_id' => $_POST['add'][$i], 'operator_id' => $res[0]['id'], 'user_type' => $res[0]['user_type']));
                     }
-                }                
+                }
             }
             if (isset($_POST['edit'])) {
-                if($_POST['edit']){
-                    for ($i=0; $i <count($_POST['edit']) ; $i++) { 
-                        $sql    = Helper::Insert_Generator(     array('menu_id' => $_POST['edit'][$i], 'operator_id' => $res[0]['id'],'user_type'=>$res[0]['user_type']), 'bnm_dashboard_menu_edit');
-                        $result = Db::secure_insert_array($sql, array('menu_id' => $_POST['edit'][$i], 'operator_id' => $res[0]['id'],'user_type'=>$res[0]['user_type']));
+                if ($_POST['edit']) {
+                    for ($i = 0; $i < count($_POST['edit']); $i++) {
+                        $sql    = Helper::Insert_Generator(array('menu_id' => $_POST['edit'][$i], 'operator_id' => $res[0]['id'], 'user_type' => $res[0]['user_type']), 'bnm_dashboard_menu_edit');
+                        $result = Db::secure_insert_array($sql, array('menu_id' => $_POST['edit'][$i], 'operator_id' => $res[0]['id'], 'user_type' => $res[0]['user_type']));
                     }
-                }                
+                }
             }
             if (isset($_POST['delete'])) {
-                if($_POST['delete']){
-                    for ($i=0; $i <count($_POST['delete']) ; $i++) { 
-                        $sql    = Helper::Insert_Generator(     array('menu_id' => $_POST['delete'][$i], 'operator_id' => $res[0]['id'],'user_type'=>$res[0]['user_type']), 'bnm_dashboard_menu_delete');
-                        $result = Db::secure_insert_array($sql, array('menu_id' => $_POST['delete'][$i], 'operator_id' => $res[0]['id'],'user_type'=>$res[0]['user_type']));
+                if ($_POST['delete']) {
+                    for ($i = 0; $i < count($_POST['delete']); $i++) {
+                        $sql    = Helper::Insert_Generator(array('menu_id' => $_POST['delete'][$i], 'operator_id' => $res[0]['id'], 'user_type' => $res[0]['user_type']), 'bnm_dashboard_menu_delete');
+                        $result = Db::secure_insert_array($sql, array('menu_id' => $_POST['delete'][$i], 'operator_id' => $res[0]['id'], 'user_type' => $res[0]['user_type']));
                     }
-                }                
+                }
             }
             // die(json_encode($_POST));
             die(Helper::Custom_Msg(Helper::Messages('s'), 1));
         }
-        if(isset($_POST['send_adminoprator_create'])){
+        if (isset($_POST['send_adminoprator_create'])) {
             parse_str($_POST[key($_POST)], $_POST);
             $_POST = Helper::xss_check_array($_POST);
-            $_POST['user_type']=__ADMINOPERATORUSERTYPE__;
-            $_POST['password']=Helper::str_md5($_POST['password']);
-            $_POST['baladasti_id']=0;
-            $_POST['status']=1;
-            $_POST['branch_id']=0;
-            $_POST['user_id']=0;
-            $sql=Helper::Insert_Generator($_POST, 'bnm_users');
-            $res=Db::secure_insert_array($sql,$_POST);
-            if($res){
-                die(Helper::Custom_Msg(Helper::Messages('s'),1));
-            }else{
-                die(Helper::Custom_Msg(Helper::Messages('f'),3));
+            $_POST['user_type'] = __ADMINOPERATORUSERTYPE__;
+            $_POST['password'] = Helper::str_md5($_POST['password']);
+            $_POST['baladasti_id'] = 0;
+            $_POST['status'] = 1;
+            $_POST['branch_id'] = 0;
+            $_POST['user_id'] = 0;
+            $sql = Helper::Insert_Generator($_POST, 'bnm_users');
+            $res = Db::secure_insert_array($sql, $_POST);
+            if ($res) {
+                die(Helper::Custom_Msg(Helper::Messages('s'), 1));
+            } else {
+                die(Helper::Custom_Msg(Helper::Messages('f'), 3));
             }
         }
-        if(isset($_POST['send_adminoperator_operation'])){
+        if (isset($_POST['send_adminoperator_operation'])) {
             parse_str($_POST[key($_POST)], $_POST);
             $_POST = Helper::xss_check_array($_POST);
-            if(! $_POST['operator']) die(Helper::Custom_Msg('اطلاعات اپراتور ناقص است.'));
-            if(! $_POST['operation']) die(Helper::Custom_Msg('درخواست شما در سیستم تعریف نشده.'));
+            if (!$_POST['operator']) die(Helper::Custom_Msg('اطلاعات اپراتور ناقص است.'));
+            if (!$_POST['operation']) die(Helper::Custom_Msg('درخواست شما در سیستم تعریف نشده.'));
             switch ($_POST['operation']) {
                 case '1':
                     //enable
-                    $sql=Helper::Update_Generator(['status'=>$_POST['operation'], 'id'=>$_POST['operator']], 'bnm_users', "WHERE id = :id");
-                    $res=Db::secure_update_array($sql, ['status'=>$_POST['operation'], 'id'=>$_POST['operator']]);
-                break;
+                    $sql = Helper::Update_Generator(['status' => $_POST['operation'], 'id' => $_POST['operator']], 'bnm_users', "WHERE id = :id");
+                    $res = Db::secure_update_array($sql, ['status' => $_POST['operation'], 'id' => $_POST['operator']]);
+                    break;
                 case '2':
                     //disable
-                    $sql=Helper::Update_Generator(['status'=>$_POST['operation'], 'id'=>$_POST['operator']], 'bnm_users', "WHERE id = :id");
-                    $res=Db::secure_update_array($sql, ['status'=>$_POST['operation'], 'id'=>$_POST['operator']]);
-                break;
+                    $sql = Helper::Update_Generator(['status' => $_POST['operation'], 'id' => $_POST['operator']], 'bnm_users', "WHERE id = :id");
+                    $res = Db::secure_update_array($sql, ['status' => $_POST['operation'], 'id' => $_POST['operator']]);
+                    break;
                 case '3':
                     //delete
-                    $operator=$_POST['operator'];
+                    $operator = $_POST['operator'];
                     // $sql="DELETE FROM bnm_users WHERE id = $operator";
                     // $res=Db::justexecute($sql);
                     Db::secure_delete("DELETE FROM bnm_users WHERE id =:id", $_POST['operator']);
@@ -155,212 +260,212 @@ class Bootstrap
                     // die(json_encode($sql));
                     // Db::justexecute($sql);
                     // $res=Db::secure_fetchall($sql,[$_POST['operator']]);
-                break;
+                    break;
                 default:
                     die(Helper::Custom_Msg(Helper::Messages('e'), 2));
-                break;
+                    break;
             }
             die(Helper::Custom_Msg(Helper::Messages('s'), 1));
         }
-        if(isset($_POST['GetBranchesListByCurrentUserAuthorities'])){
-            if(! Helper::Login_Just_Check()) die(Helper::Json_Message('af'));
+        if (isset($_POST['GetBranchesListByCurrentUserAuthorities'])) {
+            if (!Helper::Login_Just_Check()) die(Helper::Json_Message('af'));
             switch ($_SESSION['user_type']) {
                 case __ADMINUSERTYPE__:
                 case __ADMINOPERATORUSERTYPE__:
-                    $sql="SELECT id,name_sherkat FROM bnm_branch";
-                    $res=Db::fetchall_Query($sql);
-                    if($res){
-                        $res[]=['id'=>0, 'name_sherkat'=>__OWNERCOMPANYFA__];
+                    $sql = "SELECT id,name_sherkat FROM bnm_branch";
+                    $res = Db::fetchall_Query($sql);
+                    if ($res) {
+                        $res[] = ['id' => 0, 'name_sherkat' => __OWNERCOMPANYFA__];
                     }
-                break;
+                    break;
                 case __MODIRUSERTYPE__:
                 case __MODIR2USERTYPE__:
                 case __OPERATOR2USERTYPE__:
                 case __OPERATORUSERTYPE__:
-                    $sql="SELECT id,name_sherkat FROM bnm_branch WHERE id = ?";
-                    $res=Db::secure_fetchall($sql, [$_SESSION['branch_id']]);
-                break;
+                    $sql = "SELECT id,name_sherkat FROM bnm_branch WHERE id = ?";
+                    $res = Db::secure_fetchall($sql, [$_SESSION['branch_id']]);
+                    break;
                 case __MOSHTARAKUSERTYPE__:
-                    $sql="SELECT id,name_sherkat FROM bnm_branch WHERE id = ?";
-                    $res=Db::secure_fetchall($sql, [$_SESSION['branch_id']]);
-                break;
+                    $sql = "SELECT id,name_sherkat FROM bnm_branch WHERE id = ?";
+                    $res = Db::secure_fetchall($sql, [$_SESSION['branch_id']]);
+                    break;
                 default:
                     die(Helper::Json_Message('af'));
-                break;
+                    break;
             }
-            
-            if(! $res) die(Helper::Json_Message('e'));
+
+            if (!$res) die(Helper::Json_Message('e'));
             die(json_encode($res));
         }
-        if(isset($_POST['getAsiatechBitstreamBeforeAndAfterPortReserveUsers'])){
-            if(! Helper::Login_Just_Check()) die(Helper::Json_Message('af'));
-            if(! Helper::onlyAdminAndBranches()) die(Helper::Json_Message('af'));
-            $res=Helper::getAllAsiatechBitstreamReservedOrUnReservedPortUsers();
-            if(! $res) die(Helper::Custom_Msg('مشترکی برای نمایش پیدا نشد'));   
+        if (isset($_POST['getAsiatechBitstreamBeforeAndAfterPortReserveUsers'])) {
+            if (!Helper::Login_Just_Check()) die(Helper::Json_Message('af'));
+            if (!Helper::onlyAdminAndBranches()) die(Helper::Json_Message('af'));
+            $res = Helper::getAllAsiatechBitstreamReservedOrUnReservedPortUsers();
+            if (!$res) die(Helper::Custom_Msg('مشترکی برای نمایش پیدا نشد'));
             die(json_encode($res));
         }
-        if(isset($_POST['KillUserByIdAndServiceType'])){
-            if(! Helper::Login_Just_Check()) die(Helper::Json_Message('af'));
-            if(! Helper::onlyAdminAndBranches()) die(Helper::Json_Message('af'));
+        if (isset($_POST['KillUserByIdAndServiceType'])) {
+            if (!Helper::Login_Just_Check()) die(Helper::Json_Message('af'));
+            if (!Helper::onlyAdminAndBranches()) die(Helper::Json_Message('af'));
             $_POST = Helper::reformAjaxRequest($_POST);
             $_POST = Helper::xss_check_array($_POST);
-            if(! $_POST['userid']) die(Helper::Custom_Msg('اطلاعات مشترک در سامانه یافت نشد', 3));
-            if($_POST['type']==='internet' || $_POST['type']==='i'){
-                $res=$GLOBALS['ibs_internet']->killUser((int)$_POST['userid']);
-            }elseif ($_POST['type']==='v' || $_POST['type']==='v') {
-                $res=$GLOBALS['ibs_voip']->killUser((int)$_POST['userid']);
+            if (!$_POST['userid']) die(Helper::Custom_Msg('اطلاعات مشترک در سامانه یافت نشد', 3));
+            if ($_POST['type'] === 'internet' || $_POST['type'] === 'i') {
+                $res = $GLOBALS['ibs_internet']->killUser((int)$_POST['userid']);
+            } elseif ($_POST['type'] === 'v' || $_POST['type'] === 'v') {
+                $res = $GLOBALS['ibs_voip']->killUser((int)$_POST['userid']);
             }
             die(Helper::Custom_Msg(Helper::Messages('s'), 1));
         }
 
-        if(isset($_POST['GetProvincesAndCities'])){
-            if(! Helper::Login_Just_Check()) die(Helper::Json_Message('af'));
+        if (isset($_POST['GetProvincesAndCities'])) {
+            // if(! Helper::Login_Just_Check()) die(Helper::Json_Message('af'));
             // if(! Helper::onlyAdminAndBranches()) die(Helper::Json_Message('af'));
             // $res=Helper::getAllAsiatechBitstreamReservedOrUnReservedPortUsers();
             // if(! $res) die(Helper::Custom_Msg('مشترکی برای نمایش پیدا نشد'));  
-            $sql="SELECT * FROM bnm_ostan"; 
-            $ostan=Db::fetchall_Query($sql);
-            $sql="SELECT * FROM bnm_shahr"; 
-            $shahr=Db::fetchall_Query($sql);
-            if(! $ostan && !$shahr) die(Helper::Json_Message('e'));
+            $sql = "SELECT * FROM bnm_ostan";
+            $ostan = Db::fetchall_Query($sql);
+            $sql = "SELECT * FROM bnm_shahr";
+            $shahr = Db::fetchall_Query($sql);
+            if (!$ostan && !$shahr) die(Helper::Json_Message('e'));
             // $res=[];
             foreach ($ostan as $k => $v) {
                 foreach ($shahr as $kk => $vv) {
-                    if($vv['ostan_id'] && $v['id']){
-                        if($vv['ostan_id']===$v['id']){
-                            $ostan[$k]['cities'][]=$vv;
+                    if ($vv['ostan_id'] && $v['id']) {
+                        if ($vv['ostan_id'] === $v['id']) {
+                            $ostan[$k]['cities'][] = $vv;
                         }
                     }
-                }    
+                }
             }
             die(json_encode($ostan));
         }
 
 
-        if(isset($_POST['getAsiatechBitstreamOpenTickets'])){
-            if(! Helper::Login_Just_Check()) die(Helper::Json_Message('af'));
-            if(! Helper::onlyAdminAndBranches()) die(Helper::Json_Message('af'));
-            $sql="SELECT at.*, CONCAT(LEFT(at.onvan , 50), '...') onvan50, DATE_FORMAT(at.mtarikh, '%Y-%m-%d %H:%i') fmtarikh,IF(sub.noe_moshtarak='real', CONCAT(sub.name,' ', sub.f_name), sub.name_sherkat) rlname,
+        if (isset($_POST['getAsiatechBitstreamOpenTickets'])) {
+            if (!Helper::Login_Just_Check()) die(Helper::Json_Message('af'));
+            if (!Helper::onlyAdminAndBranches()) die(Helper::Json_Message('af'));
+            $sql = "SELECT at.*, CONCAT(LEFT(at.onvan , 50), '...') onvan50, DATE_FORMAT(at.mtarikh, '%Y-%m-%d %H:%i') fmtarikh,IF(sub.noe_moshtarak='real', CONCAT(sub.name,' ', sub.f_name), sub.name_sherkat) rlname,
             IF(oss.telephone=1, sub.telephone1, IF(oss.telephone=2, sub.telephone2, IF(oss.telephone=3, sub.telephone3, NULL))) tel
             FROM bnm_asiatech_bs_tickets at
             INNER JOIN bnm_oss_subscribers oss ON oss.id = at.ossid
             INNER JOIN bnm_subscribers sub ON sub.id = oss.user_id
             WHERE at.responsecode= ? AND at.status= ?";
-            $res=Db::secure_fetchall($sql, [0, 1]);
-            if(! $res) die(Helper::Custom_Msg('تیکت بازی وجود ندارد'));
-            $res=Helper::tabdileTarikhIndexArray($res, 'fmtarikh', 1, '-', '-', true);
+            $res = Db::secure_fetchall($sql, [0, 1]);
+            if (!$res) die(Helper::Custom_Msg('تیکت بازی وجود ندارد'));
+            $res = Helper::tabdileTarikhIndexArray($res, 'fmtarikh', 1, '-', '-', true);
             // foreach ($res as $k => $v) {
-                
+
             //     $res[$k][$v]['fmtarikh']=Helper::TabdileTarikh($v['fmtarikh'], 1, '-', '-');
             // }
             die(json_encode($res));
         }
-        if(isset($_POST['AsiatechBitstreamNewComment'])){//input tiid
-            if(! Helper::Login_Just_Check()) die(Helper::Json_Message('af'));
-            if(! Helper::onlyAdminAndBranches()) die(Helper::Json_Message('af'));
+        if (isset($_POST['AsiatechBitstreamNewComment'])) { //input tiid
+            if (!Helper::Login_Just_Check()) die(Helper::Json_Message('af'));
+            if (!Helper::onlyAdminAndBranches()) die(Helper::Json_Message('af'));
             parse_str($_POST[key($_POST)], $_POST);
             $_POST = Helper::xss_check_array($_POST);
 
-            $sql="SELECT * FROM bnm_asiatech_bs_tickets WHERE id = ?";
-            $ticket=Db::secure_fetchall($sql, [$_POST['tiid']]);
-            if(! $ticket) die(Helper::Custom_Msg('تیکت مورد نظر در پایگاه داده وجود نداشت'));
-            $res=$GLOBALS['bs']->insertTicketComment($ticket[0]['tiid'], $_POST['comment']);
-            if(Helper::checkAsiatechBitstreamResponse($res)){
+            $sql = "SELECT * FROM bnm_asiatech_bs_tickets WHERE id = ?";
+            $ticket = Db::secure_fetchall($sql, [$_POST['tiid']]);
+            if (!$ticket) die(Helper::Custom_Msg('تیکت مورد نظر در پایگاه داده وجود نداشت'));
+            $res = $GLOBALS['bs']->insertTicketComment($ticket[0]['tiid'], $_POST['comment']);
+            if (Helper::checkAsiatechBitstreamResponse($res)) {
                 die(Helper::Custom_Msg($res['result']['errmsg'], 1));
-            }else{
+            } else {
                 die(Helper::Custom_Msg($res['result']['errmsg'], 2));
             }
         }
-        if(isset($_POST['getAsiatechBitstreamTicketHistoryAndDetail'])){//input bnm_asiatech_bs_tickets id 
-            if(! Helper::Login_Just_Check()) die(Helper::Json_Message('af'));
-            if(! Helper::onlyAdminAndBranches()) die(Helper::Json_Message('af'));
+        if (isset($_POST['getAsiatechBitstreamTicketHistoryAndDetail'])) { //input bnm_asiatech_bs_tickets id 
+            if (!Helper::Login_Just_Check()) die(Helper::Json_Message('af'));
+            if (!Helper::onlyAdminAndBranches()) die(Helper::Json_Message('af'));
             $_POST = Helper::reformAjaxRequest($_POST);
             $_POST = Helper::xss_check_array($_POST);
-            
-            $sql="SELECT * FROM bnm_asiatech_bs_tickets WHERE id = ?";
-            $ticket=Db::secure_fetchall($sql, [$_POST['tiid']]);
-            if(! $ticket) die(Helper::Custom_Msg('تیکت مورد نظر در پایگاه داده وجود نداشت'));
+
+            $sql = "SELECT * FROM bnm_asiatech_bs_tickets WHERE id = ?";
+            $ticket = Db::secure_fetchall($sql, [$_POST['tiid']]);
+            if (!$ticket) die(Helper::Custom_Msg('تیکت مورد نظر در پایگاه داده وجود نداشت'));
             // $history=$GLOBALS['bs']->getTicketHistory($ticket[0]['tiid']);
-            $detail=$GLOBALS['bs']->getTicketDetails($ticket[0]['tiid']);
+            $detail = $GLOBALS['bs']->getTicketDetails($ticket[0]['tiid']);
             // $coment="کامنت تستی ممنون میشم پاسخ بدید.";
             // $rr=$GLOBALS['bs']->insertTicketComment($ticket[0]['tiid'],$coment);
             // die(json_encode($rr));
-            if(! Helper::checkAsiatechBitstreamResponse($detail)){
+            if (!Helper::checkAsiatechBitstreamResponse($detail)) {
                 die(Helper::Custom_Msg($detail['result']['errmsg']));
             }
-            $arr=[];
-            $arr['onvan']=$ticket[0]['onvan'];
-            $arr['description']=$ticket[0]['description'];
-            $arr['comments']=$detail['result']['ticketComment'];
-            $arr['history']=$detail['result']['ticketHistory'];
+            $arr = [];
+            $arr['onvan'] = $ticket[0]['onvan'];
+            $arr['description'] = $ticket[0]['description'];
+            $arr['comments'] = $detail['result']['ticketComment'];
+            $arr['history'] = $detail['result']['ticketHistory'];
             // $arr['chat']=array_merge($detail['result']['ticketComment'], $detail['result']['ticketHistory']);
             // foreach ($detail['result'] as $key => $value) {
             //     # code...
             // }
             // $arr['chat']+=$detail['result']['ticketComment'];
             // $arr['chat']+=$detail['result']['ticketHistory'];
-            $arr['chat']=[];
-            if($detail['result']['ticketComment']){
+            $arr['chat'] = [];
+            if ($detail['result']['ticketComment']) {
                 foreach ($detail['result']['ticketComment'] as $k => $v) {
                     array_push($arr['chat'], $v);
                 }
             }
-            if($detail['result']['ticketHistory']){
+            if ($detail['result']['ticketHistory']) {
                 foreach ($detail['result']['ticketHistory'] as $k => $v) {
                     array_push($arr['chat'], $v);
                 }
             }
             ///sort chat
-            foreach ($arr['chat'] as $key => $value){
+            foreach ($arr['chat'] as $key => $value) {
                 $ord[] = strtotime($value['submitDate']);
             }
             array_multisort($ord, SORT_ASC, $arr['chat']);
             ///sort chat
             foreach ($arr['chat'] as $k => $v) {
-                if(isset($v['operator'])){
-                    $arr['chat'][$k]['whoisit']='reply';
-                }else{
-                    $arr['chat'][$k]['operator']=__OWNER__;
-                    $arr['chat'][$k]['whoisit']='comment';
+                if (isset($v['operator'])) {
+                    $arr['chat'][$k]['whoisit'] = 'reply';
+                } else {
+                    $arr['chat'][$k]['operator'] = __OWNER__;
+                    $arr['chat'][$k]['whoisit'] = 'comment';
                 }
             }
             die(json_encode($arr));
         }
 
-        if(isset($_POST['send_asiatechbs_newticket'])){
-            if(! Helper::Login_Just_Check()) die(Helper::Json_Message('af'));
+        if (isset($_POST['send_asiatechbs_newticket'])) {
+            if (!Helper::Login_Just_Check()) die(Helper::Json_Message('af'));
             // $_POST=json_decode($_POST,true);
             // $_POST = Helper::reformAjaxRequest($_POST);
             parse_str($_POST[key($_POST)], $_POST);
             $_POST = Helper::xss_check_array($_POST);
-            if(! $_POST['sub']) die(Helper::Json_Message('f'));
-            $sql="SELECT oss.id ossid, oss.oss_id osssubid, res.id resid, res.port, oss.telephone,
+            if (!$_POST['sub']) die(Helper::Json_Message('f'));
+            $sql = "SELECT oss.id ossid, oss.oss_id osssubid, res.id resid, res.port, oss.telephone,
             sub.telephone1 tel1,sub.telephone2 tel2, sub.telephone3 tel3, sub.id subid, sub.code_meli,
             IF(oss.telephone=1, sub.telephone1, IF(oss.telephone=2, sub.telephone2, IF(oss.telephone=3, sub.telephone3, NULL))) tel
             FROM bnm_oss_subscribers oss 
             LEFT JOIN bnm_oss_reserves res ON res.oss_id = oss.id
             INNER JOIN bnm_subscribers sub ON sub.id = oss.user_id
             WHERE oss.id = ?";
-            $res=Db::secure_fetchall($sql, [$_POST['sub']]);
-            if(! $res) die(Helper::Custom_Msg('اطلاعات ثبت نام مشترک در Oss یافت نشد مجددا تلاش کنید.'));
-            $arr=[];
-            $portid=false;
-            $subid=false;
+            $res = Db::secure_fetchall($sql, [$_POST['sub']]);
+            if (!$res) die(Helper::Custom_Msg('اطلاعات ثبت نام مشترک در Oss یافت نشد مجددا تلاش کنید.'));
+            $arr = [];
+            $portid = false;
+            $subid = false;
             //todo ... check legal subscribers are shenase meli or not
-            if($res[0]['tel'] && $res[0]['code_meli']){
+            if ($res[0]['tel'] && $res[0]['code_meli']) {
                 //oss subscriberId = code_meli+'-'+tel
-                $subid=$GLOBALS['bs']->getSubscriberByID($res[0]['code_meli'].'-'.$res[0]['tel']);
-                $portid=$GLOBALS['bs']->getPortID($res[0]['tel']);
+                $subid = $GLOBALS['bs']->getSubscriberByID($res[0]['code_meli'] . '-' . $res[0]['tel']);
+                $portid = $GLOBALS['bs']->getPortID($res[0]['tel']);
                 // die(json_encode([$subid, $portid]));
-                if(! Helper::checkAsiatechBitstreamResponse($subid) && ! Helper::checkAsiatechBitstreamResponse($portid)){
+                if (!Helper::checkAsiatechBitstreamResponse($subid) && !Helper::checkAsiatechBitstreamResponse($portid)) {
                     die(Helper::Custom_Msg('اطلاعات مشترک در Oss آسیاتک یافت نشد لطفا ثبت نام مشترک را مجددا انجام دهید'));
                 }
-            }else{
+            } else {
                 die(Helper::Custom_Msg('لطفا صحیح بودن تلفن و کد ملی مشترک را بررسی نمایید.'));
             }
-        
+
             //insert ticket in bnm_asiatech_bs_tickets
-            $newticket=[
+            $newticket = [
                 'onvan'       =>    $_POST['onvan'],
                 'description' =>    $_POST['description'],
                 'tabaghe'     =>    $_POST['tabaghe'],
@@ -370,73 +475,84 @@ class Bootstrap
                 'ossid'       =>    $res[0]['ossid'],
                 'creatorid'   =>    $_SESSION['id'],
             ];
-            $sql=Helper::Insert_Generator($newticket, 'bnm_asiatech_bs_tickets');
-            $ticketid=Db::secure_insert_array($sql, $newticket);
+            $sql = Helper::Insert_Generator($newticket, 'bnm_asiatech_bs_tickets');
+            $ticketid = Db::secure_insert_array($sql, $newticket);
             // die(json_encode($ticketid));
-            if(! $ticketid) die(Helper::Json_Message('e'));
+            if (!$ticketid) die(Helper::Json_Message('e'));
             // die(json_encode([1]));
-            if(Helper::checkAsiatechBitstreamResponse($portid) && isset($portid['result']['data']['portid'])){ 
-                $maintype='port';
-                $maintypeid=$portid['result']['data']['portid'];
-            }else{
-                $maintype='subscriber';
-                $maintypeid=$subid['result']['data']['subid'];
+            if (Helper::checkAsiatechBitstreamResponse($portid) && isset($portid['result']['data']['portid'])) {
+                $maintype = 'port';
+                $maintypeid = $portid['result']['data']['portid'];
+            } else {
+                $maintype = 'subscriber';
+                $maintypeid = $subid['result']['data']['subid'];
             }
-            $sesuserinfo=Helper::getCurrentUserInfo();
-            
-            if(! $sesuserinfo) die(Helper::Json_Message('af'));
-            $ownertype          ='operator';
-            $ownerid            =(int) __ASIATECHVSPID__;
-            $source             =1;
-            $sourcevalue        ='';
-            $coordinatorName    =$sesuserinfo['name'].' '.$sesuserinfo['fname'];
-            $coordinatorMobile  =$sesuserinfo['mobile'];
-            $response=$GLOBALS['bs']->createTicket(25, $_POST['onvan'], $maintype, (int)$maintypeid,
-                 $_POST['description'], (int)$_POST['olaviat'], (int)$_POST['tabaghe'], $ownertype, $ownerid, 
-                 $source, $sourcevalue, $coordinatorName, $coordinatorMobile);
+            $sesuserinfo = Helper::getCurrentUserInfo();
+
+            if (!$sesuserinfo) die(Helper::Json_Message('af'));
+            $ownertype          = 'operator';
+            $ownerid            = (int) __ASIATECHVSPID__;
+            $source             = 1;
+            $sourcevalue        = '';
+            $coordinatorName    = $sesuserinfo['name'] . ' ' . $sesuserinfo['fname'];
+            $coordinatorMobile  = $sesuserinfo['mobile'];
+            $response = $GLOBALS['bs']->createTicket(
+                25,
+                $_POST['onvan'],
+                $maintype,
+                (int)$maintypeid,
+                $_POST['description'],
+                (int)$_POST['olaviat'],
+                (int)$_POST['tabaghe'],
+                $ownertype,
+                $ownerid,
+                $source,
+                $sourcevalue,
+                $coordinatorName,
+                $coordinatorMobile
+            );
             /////update ticket with answer recieved
-            if(Helper::checkAsiatechBitstreamResponse($response)){
-                $uparr=[
-                    'id'=> $ticketid,
-                    'responsecode'=>$response['result']['errcode'],
-                    'response_err'=>$response['result']['errmsg'],
-                    'tiid'=> $response['result']['data']['tiid'],
-                    'ticketid'=>$response['result']['data']['ticketID'],
-                    'mtarikh'=>Helper::Today_Miladi_Date().' '.Helper::nowShamsihisv(),
-                    'jresponse'=>json_encode($response),
+            if (Helper::checkAsiatechBitstreamResponse($response)) {
+                $uparr = [
+                    'id' => $ticketid,
+                    'responsecode' => $response['result']['errcode'],
+                    'response_err' => $response['result']['errmsg'],
+                    'tiid' => $response['result']['data']['tiid'],
+                    'ticketid' => $response['result']['data']['ticketID'],
+                    'mtarikh' => Helper::Today_Miladi_Date() . ' ' . Helper::nowShamsihisv(),
+                    'jresponse' => json_encode($response),
                 ];
-            }else{
-                $uparr=[
-                    'id'=> $ticketid,
-                    'responsecode'=>$response['result']['errcode'],
-                    'response_err'=>$response['result']['errmsg'],
-                    'tiid'=> '',
-                    'ticketid'=>'',
-                    'mtarikh'=>Helper::Today_Miladi_Date().' '.Helper::nowTimeTehran(':', true, true),
-                    'jresponse'=>json_encode($response),
+            } else {
+                $uparr = [
+                    'id' => $ticketid,
+                    'responsecode' => $response['result']['errcode'],
+                    'response_err' => $response['result']['errmsg'],
+                    'tiid' => '',
+                    'ticketid' => '',
+                    'mtarikh' => Helper::Today_Miladi_Date() . ' ' . Helper::nowTimeTehran(':', true, true),
+                    'jresponse' => json_encode($response),
                 ];
             }
-            $sql=Helper::Update_Generator($uparr, 'bnm_asiatech_bs_tickets', "WHERE id = :id");
-            $updateticket=Db::secure_update_array($sql, $uparr);
+            $sql = Helper::Update_Generator($uparr, 'bnm_asiatech_bs_tickets', "WHERE id = :id");
+            $updateticket = Db::secure_update_array($sql, $uparr);
             die(Helper::Custom_Msg($response['result']['errmsg'], 1));
-            
         }
 
-        if(isset($_POST['GetAllProvinces'])){
-            if(! Helper::Login_Just_Check()) die(Helper::Json_Message('f'));
-            $sql="SELECT * FROM bnm_ostan";
-            $res=Db::fetchall_Query($sql);
-            if(! $res) die(Helper::Json_Message('f'));
-            die(json_encode($res,JSON_UNESCAPED_UNICODE));
+        if (isset($_POST['GetAllProvinces'])) {
+            if (!Helper::Login_Just_Check()) die(Helper::Json_Message('f'));
+            $sql = "SELECT * FROM bnm_ostan";
+            $res = Db::fetchall_Query($sql);
+            if (!$res) die(Helper::Json_Message('f'));
+            die(json_encode($res, JSON_UNESCAPED_UNICODE));
         }
 
-        if(isset($_POST['GetCityByProvince'])){
-            if(! Helper::Login_Just_Check()) die(Helper::Json_Message('f'));
+        if (isset($_POST['GetCityByProvince'])) {
+            if (!Helper::Login_Just_Check()) die(Helper::Json_Message('f'));
             $_POST = Helper::reformAjaxRequest($_POST);
-            $sql="SELECT * FROM bnm_shahr shahr WHERE ostan_id = ?";
-            $res=Db::secure_fetchall($sql, [$_POST['ostanid']]);
-            if(! $res) die(Helper::Json_Message('f'));
-            die(json_encode($res,JSON_UNESCAPED_UNICODE));
+            $sql = "SELECT * FROM bnm_shahr shahr WHERE ostan_id = ?";
+            $res = Db::secure_fetchall($sql, [$_POST['ostanid']]);
+            if (!$res) die(Helper::Json_Message('f'));
+            die(json_encode($res, JSON_UNESCAPED_UNICODE));
         }
         // if(isset($_POST['getcitybyprovince'])){
         //     die(json_encode($_POST));
@@ -448,355 +564,346 @@ class Bootstrap
         //     die(json_encode($res,JSON_UNESCAPED_UNICODE));
         // }
 
-        if(isset($_POST['GetTeleCenters'])){
-            if(! Helper::Login_Just_Check()) die(Helper::Json_Message('f'));
+        if (isset($_POST['GetTeleCenters'])) {
+            if (!Helper::Login_Just_Check()) die(Helper::Json_Message('f'));
             $_POST = Helper::reformAjaxRequest($_POST);
-            $sql="SELECT tc.*,os.name ostan_faname, os.pish_shomare_ostan ostan_prenumber
+            $sql = "SELECT tc.*,os.name ostan_faname, os.pish_shomare_ostan ostan_prenumber
                 FROM bnm_telecommunications_center tc 
                 INNER JOIN bnm_ostan os ON os.id = tc.ostan";
             // $res=Db::secure_fetchall($sql, [$_POST['shahrid']]);
-            $res=Db::fetchall_Query($sql);
-            if(! $res) die(Helper::Json_Message('f'));
-            die(json_encode($res,JSON_UNESCAPED_UNICODE));
+            $res = Db::fetchall_Query($sql);
+            if (!$res) die(Helper::Json_Message('f'));
+            die(json_encode($res, JSON_UNESCAPED_UNICODE));
         }
 
-        if(isset($_POST['GetTeleCenterByCity'])){
-            if(! Helper::Login_Just_Check()) die(Helper::Json_Message('f'));
+        if (isset($_POST['GetTeleCenterByCity'])) {
+            if (!Helper::Login_Just_Check()) die(Helper::Json_Message('f'));
             $_POST = Helper::reformAjaxRequest($_POST);
-            $sql="SELECT * FROM bnm_telecommunications_center telec WHERE shahr = ?";
-            $res=Db::secure_fetchall($sql, [$_POST['shahrid']]);
-            if(! $res) die(Helper::Json_Message('f'));
-            die(json_encode($res,JSON_UNESCAPED_UNICODE));
+            $sql = "SELECT * FROM bnm_telecommunications_center telec WHERE shahr = ?";
+            $res = Db::secure_fetchall($sql, [$_POST['shahrid']]);
+            if (!$res) die(Helper::Json_Message('f'));
+            die(json_encode($res, JSON_UNESCAPED_UNICODE));
         }
 
-        if(isset($_POST['getallservicestatuses'])){
-            $sql="SELECT * FROM shahkar_log WHERE requestname = ? AND response=?";
-            $res=Db::secure_fetchall($sql, array('estservicestatus', 200));
-            if($res){
+        if (isset($_POST['getallservicestatuses'])) {
+            $sql = "SELECT * FROM shahkar_log WHERE requestname = ? AND response=?";
+            $res = Db::secure_fetchall($sql, array('estservicestatus', 200));
+            if ($res) {
                 die(json_encode($res));
-            }else{
+            } else {
                 die(Helper::Json_Message('inf'));
             }
         }
         //get serviceinfo by service type (no user filter)
-        if(isset($_POST['getServicesInfoWithServiceType'])){
+        if (isset($_POST['getServicesInfoWithServiceType'])) {
             $_POST = Helper::reformAjaxRequest($_POST);
-            (! $_POST['sertype'])? die(Helper::Json_Message('e')): '';
-            $res=Helper::getServiceInfoByServiceType($_POST['sertype']);
-            (! $res)? die(Helper::Custom_Msg('اطلاعاتی پیدا نشد')): '';
+            (!$_POST['sertype']) ? die(Helper::Json_Message('e')) : '';
+            $res = Helper::getServiceInfoByServiceType($_POST['sertype']);
+            (!$res) ? die(Helper::Custom_Msg('اطلاعاتی پیدا نشد')) : '';
             die(json_encode($res));
         }
         //get serviceinfo by Multiple service types (no user filter)
-        if(isset($_POST['getServicesInfoWithMultipleServiceTypes'])){
+        if (isset($_POST['getServicesInfoWithMultipleServiceTypes'])) {
             $_POST = Helper::reformAjaxRequest($_POST);
             // die(json_encode($_POST));
-            if(! isset($_POST['sertypes'])) die(Helper::Json_Message('e'));
-            (! $_POST['sertypes'])? die(Helper::Json_Message('e')): '';
-            $res=Helper::getServiceInfoByMultipleServiceTypes($_POST['sertypes']);
-            if(! isset($res)) die(Helper::Json_Message('inf'));
-            (! $res)? die(Helper::Custom_Msg('اطلاعاتی پیدا نشد')): '';
+            if (!isset($_POST['sertypes'])) die(Helper::Json_Message('e'));
+            (!$_POST['sertypes']) ? die(Helper::Json_Message('e')) : '';
+            $res = Helper::getServiceInfoByMultipleServiceTypes($_POST['sertypes']);
+            if (!isset($res)) die(Helper::Json_Message('inf'));
+            (!$res) ? die(Helper::Custom_Msg('اطلاعاتی پیدا نشد')) : '';
             die(json_encode($res));
         }
 
         //get get Port's Vpi Vci Vlan By Factorid
-        if(isset($_POST['getAsiatechPortVpiVciVlanByFactorid'])){
+        if (isset($_POST['getAsiatechPortVpiVciVlanByFactorid'])) {
             $_POST = Helper::reformAjaxRequest($_POST);
-            (! $_POST['factorid'])? die(Helper::Json_Message('e')): '';
-            $factor=Helper::getServiceInfoByFactorid($_POST['factorid']);
-            (! $factor)? die(Helper::Custom_Msg('اطلاعاتی پیدا نشد')): '';
-            $port=$GLOBALS['bs']->getPortID($factor[0]['ibsusername']);
-            if(! Helper::checkAsiatechBitstreamResponse($port)){
-                if(! $port['result']['errmsg']) die(Helper::Custom_Msg(Helper::Messages('absnr'),2));
+            (!$_POST['factorid']) ? die(Helper::Json_Message('e')) : '';
+            $factor = Helper::getServiceInfoByFactorid($_POST['factorid']);
+            (!$factor) ? die(Helper::Custom_Msg('اطلاعاتی پیدا نشد')) : '';
+            $port = $GLOBALS['bs']->getPortID($factor[0]['ibsusername']);
+            if (!Helper::checkAsiatechBitstreamResponse($port)) {
+                if (!$port['result']['errmsg']) die(Helper::Custom_Msg(Helper::Messages('absnr'), 2));
                 die(Helper::Custom_Msg($port['result']['errmsg']));
             }
-            $vpi_vci_vlan=$GLOBALS['bs']->getInterfaceServicePort($port['result']['data']['portid']);
-            if(! Helper::checkAsiatechBitstreamResponse($vpi_vci_vlan)) {
-                if(! $vpi_vci_vlan['result']['errmsg']) die(Helper::Custom_Msg(Helper::Messages('absnr'),2));
+            $vpi_vci_vlan = $GLOBALS['bs']->getInterfaceServicePort($port['result']['data']['portid']);
+            if (!Helper::checkAsiatechBitstreamResponse($vpi_vci_vlan)) {
+                if (!$vpi_vci_vlan['result']['errmsg']) die(Helper::Custom_Msg(Helper::Messages('absnr'), 2));
                 die(Helper::Custom_Msg($vpi_vci_vlan['result']['errmsg']));
             }
-            
+
             // die(json_encode($vpi_vci_vlan));
-            $msg="";
-            $msg.="IP: ".$vpi_vci_vlan['result']['data']['ip']."<br/>";
-            $msg.="LineProfile: ".$vpi_vci_vlan['result']['data']['lineprofile']."<br/>";
-            $msg.="Port: ".$vpi_vci_vlan['result']['data']['port']."<br/>";
-            $msg.="Shelf: ".$vpi_vci_vlan['result']['data']['shelf']."<br/>";
-            $msg.="Slot: ".$vpi_vci_vlan['result']['data']['slot']."<br/>";
-            $msg.="SubSlot: ".$vpi_vci_vlan['result']['data']['subslot']."<br/>";
-            $msg.="ServicePort: "."<br/>";
-            for ($i=0; $i <count($vpi_vci_vlan['result']['data']['servicePort']) ; $i++) { 
-                $msg.='Vpi: '.$vpi_vci_vlan['result']['data']['servicePort'][$i]['vpi']." ";
-                $msg.='Vci: '.$vpi_vci_vlan['result']['data']['servicePort'][$i]['vci']." ";
-                $msg.='Vlan: '.$vpi_vci_vlan['result']['data']['servicePort'][$i]['vlan']." ";
-                $msg.="<br/>";
+            $msg = "";
+            $msg .= "IP: " . $vpi_vci_vlan['result']['data']['ip'] . "<br/>";
+            $msg .= "LineProfile: " . $vpi_vci_vlan['result']['data']['lineprofile'] . "<br/>";
+            $msg .= "Port: " . $vpi_vci_vlan['result']['data']['port'] . "<br/>";
+            $msg .= "Shelf: " . $vpi_vci_vlan['result']['data']['shelf'] . "<br/>";
+            $msg .= "Slot: " . $vpi_vci_vlan['result']['data']['slot'] . "<br/>";
+            $msg .= "SubSlot: " . $vpi_vci_vlan['result']['data']['subslot'] . "<br/>";
+            $msg .= "ServicePort: " . "<br/>";
+            for ($i = 0; $i < count($vpi_vci_vlan['result']['data']['servicePort']); $i++) {
+                $msg .= 'Vpi: ' . $vpi_vci_vlan['result']['data']['servicePort'][$i]['vpi'] . " ";
+                $msg .= 'Vci: ' . $vpi_vci_vlan['result']['data']['servicePort'][$i]['vci'] . " ";
+                $msg .= 'Vlan: ' . $vpi_vci_vlan['result']['data']['servicePort'][$i]['vlan'] . " ";
+                $msg .= "<br/>";
             }
             // die(Helper::Json_Message('test2'));
             // die(json_encode(Helper::Custom_Msg('asdsad', 1),JSON_UNESCAPED_UNICODE));
-            die(Helper::Custom_Msg($msg,1));
-
-
+            die(Helper::Custom_Msg($msg, 1));
         }
 
-        if(isset($_POST['currentuserservicesinfo'])){
-            if($_SESSION['user_type'] === (string) __MOSHTARAKUSERTYPE__){
+        if (isset($_POST['currentuserservicesinfo'])) {
+            if ($_SESSION['user_type'] === (string) __MOSHTARAKUSERTYPE__) {
                 // die(json_encode([$_SESSION['user_id']]));
-                    $services=Helper::getServiceInfoBySubid($_SESSION['user_id']);
-                    if(! $services) die(json_encode(false));
-                    for ($i=0; $i <count($services) ; $i++) {
-                        switch ($services[$i]['sertype']) {
-                            case 'adsl':
-                            case 'vdsl':
-                            case 'bitstream':
-                            case 'wireless':
-                            case 'tdlte':
-                                $ibs=$GLOBALS['ibs_internet']->getUserInfoByNormalUserName($services[$i]['ibsusername']);
-                                if(Helper::checkIbsUserInfo($ibs)){
-                                    $ibs=Helper::reformIbsUserInfo($ibs);
-                                    $services[$i]['ibsinfo']=$ibs;
-                                }else{
-                                    $services[$i]['ibsinfo']=false;
-                                }
-                                if($services[$i]['ibsinfo']){
-                                    $services[$i]['ibsinfo']['basic_info']['nearest_exp_date']=Helper::tabdileTarikh($services[$i]['ibsinfo']['basic_info']['nearest_exp_date'], 1, '-', '/', false);
-                                    $services[$i]['ibsinfo']['basic_info']['credit']=str_replace('.', ',', Helper::byteConvert((int) Helper::toByteSize((string)$services[$i]['ibsinfo']['basic_info']['credit'] . 'MB')));
-                                    
-
-                                }
+                $services = Helper::getServiceInfoBySubid($_SESSION['user_id']);
+                if (!$services) die(json_encode(false));
+                for ($i = 0; $i < count($services); $i++) {
+                    switch ($services[$i]['sertype']) {
+                        case 'adsl':
+                        case 'vdsl':
+                        case 'bitstream':
+                        case 'wireless':
+                        case 'tdlte':
+                            $ibs = $GLOBALS['ibs_internet']->getUserInfoByNormalUserName($services[$i]['ibsusername']);
+                            if (Helper::checkIbsUserInfo($ibs)) {
+                                $ibs = Helper::reformIbsUserInfo($ibs);
+                                $services[$i]['ibsinfo'] = $ibs;
+                            } else {
+                                $services[$i]['ibsinfo'] = false;
+                            }
+                            if ($services[$i]['ibsinfo']) {
+                                $services[$i]['ibsinfo']['basic_info']['nearest_exp_date'] = Helper::tabdileTarikh($services[$i]['ibsinfo']['basic_info']['nearest_exp_date'], 1, '-', '/', false);
+                                $services[$i]['ibsinfo']['basic_info']['credit'] = str_replace('.', ',', Helper::byteConvert((int) Helper::toByteSize((string)$services[$i]['ibsinfo']['basic_info']['credit'] . 'MB')));
+                            }
                             break;
-                            case 'voip':
-                                $ibs=$GLOBALS['ibs_voip']->getUserInfoByVoipUserName($services[$i]['ibsusername']);
-                                if(Helper::checkIbsUserInfo($ibs)){
-                                    $ibs=Helper::reformIbsUserInfo($ibs);
-                                    $services[$i]['ibsinfo']=$ibs;
-                                }else{
-                                    $services[$i]['ibsinfo']=false;
-                                }
-                                if($services[$i]['ibsinfo']){
-                                    $services[$i]['ibsinfo']['basic_info']['nearest_exp_date']=Helper::tabdileTarikh($services[$i]['ibsinfo']['basic_info']['nearest_exp_date'], 1, '-', '/', false);
-                                    $services[$i]['ibsinfo']['basic_info']['credit']=number_format($services[$i]['ibsinfo']['basic_info']['credit'])." "."تومان";
-                                }
+                        case 'voip':
+                            $ibs = $GLOBALS['ibs_voip']->getUserInfoByVoipUserName($services[$i]['ibsusername']);
+                            if (Helper::checkIbsUserInfo($ibs)) {
+                                $ibs = Helper::reformIbsUserInfo($ibs);
+                                $services[$i]['ibsinfo'] = $ibs;
+                            } else {
+                                $services[$i]['ibsinfo'] = false;
+                            }
+                            if ($services[$i]['ibsinfo']) {
+                                $services[$i]['ibsinfo']['basic_info']['nearest_exp_date'] = Helper::tabdileTarikh($services[$i]['ibsinfo']['basic_info']['nearest_exp_date'], 1, '-', '/', false);
+                                $services[$i]['ibsinfo']['basic_info']['credit'] = number_format($services[$i]['ibsinfo']['basic_info']['credit']) . " " . "تومان";
+                            }
                             break;
-                            default:
-                                $services[$i]['ibsinfo']=false;
+                        default:
+                            $services[$i]['ibsinfo'] = false;
                             break;
-                        }
-                        $services[$i]['sertype']=strtoupper($services[$i]['sertype']);
-                        
                     }
-                    die(json_encode($services));
-            }else{
+                    $services[$i]['sertype'] = strtoupper($services[$i]['sertype']);
+                }
+                die(json_encode($services));
+            } else {
                 die(json_encode(false));
-            } 
-            
+            }
         }
 
-        if(isset($_POST['getServiceIbsInfoByFactorid'])){
+        if (isset($_POST['getServiceIbsInfoByFactorid'])) {
             $_POST = Helper::reformAjaxRequest($_POST);
-            $res=false;
-            if(! isset($_POST['factorid'])) die(Helper::Custom_Msg('اطلاعات سرویس یافت نشد.'));
-            if(! $_POST['factorid']) die(Helper::Custom_Msg('اطلاعات سرویس یافت نشد.'));
-            $factor=Helper::getServiceInfoByFactorid($_POST['factorid']);
-            if(! $factor) die(Helper::Custom_Msg('اطلاعات سرویس یافت نشد.'));
-            if(! $factor[0]['ibsusername']) die(Helper::Custom_Msg('اطلاعات سرویس یافت نشد.'));
+            $res = false;
+            if (!isset($_POST['factorid'])) die(Helper::Custom_Msg('اطلاعات سرویس یافت نشد.'));
+            if (!$_POST['factorid']) die(Helper::Custom_Msg('اطلاعات سرویس یافت نشد.'));
+            $factor = Helper::getServiceInfoByFactorid($_POST['factorid']);
+            if (!$factor) die(Helper::Custom_Msg('اطلاعات سرویس یافت نشد.'));
+            if (!$factor[0]['ibsusername']) die(Helper::Custom_Msg('اطلاعات سرویس یافت نشد.'));
             switch ($factor[0]['sertype']) {
                 case 'bitstream':
                 case 'adsl':
                 case 'vdsl':
                 case 'wireless':
                 case 'tdlte':
-                    $res= $GLOBALS['ibs_internet']->getUserInfoByNormalUserName($factor[0]['ibsusername']);
-                    if(! Helper::checkIbsUserInfo($res)) die(Helper::Custom_Msg('اطلاعات سرویس در اکانتینگ یافت نشد'));
-                    $res=Helper::reformIbsUserInfo($res);
-                    $factor[0]['ibsinfo']=$res;
-                    $factor[0]['ibsinfo']['basic_info']['credit']=str_replace('.', ',', Helper::byteConvert((int) Helper::toByteSize((string)$factor[0]['ibsinfo']['basic_info']['credit'] . 'MB')));
-                break;
+                    $res = $GLOBALS['ibs_internet']->getUserInfoByNormalUserName($factor[0]['ibsusername']);
+                    if (!Helper::checkIbsUserInfo($res)) die(Helper::Custom_Msg('اطلاعات سرویس در اکانتینگ یافت نشد'));
+                    $res = Helper::reformIbsUserInfo($res);
+                    $factor[0]['ibsinfo'] = $res;
+                    $factor[0]['ibsinfo']['basic_info']['credit'] = str_replace('.', ',', Helper::byteConvert((int) Helper::toByteSize((string)$factor[0]['ibsinfo']['basic_info']['credit'] . 'MB')));
+                    break;
                 case 'voip':
-                    $res= $GLOBALS['ibs_voip']->getUserInfoByVoipUserName($factor[0]['ibsusername']);
-                    if(! Helper::checkIbsUserInfo($res)) die(Helper::Custom_Msg('اطلاعات سرویس در اکانتینگ یافت نشد'));
-                    $res=Helper::reformIbsUserInfo($res);
-                    $factor[0]['ibsinfo']=$res;
-                    $factor[0]['ibsinfo']['basic_info']['credit']=number_format($factor[0]['ibsinfo']['basic_info']['credit'], 0 );
-                    
-                break;
+                    $res = $GLOBALS['ibs_voip']->getUserInfoByVoipUserName($factor[0]['ibsusername']);
+                    if (!Helper::checkIbsUserInfo($res)) die(Helper::Custom_Msg('اطلاعات سرویس در اکانتینگ یافت نشد'));
+                    $res = Helper::reformIbsUserInfo($res);
+                    $factor[0]['ibsinfo'] = $res;
+                    $factor[0]['ibsinfo']['basic_info']['credit'] = number_format($factor[0]['ibsinfo']['basic_info']['credit'], 0);
+
+                    break;
                 default:
                     die(Helper::Custom_Msg('امکان دریافت اطلاعات این سرویس از اکانتینگ وجود ندارد'));
-                break;
+                    break;
             }
-            $tmp=[];
-            $datearr=[];
-            $factor[0]['ibsinfo']['basic_info']['creation_date']=Helper::tabdileTarikh($factor[0]['ibsinfo']['basic_info']['creation_date']);
-            if(isset($factor[0]['ibsinfo']['basic_info']['nearest_exp_date'])){
-                $datearr=Helper::dateConvertInitialize($factor[0]['ibsinfo']['basic_info']['nearest_exp_date'],'-',false);
-                $flag=Helper::isSeperatedDateGregorian($datearr);
-                if($flag){
+            $tmp = [];
+            $datearr = [];
+            $factor[0]['ibsinfo']['basic_info']['creation_date'] = Helper::tabdileTarikh($factor[0]['ibsinfo']['basic_info']['creation_date']);
+            if (isset($factor[0]['ibsinfo']['basic_info']['nearest_exp_date'])) {
+                $datearr = Helper::dateConvertInitialize($factor[0]['ibsinfo']['basic_info']['nearest_exp_date'], '-', false);
+                $flag = Helper::isSeperatedDateGregorian($datearr);
+                if ($flag) {
                     //tarikh miladi ast
-                    $factor[0]['ibsinfo']['en_expireation_date']=$factor[0]['ibsinfo']['basic_info']['nearest_exp_date'];
-                    $factor[0]['ibsinfo']['basic_info']['nearest_exp_date']=Helper::tabdileTarikh($factor[0]['ibsinfo']['basic_info']['nearest_exp_date']);
-                    $factor[0]['ibsinfo']['fa_expireation_date']=$factor[0]['ibsinfo']['basic_info']['nearest_exp_date'];
-                }else{
+                    $factor[0]['ibsinfo']['en_expireation_date'] = $factor[0]['ibsinfo']['basic_info']['nearest_exp_date'];
+                    $factor[0]['ibsinfo']['basic_info']['nearest_exp_date'] = Helper::tabdileTarikh($factor[0]['ibsinfo']['basic_info']['nearest_exp_date']);
+                    $factor[0]['ibsinfo']['fa_expireation_date'] = $factor[0]['ibsinfo']['basic_info']['nearest_exp_date'];
+                } else {
                     //tarikh miladi ast
                 }
-                
-                
-                
             }
-            if(isset($factor[0]['ibsinfo']['attrs']['nearest_exp_date'])){
-                $factor[0]['ibsinfo']['attrs']['nearest_exp_date']=Helper::tabdileTarikh($factor[0]['ibsinfo']['attrs']['nearest_exp_date']);
+            if (isset($factor[0]['ibsinfo']['attrs']['nearest_exp_date'])) {
+                $factor[0]['ibsinfo']['attrs']['nearest_exp_date'] = Helper::tabdileTarikh($factor[0]['ibsinfo']['attrs']['nearest_exp_date']);
             }
-            if(isset($factor[0]['ibsinfo']['attrs']['abs_exp_date'])){
-                $factor[0]['ibsinfo']['attrs']['abs_exp_date']=Helper::tabdileTarikh($factor[0]['ibsinfo']['attrs']['abs_exp_date']);
+            if (isset($factor[0]['ibsinfo']['attrs']['abs_exp_date'])) {
+                $factor[0]['ibsinfo']['attrs']['abs_exp_date'] = Helper::tabdileTarikh($factor[0]['ibsinfo']['attrs']['abs_exp_date']);
             }
-            if(isset($factor[0]['ibsinfo']['attrs']['real_first_login'])){
-                $factor[0]['ibsinfo']['attrs']['real_first_login']=Helper::tabdileTarikh($factor[0]['ibsinfo']['attrs']['real_first_login']);
+            if (isset($factor[0]['ibsinfo']['attrs']['real_first_login'])) {
+                $factor[0]['ibsinfo']['attrs']['real_first_login'] = Helper::tabdileTarikh($factor[0]['ibsinfo']['attrs']['real_first_login']);
             }
-            if(isset($factor[0]['ibsinfo']['attrs']['first_login'])){
-                $factor[0]['ibsinfo']['attrs']['first_login']=Helper::tabdileTarikh($factor[0]['ibsinfo']['attrs']['first_login']);
+            if (isset($factor[0]['ibsinfo']['attrs']['first_login'])) {
+                $factor[0]['ibsinfo']['attrs']['first_login'] = Helper::tabdileTarikh($factor[0]['ibsinfo']['attrs']['first_login']);
             }
             die(json_encode($factor));
         }
 
-        if(isset($_POST['getServicePasswordByFactorid'])){
+        if (isset($_POST['getServicePasswordByFactorid'])) {
             $_POST = Helper::reformAjaxRequest($_POST);
-            $res=false;
-            if(! isset($_POST['factorid'])) die(Helper::Custom_Msg('اطلاعات سرویس یافت نشد.'));
-            if(! $_POST['factorid']) die(Helper::Custom_Msg('اطلاعات سرویس یافت نشد.'));
-            $factor=Helper::getServiceInfoByFactorid($_POST['factorid']);
-            if(! $factor) die(Helper::Custom_Msg('اطلاعات سرویس یافت نشد.'));
-            if(! $factor[0]['ibsusername']) die(Helper::Custom_Msg('اطلاعات سرویس یافت نشد.'));
+            $res = false;
+            if (!isset($_POST['factorid'])) die(Helper::Custom_Msg('اطلاعات سرویس یافت نشد.'));
+            if (!$_POST['factorid']) die(Helper::Custom_Msg('اطلاعات سرویس یافت نشد.'));
+            $factor = Helper::getServiceInfoByFactorid($_POST['factorid']);
+            if (!$factor) die(Helper::Custom_Msg('اطلاعات سرویس یافت نشد.'));
+            if (!$factor[0]['ibsusername']) die(Helper::Custom_Msg('اطلاعات سرویس یافت نشد.'));
             switch ($factor[0]['sertype']) {
                 case 'bitstream':
                 case 'adsl':
                 case 'vdsl':
                 case 'wireless':
                 case 'tdlte':
-                     $res= $GLOBALS['ibs_internet']->getUserInfoByNormalUserName($factor[0]['ibsusername']);
-                break;
+                    $res = $GLOBALS['ibs_internet']->getUserInfoByNormalUserName($factor[0]['ibsusername']);
+                    break;
                 case 'voip':
-                    $res= $GLOBALS['ibs_voip']->getUserInfoByVoipUserName($factor[0]['ibsusername']);
-                    die(json_encode($res));        
+                    $res = $GLOBALS['ibs_voip']->getUserInfoByVoipUserName($factor[0]['ibsusername']);
+                    die(json_encode($res));
                     break;
                 default:
                     die(Helper::Custom_Msg('امکان دریافت اطلاعات این سرویس از اکانتینگ وجود ندارد'));
-                break;
+                    break;
             }
-            if(! $res) die(Helper::Custom_Msg('اطلاعات سرویس در اکانتینگ یافت نشد'));
-            if(! isset($res[1])) die(Helper::Custom_Msg('اطلاعات سرویس در اکانتینگ یافت نشد'));
-            if(! $res[1]) die(Helper::Custom_Msg('اطلاعات سرویس در اکانتینگ یافت نشد'));
-            $res=Helper::reformIbsUserInfo($res);
-            die(json_encode(['password'=>$res['attrs']['normal_password']],JSON_UNESCAPED_UNICODE));
+            if (!$res) die(Helper::Custom_Msg('اطلاعات سرویس در اکانتینگ یافت نشد'));
+            if (!isset($res[1])) die(Helper::Custom_Msg('اطلاعات سرویس در اکانتینگ یافت نشد'));
+            if (!$res[1]) die(Helper::Custom_Msg('اطلاعات سرویس در اکانتینگ یافت نشد'));
+            $res = Helper::reformIbsUserInfo($res);
+            die(json_encode(['password' => $res['attrs']['normal_password']], JSON_UNESCAPED_UNICODE));
         }
-        if(isset($_POST['checkServiceIbsInfoByFactorid'])){
+        if (isset($_POST['checkServiceIbsInfoByFactorid'])) {
             $_POST = Helper::reformAjaxRequest($_POST);
-            $res=false;
-            if(! isset($_POST['factorid'])) die(Helper::Custom_Msg('اطلاعات سرویس یافت نشد.'));
-            if(! $_POST['factorid']) die(Helper::Custom_Msg('اطلاعات سرویس یافت نشد.'));
-            $factor=Helper::getServiceInfoByFactorid($_POST['factorid']);
-            if(! $factor) die(Helper::Custom_Msg('اطلاعات سرویس یافت نشد.'));
-            if(! $factor[0]['ibsusername']) die(Helper::Custom_Msg('اطلاعات سرویس یافت نشد.'));
+            $res = false;
+            if (!isset($_POST['factorid'])) die(Helper::Custom_Msg('اطلاعات سرویس یافت نشد.'));
+            if (!$_POST['factorid']) die(Helper::Custom_Msg('اطلاعات سرویس یافت نشد.'));
+            $factor = Helper::getServiceInfoByFactorid($_POST['factorid']);
+            if (!$factor) die(Helper::Custom_Msg('اطلاعات سرویس یافت نشد.'));
+            if (!$factor[0]['ibsusername']) die(Helper::Custom_Msg('اطلاعات سرویس یافت نشد.'));
             switch ($factor[0]['sertype']) {
                 case 'bitstream':
                 case 'adsl':
                 case 'vdsl':
                 case 'wireless':
                 case 'tdlte':
-                    $service_group_type='internet';
-                    $res= $GLOBALS['ibs_internet']->getUserInfoByNormalUserName($factor[0]['ibsusername']);
-                break;
+                    $service_group_type = 'internet';
+                    $res = $GLOBALS['ibs_internet']->getUserInfoByNormalUserName($factor[0]['ibsusername']);
+                    break;
                 case 'voip':
-                    $service_group_type='voip';
-                    $res= $GLOBALS['ibs_voip']->getUserInfoByVoipUserName($factor[0]['ibsusername']);
+                    $service_group_type = 'voip';
+                    $res = $GLOBALS['ibs_voip']->getUserInfoByVoipUserName($factor[0]['ibsusername']);
                     break;
                 default:
                     die(Helper::Custom_Msg('امکان دریافت اطلاعات این سرویس از اکانتینگ وجود ندارد'));
-                break;
-            }
-            if(! $res) die(Helper::Custom_Msg('اطلاعات سرویس در اکانتینگ یافت نشد'));
-            if(! isset($res[1])) die(Helper::Custom_Msg('اطلاعات سرویس در اکانتینگ یافت نشد'));
-            if(! $res[1]) die(Helper::Custom_Msg('اطلاعات سرویس در اکانتینگ یافت نشد'));
-            $res=Helper::reformIbsUserInfo($res);
-            if(! $res) die(Helper::Custom_Msg("سرویس انتخاب شده با این نام کاربری در اکانتینگ وجود نداشت"));
-            die(json_encode(['service_group_type'=>$service_group_type,'user_id'=>$res['basic_info']['user_id']],JSON_UNESCAPED_UNICODE));
-        }
-
-        if(isset($_POST['getnoemasrafbyfactorid'])){
-            $_POST = Helper::reformAjaxRequest($_POST);
-            $res=false;
-            if(! isset($_POST['factorid'])) die(Helper::Custom_Msg('اطلاعات سرویس یافت نشد.'));
-            if(! $_POST['factorid']) die(Helper::Custom_Msg('اطلاعات سرویس یافت نشد.'));
-            $factor=Helper::getServiceInfoByFactorid($_POST['factorid']);
-            if(! $factor) die(Helper::Custom_Msg('اطلاعات سرویس یافت نشد.'));
-            if(! $factor[0]['ibsusername']) die(Helper::Custom_Msg('اطلاعات سرویس یافت نشد.'));
-            switch ($factor[0]['sertype']) {
-                case 'bitstream':
-                case 'adsl':
-                case 'vdsl':
-                case 'wireless':
-                case 'tdlte':
-                    $service_group_type='internet';
-                    $sql="SELECT * FROM bnm_connection_log";
-                    $noemasraf= Db::fetchall_Query($sql);
-                    $res= $GLOBALS['ibs_internet']->getUserInfoByNormalUserName($factor[0]['ibsusername']);
-                break;
-                case 'voip':
-                    $service_group_type='voip';
-                    $sql="SELECT * FROM bnm_connection_log WHERE name = ?";
-                    $noemasraf= Db::secure_fetchall($sql, ['All']);
-                    $res= $GLOBALS['ibs_voip']->getUserInfoByVoipUserName($factor[0]['ibsusername']);
                     break;
-                default:
-                    die(Helper::Custom_Msg('امکان دریافت اطلاعات این سرویس از اکانتینگ وجود ندارد'));
-                break;
             }
-            if(! $res) die(Helper::Custom_Msg('اطلاعات سرویس در اکانتینگ یافت نشد'));
-            if(! isset($res[1])) die(Helper::Custom_Msg('اطلاعات سرویس در اکانتینگ یافت نشد'));
-            if(! $res[1]) die(Helper::Custom_Msg('اطلاعات سرویس در اکانتینگ یافت نشد'));
-            $res=Helper::reformIbsUserInfo($res);
-            if(! $res) die(Helper::Custom_Msg("سرویس انتخاب شده با این نام کاربری در اکانتینگ وجود نداشت"));
-            
-            die(json_encode(['service_group_type'=>$service_group_type, 'user_id'=>$res['basic_info']['user_id'],'noe_masraf'=>$noemasraf],JSON_UNESCAPED_UNICODE));
+            if (!$res) die(Helper::Custom_Msg('اطلاعات سرویس در اکانتینگ یافت نشد'));
+            if (!isset($res[1])) die(Helper::Custom_Msg('اطلاعات سرویس در اکانتینگ یافت نشد'));
+            if (!$res[1]) die(Helper::Custom_Msg('اطلاعات سرویس در اکانتینگ یافت نشد'));
+            $res = Helper::reformIbsUserInfo($res);
+            if (!$res) die(Helper::Custom_Msg("سرویس انتخاب شده با این نام کاربری در اکانتینگ وجود نداشت"));
+            die(json_encode(['service_group_type' => $service_group_type, 'user_id' => $res['basic_info']['user_id']], JSON_UNESCAPED_UNICODE));
         }
 
-        if(isset($_POST['getInternetUsersServicesInfo'])){
-            $res=Helper::getInternetUsersServicesInfo();
-            if(! $res){
+        if (isset($_POST['getnoemasrafbyfactorid'])) {
+            $_POST = Helper::reformAjaxRequest($_POST);
+            $res = false;
+            if (!isset($_POST['factorid'])) die(Helper::Custom_Msg('اطلاعات سرویس یافت نشد.'));
+            if (!$_POST['factorid']) die(Helper::Custom_Msg('اطلاعات سرویس یافت نشد.'));
+            $factor = Helper::getServiceInfoByFactorid($_POST['factorid']);
+            if (!$factor) die(Helper::Custom_Msg('اطلاعات سرویس یافت نشد.'));
+            if (!$factor[0]['ibsusername']) die(Helper::Custom_Msg('اطلاعات سرویس یافت نشد.'));
+            switch ($factor[0]['sertype']) {
+                case 'bitstream':
+                case 'adsl':
+                case 'vdsl':
+                case 'wireless':
+                case 'tdlte':
+                    $service_group_type = 'internet';
+                    $sql = "SELECT * FROM bnm_connection_log";
+                    $noemasraf = Db::fetchall_Query($sql);
+                    $res = $GLOBALS['ibs_internet']->getUserInfoByNormalUserName($factor[0]['ibsusername']);
+                    break;
+                case 'voip':
+                    $service_group_type = 'voip';
+                    $sql = "SELECT * FROM bnm_connection_log WHERE name = ?";
+                    $noemasraf = Db::secure_fetchall($sql, ['All']);
+                    $res = $GLOBALS['ibs_voip']->getUserInfoByVoipUserName($factor[0]['ibsusername']);
+                    break;
+                default:
+                    die(Helper::Custom_Msg('امکان دریافت اطلاعات این سرویس از اکانتینگ وجود ندارد'));
+                    break;
+            }
+            if (!$res) die(Helper::Custom_Msg('اطلاعات سرویس در اکانتینگ یافت نشد'));
+            if (!isset($res[1])) die(Helper::Custom_Msg('اطلاعات سرویس در اکانتینگ یافت نشد'));
+            if (!$res[1]) die(Helper::Custom_Msg('اطلاعات سرویس در اکانتینگ یافت نشد'));
+            $res = Helper::reformIbsUserInfo($res);
+            if (!$res) die(Helper::Custom_Msg("سرویس انتخاب شده با این نام کاربری در اکانتینگ وجود نداشت"));
+
+            die(json_encode(['service_group_type' => $service_group_type, 'user_id' => $res['basic_info']['user_id'], 'noe_masraf' => $noemasraf], JSON_UNESCAPED_UNICODE));
+        }
+
+        if (isset($_POST['getInternetUsersServicesInfo'])) {
+            $res = Helper::getInternetUsersServicesInfo();
+            if (!$res) {
                 die(Helper::Json_Message('e'));
             }
-            die(json_encode($res,JSON_UNESCAPED_UNICODE));
+            die(json_encode($res, JSON_UNESCAPED_UNICODE));
         }
-        if(isset($_POST['getAllUsersServicesInfo'])){
-            $res=Helper::getAllUsersServicesInfo();
-            if(! $res){
+        if (isset($_POST['getAllUsersServicesInfo'])) {
+            $res = Helper::getAllUsersServicesInfo();
+            if (!$res) {
                 die(Helper::Json_Message('e'));
             }
-            die(json_encode($res,JSON_UNESCAPED_UNICODE));
+            die(json_encode($res, JSON_UNESCAPED_UNICODE));
         }
 
-        if(isset($_POST['ipassign_getservicesinfobysertypeandsubid'])){
-            $_POST=Helper::reformAjaxRequest($_POST);
-            $_POST=Helper::xss_check_array($_POST);
-            if(! isset($_POST['sertype'])) die(Helper::Custom_Msg(Helper::Messages('inf')));
-            if(! isset($_POST['subid'])) die(Helper::Custom_Msg(Helper::Messages('inf')));
-            if(! $_POST['sertype'] || ! $_POST['subid']) die(Helper::Custom_Msg(Helper::Messages('inf')));
-            $res=Helper::getServiceInfoByServiceTypeAndSubid($_POST['subid'], $_POST['sertype']);
+        if (isset($_POST['ipassign_getservicesinfobysertypeandsubid'])) {
+            $_POST = Helper::reformAjaxRequest($_POST);
+            $_POST = Helper::xss_check_array($_POST);
+            if (!isset($_POST['sertype'])) die(Helper::Custom_Msg(Helper::Messages('inf')));
+            if (!isset($_POST['subid'])) die(Helper::Custom_Msg(Helper::Messages('inf')));
+            if (!$_POST['sertype'] || !$_POST['subid']) die(Helper::Custom_Msg(Helper::Messages('inf')));
+            $res = Helper::getServiceInfoByServiceTypeAndSubid($_POST['subid'], $_POST['sertype']);
             // $arr=[];
-            if(! $res){
+            if (!$res) {
                 // $arr['noservice']
-                
+
                 die(json_encode(false));
-            }else{
-                die(json_encode($res,JSON_UNESCAPED_UNICODE));
+            } else {
+                die(json_encode($res, JSON_UNESCAPED_UNICODE));
             }
             // if(! $res) die(Helper::Json_Message('ndf'));
             // die(json_encode($res,JSON_UNESCAPED_UNICODE));
         }
 
-        if(isset($_POST['get_ips_by_poolid'])){
+        if (isset($_POST['get_ips_by_poolid'])) {
             $_POST = Helper::reformAjaxRequest($_POST);
-            if(isset($_POST['poolid'])){             
+            if (isset($_POST['poolid'])) {
                 // $sql="SELECT
-                    // ip.id,
-                    // IF( ip.gender = '1', 'Valid', 'Invalid' ) gender,
-                    // IF( ip.iptype = '1', 'Static', 'Dynamic' ) iptype,
+                // ip.id,
+                // IF( ip.gender = '1', 'Valid', 'Invalid' ) gender,
+                // IF( ip.iptype = '1', 'Static', 'Dynamic' ) iptype,
                 //     ip.ip
                 // FROM bnm_ip ip
                 //     INNER JOIN bnm_ip_pool_list pool ON ip.pool = pool.id
@@ -818,46 +925,46 @@ class Bootstrap
                 //         WHERE
                 //             ipid IS NULL 
                 //             OR ipid = ''";
-                $sql= "SELECT ip.id,
+                $sql = "SELECT ip.id,
                 ip.ip,
                 IF( ip.gender = '1', 'Valid', 'Invalid' ) gender,
                 IF( ip.iptype = '1', 'Static', 'Dynamic' ) iptype
                 FROM bnm_ip ip
                 WHERE ip.id NOT IN (SELECT ip from bnm_ip_assign)
                 AND ip.pool = ?";
-                $res=Db::secure_fetchall($sql, array($_POST['poolid']));
-                if(! $res){
+                $res = Db::secure_fetchall($sql, array($_POST['poolid']));
+                if (!$res) {
                     die(Helper::Custom_Msg('آی پی یافت نشد'));
                 }
-                die(json_encode($res,JSON_UNESCAPED_UNICODE));
+                die(json_encode($res, JSON_UNESCAPED_UNICODE));
             }
             die(Helper::Custom_Msg('Ip Pool یافت نشد'));
         }
 
-        
-        if(isset($_POST['getInternetServiceTypesByUserid'])){
+
+        if (isset($_POST['getInternetServiceTypesByUserid'])) {
             $_POST = Helper::reformAjaxRequest($_POST);
             $_POST = Helper::xss_check_array($_POST);
-            (! $_POST)? die(Helper::Custom_Msg(Helper::Messages('e'),2)):'';
-            (! $_POST['subid'])? die(Helper::Custom_Msg(Helper::Messages('inf'),2)):'';
+            (!$_POST) ? die(Helper::Custom_Msg(Helper::Messages('e'), 2)) : '';
+            (!$_POST['subid']) ? die(Helper::Custom_Msg(Helper::Messages('inf'), 2)) : '';
             // $services=Helper::getInternetServiceTypesByUserid($_POST['subid']);
-            $services=Helper::getInternetServiceTypesByUserid($_POST['subid']);
+            $services = Helper::getInternetServiceTypesByUserid($_POST['subid']);
             // die(json_encode($services));
-            $arr=[];
-            $arr[0]=['sertype'=>'bandwidth', 'display_sertype'=> strtoupper('bandwidth')];
-            if(! $services){
+            $arr = [];
+            $arr[0] = ['sertype' => 'bandwidth', 'display_sertype' => strtoupper('bandwidth')];
+            if (!$services) {
                 die(json_encode($arr));
             }
-            $arr=[];
-            $bwi=count($services)+1;
+            $arr = [];
+            $bwi = count($services) + 1;
             // $services[$bwindex]=
-            for ($i=0; $i < count($services) ; $i++) { 
-                $services[$i]['display_sertype']=strtoupper($services[$i]['sertype']);
+            for ($i = 0; $i < count($services); $i++) {
+                $services[$i]['display_sertype'] = strtoupper($services[$i]['sertype']);
             }
-            $services[$bwi]['sertype']='bandwidth';
-            $services[$bwi]['display_sertype']=strtoupper('bandwidth');
+            $services[$bwi]['sertype'] = 'bandwidth';
+            $services[$bwi]['display_sertype'] = strtoupper('bandwidth');
             die(json_encode($services, JSON_UNESCAPED_UNICODE));
-            
+
             // if(isset($_POST['poolid'])){             
             //     $sql="SELECT
             //         ip.id,
@@ -877,246 +984,245 @@ class Bootstrap
             // die(Helper::Custom_Msg('Ip Pool یافت نشد'));
         }
 
-        if(isset($_POST['get_all_ippools'])){
-            $sql="SELECT * FROM bnm_ip_pool_list";
-            $res=Db::fetchall_Query($sql);
-            if(! $res) {
-                $msg1='خطا در برنامه:';
-                $msg2="مشکل در دریافت IP Pool";
-                die(Helper::Custom_Msg($msg1.'<br/>'.$msg2,2));
+        if (isset($_POST['get_all_ippools'])) {
+            $sql = "SELECT * FROM bnm_ip_pool_list";
+            $res = Db::fetchall_Query($sql);
+            if (!$res) {
+                $msg1 = 'خطا در برنامه:';
+                $msg2 = "مشکل در دریافت IP Pool";
+                die(Helper::Custom_Msg($msg1 . '<br/>' . $msg2, 2));
             }
-            die(json_encode($res,JSON_UNESCAPED_UNICODE));
+            die(json_encode($res, JSON_UNESCAPED_UNICODE));
         }
 
-        if(isset($_POST['send_suspensions'])){
+        if (isset($_POST['send_suspensions'])) {
             parse_str($_POST[key($_POST)], $_POST);
-            if(Helper::Login_Just_Check()){
+            if (Helper::Login_Just_Check()) {
                 switch ($_SESSION['user_type']) {
                     case __ADMINUSERTYPE__:
                     case __ADMINOPERATORUSERTYPE__:
-                        if(! isset($_POST['time']) || ! isset($_POST['sub']) || ! isset($_POST['service']) || ! isset($_POST['tozihat']) || ! isset($_POST['operationtype'])){
+                        if (!isset($_POST['time']) || !isset($_POST['sub']) || !isset($_POST['service']) || !isset($_POST['tozihat']) || !isset($_POST['operationtype'])) {
                             die(Helper::Custom_Msg(Helper::Messages('inf'), 2));
                         }
-                        if($_POST['operationtype']==="1"){
+                        if ($_POST['operationtype'] === "1") {
                             //Azad
-                            $res=Helper::unlockWithLog($_POST['operationtype'], $_POST['service'], $_POST['tozihat']);
+                            $res = Helper::unlockWithLog($_POST['operationtype'], $_POST['service'], $_POST['tozihat']);
                             // die(json_encode('asdsad'));
-                            if(! $res){
+                            if (!$res) {
                                 die(Helper::Json_Message('e'));
-                            }else{
+                            } else {
                                 die(Helper::displayPredefiendMessage($res));
                             }
-                        }else {
+                        } else {
                             //masdod
-                            $res=Helper::lockWithLog($_POST['operationtype'], $_POST['service'], $_POST['time'], $_POST['tozihat']);
-                            if(! $res){
+                            $res = Helper::lockWithLog($_POST['operationtype'], $_POST['service'], $_POST['time'], $_POST['tozihat']);
+                            if (!$res) {
                                 die(Helper::Json_Message('e'));
-                            }else{
+                            } else {
                                 die(Helper::displayPredefiendMessage($res));
                             }
                         }
-                    break;
+                        break;
                     default:
                         die(Helper::Json_Message('f'));
-                    break;
+                        break;
                 }
             }
         }
 
-        if(isset($_POST['getallsubscribers'])){
-            $res=Helper::getAllUsers();
-            ($res) ? die(json_encode($res,JSON_UNESCAPED_UNICODE)) : die(Helper::Json_Message('f'));
+        if (isset($_POST['getallsubscribers'])) {
+            $res = Helper::getAllUsers();
+            ($res) ? die(json_encode($res, JSON_UNESCAPED_UNICODE)) : die(Helper::Json_Message('f'));
         }
-        if(isset($_POST['getuserservices'])){
+        if (isset($_POST['getuserservices'])) {
             // die(json_encode($_POST['getalluserservices']['user_id']));
-            $res=Helper::getUserServices($_POST['getuserservices']['user_id'], $_POST['getuserservices']['sertype']);
-            if($res){
-                die(json_encode($res,JSON_UNESCAPED_UNICODE));
-            }else{
+            $res = Helper::getUserServices($_POST['getuserservices']['user_id'], $_POST['getuserservices']['sertype']);
+            if ($res) {
+                die(json_encode($res, JSON_UNESCAPED_UNICODE));
+            } else {
                 die(Helper::Json_Message('f'));
             }
         }
 
 
-        if(isset($_POST['currentuserecredit'])){
-            if(Helper::Login_Just_Check()){
-                    $res=Helper::getUserCurrentCredit();
-                    if(isset($res)){
-                        if($res){
-                            die(json_encode($res));
-                        }else{
-                            die(Helper::Json_Message('f'));
-                        }
-                    }else{
+        if (isset($_POST['currentuserecredit'])) {
+            if (Helper::Login_Just_Check()) {
+                $res = Helper::getUserCurrentCredit();
+                if (isset($res)) {
+                    if ($res) {
+                        die(json_encode($res));
+                    } else {
                         die(Helper::Json_Message('f'));
                     }
-            }else{
+                } else {
+                    die(Helper::Json_Message('f'));
+                }
+            } else {
                 die(Helper::Json_Message('f'));
             }
         }
 
-        if(isset($_POST['currentuserestauth'])){
-            if(Helper::Login_Just_Check()){
-                $res=Helper::checkEstAuthSub($_SESSION['user_id']);
-                if(! $res) die(json_encode(['HasError'=>true,'Message'=>'احراز هویت نشده']));
-                if($res) die(json_encode(['HasError'=>false,'Message'=>'احراز هویت موفق']));
-            }else{
-                die(Helper::Json_Message('f'));
-            }
-        }
-        
-        if(isset($_POST['estauthsub'])){
-            if(isset($_POST['estauthsub']['subid'])){
-                if($_POST['estauthsub']['subid']){
-                    $res=ShahkarHelper::estAuthSub($_POST['estauthsub']['subid']);
-                    if($res){
-                        $msg="شناسه استعلام: ".$res;
-                        die(Helper::Custom_Msg($msg,1));
-                        
-                    }else{
-                        die(Helper::Json_Message('f'));    
-                    }
-                    // die(json_encode($res));
-                    // die(Helper::Custom_Msg($res['response'],2));
-                }else{
-                    die(Helper::Json_Message('f'));
-                }
-            }else{
+        if (isset($_POST['currentuserestauth'])) {
+            if (Helper::Login_Just_Check()) {
+                $res = Helper::checkEstAuthSub($_SESSION['user_id']);
+                if (!$res) die(json_encode(['HasError' => true, 'Message' => 'احراز هویت نشده']));
+                if ($res) die(json_encode(['HasError' => false, 'Message' => 'احراز هویت موفق']));
+            } else {
                 die(Helper::Json_Message('f'));
             }
         }
 
-        if(isset($_POST['factorshahkar'])){
-            if(isset($_POST['factorshahkar']['factorid'])){
-                if($_POST['factorshahkar']['factorid']){
-                    $res=ShahkarHelper::putServices($_POST['factorshahkar']['factorid']);
-                    // die(json_encode($res));
-                    if($res){
-                        $msg="شناسه : ".$res;
-                        die(Helper::Custom_Msg($msg,1));
-                        
-                    }else{
-                        die(Helper::Json_Message('f'));    
+        if (isset($_POST['estauthsub'])) {
+            if (isset($_POST['estauthsub']['subid'])) {
+                if ($_POST['estauthsub']['subid']) {
+                    $res = ShahkarHelper::estAuthSub($_POST['estauthsub']['subid']);
+                    if ($res) {
+                        $msg = "شناسه استعلام: " . $res;
+                        die(Helper::Custom_Msg($msg, 1));
+                    } else {
+                        die(Helper::Json_Message('f'));
                     }
                     // die(json_encode($res));
                     // die(Helper::Custom_Msg($res['response'],2));
-                }else{
+                } else {
                     die(Helper::Json_Message('f'));
                 }
-            }else{
+            } else {
                 die(Helper::Json_Message('f'));
             }
         }
-                /////////////////factorha edit modal forms
-                if (isset($_POST['send_ft_adsl_update_status'])) {
-                    parse_str($_POST[key($_POST)], $_POST);
-                    switch ($_SESSION['user_type']) {
-                        case __MOSHTARAKUSERTYPE__:
-                            die(Helper::Json_Message('na'));
-                            break;
+
+        if (isset($_POST['factorshahkar'])) {
+            $_POST = Helper::reformAjaxRequest($_POST);
+            if (isset($_POST['factorid'])) {
+                if ($_POST['factorid']) {
+                    $res = ShahkarHelper::putServices($_POST['factorid']);
+                    die(json_encode($res));
+                    if ($res) {
+                        $msg = "شناسه : " . $res;
+                        die(Helper::Custom_Msg($msg, 1));
+                    } else {
+                        die(Helper::Json_Message('f'));
                     }
-                    // die(json_encode($_POST));
-                    // $_POST = Helper::xss_check_array($_POST);
-                    $unset_array = array(
-                        "noe_khadamat", "terafik", "zaname_estefade_be_tarikh", "tarikhe_shoroe_service", "tarikhe_payane_service",
-                        "gheymate_service", "takhfif", "hazine_ranzhe", "hazine_dranzhe", "hazine_nasb", "abonmane_port", "abonmane_faza", "abonmane_tajhizat",
-                        "darsade_avareze_arzeshe_afzode", "maliate_arzeshe_afzode", "mablaghe_ghabele_pardakht"
-                    );
-                    for ($i = 0; $i < count($unset_array); $i++) {
-                        if (isset($_POST[$unset_array[$i]])) {
-                            unset($_POST[$unset_array[$i]]);
-                        }
-                    }
-                    $sql = Helper::Update_Generator($_POST, 'bnm_factor', "WHERE id = :id");
-                    $res = Db::secure_update_array($sql, $_POST);
-                    if($res){
-                        die(Helper::Custom_Msg(Helper::Messages('s'), 1));
-                    }else{
-                        die(Helper::Custom_Msg(Helper::Messages('f'), 2));
-                    }
-                    //die(json_encode($_POST));
+                    // die(json_encode($res));
+                    // die(Helper::Custom_Msg($res['response'],2));
+                } else {
+                    die(Helper::Json_Message('pcae'));
                 }
-                if (isset($_POST['send_ft_wireless_update_status'])) {
-                    parse_str($_POST[key($_POST)], $_POST);
-                    switch ($_SESSION['user_type']) {
-                        case __MOSHTARAKUSERTYPE__:
-                            die(Helper::Json_Message('na'));
-                            break;
-                    }
-                    // $_POST = Helper::xss_check_array($_POST);
-                    $unset_array = array(
-                        "noe_khadamat", "terafik", "zaname_estefade_be_tarikh", "tarikhe_shoroe_service", "tarikhe_payane_service",
-                        "gheymate_service", "takhfif", "hazine_ranzhe", "hazine_dranzhe", "hazine_nasb", "abonmane_port", "abonmane_faza", "abonmane_tajhizat",
-                        "darsade_avareze_arzeshe_afzode", "maliate_arzeshe_afzode", "mablaghe_ghabele_pardakht"
-                    );
-                    for ($i = 0; $i < count($unset_array); $i++) {
-                        if (isset($_POST[$unset_array[$i]])) {
-                            unset($_POST[$unset_array[$i]]);
-                        }
-                    }
-                    $sql = Helper::Update_Generator($_POST, 'bnm_factor', "WHERE id = :id");
-                    $res = Db::secure_update_array($sql, $_POST);
-                    if($res){
-                        die(Helper::Custom_Msg(Helper::Messages('s'), 1));
-                    }else{
-                        die(Helper::Custom_Msg(Helper::Messages('f'), 2));
-                    }
-                    //            die(json_encode($_POST));
+            } else {
+                die(Helper::Json_Message('f'));
+            }
+        }
+        /////////////////factorha edit modal forms
+        if (isset($_POST['send_ft_adsl_update_status'])) {
+            parse_str($_POST[key($_POST)], $_POST);
+            switch ($_SESSION['user_type']) {
+                case __MOSHTARAKUSERTYPE__:
+                    die(Helper::Json_Message('na'));
+                    break;
+            }
+            // die(json_encode($_POST));
+            // $_POST = Helper::xss_check_array($_POST);
+            $unset_array = array(
+                "noe_khadamat", "terafik", "zaname_estefade_be_tarikh", "tarikhe_shoroe_service", "tarikhe_payane_service",
+                "gheymate_service", "takhfif", "hazine_ranzhe", "hazine_dranzhe", "hazine_nasb", "abonmane_port", "abonmane_faza", "abonmane_tajhizat",
+                "darsade_avareze_arzeshe_afzode", "maliate_arzeshe_afzode", "mablaghe_ghabele_pardakht"
+            );
+            for ($i = 0; $i < count($unset_array); $i++) {
+                if (isset($_POST[$unset_array[$i]])) {
+                    unset($_POST[$unset_array[$i]]);
                 }
-                if (isset($_POST['send_ft_tdlte_update_status'])) {
-                    parse_str($_POST[key($_POST)], $_POST);
-                    switch ($_SESSION['user_type']) {
-                        case __MOSHTARAKUSERTYPE__:
-                            die(Helper::Json_Message('na'));
-                            break;
-                    }
-                    // $_POST = Helper::xss_check_array($_POST);
-                    $unset_array = array(
-                        "noe_khadamat", "terafik", "zaname_estefade_be_tarikh", "tarikhe_shoroe_service", "tarikhe_payane_service",
-                        "gheymate_service", "takhfif", "hazine_ranzhe", "hazine_dranzhe", "hazine_nasb", "abonmane_port", "abonmane_faza", "abonmane_tajhizat",
-                        "darsade_avareze_arzeshe_afzode", "maliate_arzeshe_afzode", "mablaghe_ghabele_pardakht"
-                    );
-                    for ($i = 0; $i < count($unset_array); $i++) {
-                        if (isset($_POST[$unset_array[$i]])) {
-                            unset($_POST[$unset_array[$i]]);
-                        }
-                    }
-                    $sql = Helper::Update_Generator($_POST, 'bnm_factor', "WHERE id = :id");
-                    $res = Db::secure_update_array($sql, $_POST);
-                    if($res){
-                        die(Helper::Custom_Msg(Helper::Messages('s'), 1));
-                    }else{
-                        die(Helper::Custom_Msg(Helper::Messages('f'), 2));
-                    }
-                    //            die(json_encode($_POST));
+            }
+            $sql = Helper::Update_Generator($_POST, 'bnm_factor', "WHERE id = :id");
+            $res = Db::secure_update_array($sql, $_POST);
+            if ($res) {
+                die(Helper::Custom_Msg(Helper::Messages('s'), 1));
+            } else {
+                die(Helper::Custom_Msg(Helper::Messages('f'), 2));
+            }
+            //die(json_encode($_POST));
+        }
+        if (isset($_POST['send_ft_wireless_update_status'])) {
+            parse_str($_POST[key($_POST)], $_POST);
+            switch ($_SESSION['user_type']) {
+                case __MOSHTARAKUSERTYPE__:
+                    die(Helper::Json_Message('na'));
+                    break;
+            }
+            // $_POST = Helper::xss_check_array($_POST);
+            $unset_array = array(
+                "noe_khadamat", "terafik", "zaname_estefade_be_tarikh", "tarikhe_shoroe_service", "tarikhe_payane_service",
+                "gheymate_service", "takhfif", "hazine_ranzhe", "hazine_dranzhe", "hazine_nasb", "abonmane_port", "abonmane_faza", "abonmane_tajhizat",
+                "darsade_avareze_arzeshe_afzode", "maliate_arzeshe_afzode", "mablaghe_ghabele_pardakht"
+            );
+            for ($i = 0; $i < count($unset_array); $i++) {
+                if (isset($_POST[$unset_array[$i]])) {
+                    unset($_POST[$unset_array[$i]]);
                 }
-                if (isset($_POST['send_ft_voip_update_status'])) {
-                    parse_str($_POST[key($_POST)], $_POST);
-                    switch ($_SESSION['user_type']) {
-                        case __MOSHTARAKUSERTYPE__:
-                            die(Helper::Json_Message('na'));
-                            break;
-                    }
-                    // $_POST = Helper::xss_check_array($_POST);
-                    $unset_array = array(
-                        "pin_code", "noe_khadamat", "terafik", "zaname_estefade_be_tarikh", "tarikhe_shoroe_service", "tarikhe_payane_service",
-                        "gheymate_service", "takhfif", "hazine_ranzhe", "hazine_dranzhe", "hazine_nasb", "abonmane_port", "abonmane_faza", "abonmane_tajhizat",
-                        "darsade_avareze_arzeshe_afzode", "maliate_arzeshe_afzode", "mablaghe_ghabele_pardakht"
-                    );
-                    for ($i = 0; $i < count($unset_array); $i++) {
-                        if (isset($_POST[$unset_array[$i]])) {
-                            unset($_POST[$unset_array[$i]]);
-                        }
-                    }
-                    $sql = Helper::Update_Generator($_POST, 'bnm_factor', "WHERE id = :id");
-                    $res = Db::secure_update_array($sql, $_POST);
-                    if($res){
-                        die(Helper::Custom_Msg(Helper::Messages('s'), 1));
-                    }else{
-                        die(Helper::Custom_Msg(Helper::Messages('f'), 2));
-                    }
-                    //            die(json_encode($_POST));
+            }
+            $sql = Helper::Update_Generator($_POST, 'bnm_factor', "WHERE id = :id");
+            $res = Db::secure_update_array($sql, $_POST);
+            if ($res) {
+                die(Helper::Custom_Msg(Helper::Messages('s'), 1));
+            } else {
+                die(Helper::Custom_Msg(Helper::Messages('f'), 2));
+            }
+            //            die(json_encode($_POST));
+        }
+        if (isset($_POST['send_ft_tdlte_update_status'])) {
+            parse_str($_POST[key($_POST)], $_POST);
+            switch ($_SESSION['user_type']) {
+                case __MOSHTARAKUSERTYPE__:
+                    die(Helper::Json_Message('na'));
+                    break;
+            }
+            // $_POST = Helper::xss_check_array($_POST);
+            $unset_array = array(
+                "noe_khadamat", "terafik", "zaname_estefade_be_tarikh", "tarikhe_shoroe_service", "tarikhe_payane_service",
+                "gheymate_service", "takhfif", "hazine_ranzhe", "hazine_dranzhe", "hazine_nasb", "abonmane_port", "abonmane_faza", "abonmane_tajhizat",
+                "darsade_avareze_arzeshe_afzode", "maliate_arzeshe_afzode", "mablaghe_ghabele_pardakht"
+            );
+            for ($i = 0; $i < count($unset_array); $i++) {
+                if (isset($_POST[$unset_array[$i]])) {
+                    unset($_POST[$unset_array[$i]]);
                 }
+            }
+            $sql = Helper::Update_Generator($_POST, 'bnm_factor', "WHERE id = :id");
+            $res = Db::secure_update_array($sql, $_POST);
+            if ($res) {
+                die(Helper::Custom_Msg(Helper::Messages('s'), 1));
+            } else {
+                die(Helper::Custom_Msg(Helper::Messages('f'), 2));
+            }
+            //            die(json_encode($_POST));
+        }
+        if (isset($_POST['send_ft_voip_update_status'])) {
+            parse_str($_POST[key($_POST)], $_POST);
+            switch ($_SESSION['user_type']) {
+                case __MOSHTARAKUSERTYPE__:
+                    die(Helper::Json_Message('na'));
+                    break;
+            }
+            // $_POST = Helper::xss_check_array($_POST);
+            $unset_array = array(
+                "pin_code", "noe_khadamat", "terafik", "zaname_estefade_be_tarikh", "tarikhe_shoroe_service", "tarikhe_payane_service",
+                "gheymate_service", "takhfif", "hazine_ranzhe", "hazine_dranzhe", "hazine_nasb", "abonmane_port", "abonmane_faza", "abonmane_tajhizat",
+                "darsade_avareze_arzeshe_afzode", "maliate_arzeshe_afzode", "mablaghe_ghabele_pardakht"
+            );
+            for ($i = 0; $i < count($unset_array); $i++) {
+                if (isset($_POST[$unset_array[$i]])) {
+                    unset($_POST[$unset_array[$i]]);
+                }
+            }
+            $sql = Helper::Update_Generator($_POST, 'bnm_factor', "WHERE id = :id");
+            $res = Db::secure_update_array($sql, $_POST);
+            if ($res) {
+                die(Helper::Custom_Msg(Helper::Messages('s'), 1));
+            } else {
+                die(Helper::Custom_Msg(Helper::Messages('f'), 2));
+            }
+            //            die(json_encode($_POST));
+        }
         if (isset($_POST['send_administration_online_report'])) {
             parse_str($_POST[key($_POST)], $_POST);
             // $_POST=Helper::Create_Post_Array_Without_Key($_POST);
@@ -1125,7 +1231,7 @@ class Bootstrap
                 // $res = $GLOBALS['ibs_internet']->getOnlineUsers();
                 $onlines = $GLOBALS['ibs_internet']->findOnlineUsers(true);
                 $res = Helper::ibsGetOnlineUserInfoByArrayId($onlines);
-                if(! Helper::checkIbsResultExist($res)){
+                if (!Helper::checkIbsResultExist($res)) {
                     die(Helper::Custom_Msg("اطلاعاتی برای نمایش وجود ندارد.", 2));
                 }
                 // $res = Helper::ibsOnlineuserFilterInitialize($res);
@@ -1153,52 +1259,52 @@ class Bootstrap
             $_POST = Helper::xss_check_array($_POST);
             unset($_POST['send_change_service_password']);
             unset($_POST['currentpassword']);
-            $checkvalues= Helper::allArrayElementsHasValue($_POST);
-            if(! $checkvalues){
-                $msg="هیچ فیلدی نباید خالی ارسال شود";
-                die(json_encode(Helper::Custom_Msg($msg),JSON_UNESCAPED_UNICODE));
+            $checkvalues = Helper::allArrayElementsHasValue($_POST);
+            if (!$checkvalues) {
+                $msg = "هیچ فیلدی نباید خالی ارسال شود";
+                die(json_encode(Helper::Custom_Msg($msg), JSON_UNESCAPED_UNICODE));
             }
-            $res_factor=Helper::getServiceInfoByFactorid($_POST['service']);
-            if(! $res_factor){
-                $msg="خطای سیستمی! اطلاعات سرویس انتخاب شده یافت نشد لطفا با پشتیبانی تماس بگیرید";
-                die(json_encode(Helper::Custom_Msg($msg),JSON_UNESCAPED_UNICODE));
+            $res_factor = Helper::getServiceInfoByFactorid($_POST['service']);
+            if (!$res_factor) {
+                $msg = "خطای سیستمی! اطلاعات سرویس انتخاب شده یافت نشد لطفا با پشتیبانی تماس بگیرید";
+                die(json_encode(Helper::Custom_Msg($msg), JSON_UNESCAPED_UNICODE));
             }
-            if(! $res_factor) die(Helper::Custom_Msg('اطلاعات سرویس یافت نشد با پشتیبانی تماس بگیرید'));
-            if(! $res_factor[0]['ibsusername']) die(Helper::Custom_Msg('اطلاعات سرویس یافت نشد با پشتیبانی تماس بگیرید'));
+            if (!$res_factor) die(Helper::Custom_Msg('اطلاعات سرویس یافت نشد با پشتیبانی تماس بگیرید'));
+            if (!$res_factor[0]['ibsusername']) die(Helper::Custom_Msg('اطلاعات سرویس یافت نشد با پشتیبانی تماس بگیرید'));
             // die(json_encode($res_factor));
             switch ($res_factor[0]['sertype']) {
-                    case 'adsl':
-                    case 'vdsl':
-                    case 'bitstream':
-                    case 'wireless':
-                    case 'tdlte':
-                        $res_usrid = $GLOBALS['ibs_internet']->getUserIdByNormalUsername($res_factor[0]['ibsusername']);
-                        $res = $GLOBALS['ibs_internet']->setNormalUserAuth((string) $res_usrid[1], $res_factor[0]['ibsusername'], $_POST['newpassword']);
-                        $userinfo = $GLOBALS['ibs_internet']->getUserInfoByNormalUserName($res_factor[0]['ibsusername']);
-                        break;
-                    case 'voip':
-                        die(Helper::Json_Message('e'));
-                        $res_usrid = $GLOBALS['ibs_internet']->getUserIdByVoipUsername($res_factor[0]['ibsusername']);
-                        $res = $GLOBALS['ibs_voip']->setVoipUserAuth((string) $res_usrid, $res_factor[0]['ibsusername'], $_POST[0]['newpassword']);
-                        $userinfo = $GLOBALS['ibs_internet']->getUserInfoByViopUserName($res_factor[0]['ibsusername']);
-                        break;
-                    default:
-                        die(Helper::Json_Message('f'));
-                        break;
-                }
-                if(! $userinfo) die(Helper::Json_Message('e'));
-                //todo... send sms to user
-                $smsmessage=__OWNER__." ";
-                $smsmessage.="نام کاربری سرویس:"." ";
-                $smsmessage.=$res_factor[0]['ibsusername']." ";
-                $smsmessage.="رمز عبور جدید:"." ";
-                $smsmessage.=$_POST['newpassword'];
-                $sms=Helper::Send_Sms_Single($res_factor[0]['telephone_hamrah'], $smsmessage);
-                $msg="نام کاربری سرویس:"." ";
-                $msg.=$res_factor[0]['ibsusername']." ";
-                $msg.="رمز عبور جدید:"." ";
-                $msg.=$_POST['newpassword'];
-                die(Helper::Custom_Msg(Helper::Messages('s')." ".$msg, 1));
+                case 'adsl':
+                case 'vdsl':
+                case 'bitstream':
+                case 'wireless':
+                case 'tdlte':
+                    $res_usrid = $GLOBALS['ibs_internet']->getUserIdByNormalUsername($res_factor[0]['ibsusername']);
+                    $res = $GLOBALS['ibs_internet']->setNormalUserAuth((string) $res_usrid[1], $res_factor[0]['ibsusername'], $_POST['newpassword']);
+                    $userinfo = $GLOBALS['ibs_internet']->getUserInfoByNormalUserName($res_factor[0]['ibsusername']);
+                    break;
+                case 'voip':
+                    die(Helper::Json_Message('e'));
+                    $res_usrid = $GLOBALS['ibs_internet']->getUserIdByVoipUsername($res_factor[0]['ibsusername']);
+                    $res = $GLOBALS['ibs_voip']->setVoipUserAuth((string) $res_usrid, $res_factor[0]['ibsusername'], $_POST[0]['newpassword']);
+                    $userinfo = $GLOBALS['ibs_internet']->getUserInfoByViopUserName($res_factor[0]['ibsusername']);
+                    break;
+                default:
+                    die(Helper::Json_Message('f'));
+                    break;
+            }
+            if (!$userinfo) die(Helper::Json_Message('e'));
+            //todo... send sms to user
+            $smsmessage = __OWNER__ . " ";
+            $smsmessage .= "نام کاربری سرویس:" . " ";
+            $smsmessage .= $res_factor[0]['ibsusername'] . " ";
+            $smsmessage .= "رمز عبور جدید:" . " ";
+            $smsmessage .= $_POST['newpassword'];
+            $sms = Helper::Send_Sms_Single($res_factor[0]['telephone_hamrah'], $smsmessage);
+            $msg = "نام کاربری سرویس:" . " ";
+            $msg .= $res_factor[0]['ibsusername'] . " ";
+            $msg .= "رمز عبور جدید:" . " ";
+            $msg .= $_POST['newpassword'];
+            die(Helper::Custom_Msg(Helper::Messages('s') . " " . $msg, 1));
             // if($_POST['new_password'] && $_POST[''])
             // if (isset($_POST['ibsusername']) && isset($_POST['noeservice']) && isset($_POST['userid']) && isset($_POST['newpassword'])) {
             //     switch ($_SESSION['user_type']) {
@@ -1454,7 +1560,6 @@ class Bootstrap
                         } else {
                             die(Helper::Json_Message('f'));
                         }
-
                     } else {
                         die(Helper::Custom_Msg(Helper::Messages('npacf'), 2));
                     }
@@ -1469,33 +1574,32 @@ class Bootstrap
         if (isset($_POST['send_administration_change_system_password'])) {
             parse_str($_POST[key($_POST)], $_POST);
             $_POST = Helper::xss_check_array($_POST);
-            if($_POST['new_password'])
-            if (isset($_POST['new_password']) && isset($_POST['new_password_confirm'])) {
-                if($_POST['new_password']===$_POST['new_password_confirm']){
-                    // $sql=Helper::Update_Generator(['password'=>$_POST['password'],'user_id'=>$_POST['userid'], 'user_type'=>__MOSHTARAKUSERTYPE__], 'bnm_users', 'WHERE user_id=:user_id AND user_type=:'.__MOSHTARAKUSERTYPE__);
-                    $arr=[
-                        'password'=>Helper::str_md5($_POST['new_password']),
-                        'user_id'=>$_POST['userid'],
-                        'user_type'=>__MOSHTARAKUSERTYPE__
-                    ];
-                    $sql="SELECT * FROM bnm_users WHERE user_id = ? AND user_type = ?";
-                    $userinfo=Db::secure_fetchall($sql, [$arr['user_id'], $arr['user_type']]);
-                    if(! $userinfo) die(Helper::Custom_Msg(Helper::Messages('f'), 3));
-                    if(isset($userinfo['errorInfo'])) die(Helper::Custom_Msg(Helper::Messages('f'), 3));
-                    $sql=Helper::Update_Generator(['id'=>$userinfo[0]['id'], 'password'=>$arr['password']], 'bnm_users', "WHERE id= :id");
-                    $res=Db::secure_update_array($sql, ['id'=>$userinfo[0]['id'], 'password'=>$arr['password']]);
-                    if($res){
-                        die(Helper::Custom_Msg(Helper::Messages('s'), 1));
-                    }else{
-                        die(Helper::Custom_Msg("مشکلی در انجام درخواست شما بوجود آمده و یا رمز عبور تکراری است", 3));
-                        
+            if ($_POST['new_password'])
+                if (isset($_POST['new_password']) && isset($_POST['new_password_confirm'])) {
+                    if ($_POST['new_password'] === $_POST['new_password_confirm']) {
+                        // $sql=Helper::Update_Generator(['password'=>$_POST['password'],'user_id'=>$_POST['userid'], 'user_type'=>__MOSHTARAKUSERTYPE__], 'bnm_users', 'WHERE user_id=:user_id AND user_type=:'.__MOSHTARAKUSERTYPE__);
+                        $arr = [
+                            'password' => Helper::str_md5($_POST['new_password']),
+                            'user_id' => $_POST['userid'],
+                            'user_type' => __MOSHTARAKUSERTYPE__
+                        ];
+                        $sql = "SELECT * FROM bnm_users WHERE user_id = ? AND user_type = ?";
+                        $userinfo = Db::secure_fetchall($sql, [$arr['user_id'], $arr['user_type']]);
+                        if (!$userinfo) die(Helper::Custom_Msg(Helper::Messages('f'), 3));
+                        if (isset($userinfo['errorInfo'])) die(Helper::Custom_Msg(Helper::Messages('f'), 3));
+                        $sql = Helper::Update_Generator(['id' => $userinfo[0]['id'], 'password' => $arr['password']], 'bnm_users', "WHERE id= :id");
+                        $res = Db::secure_update_array($sql, ['id' => $userinfo[0]['id'], 'password' => $arr['password']]);
+                        if ($res) {
+                            die(Helper::Custom_Msg(Helper::Messages('s'), 1));
+                        } else {
+                            die(Helper::Custom_Msg("مشکلی در انجام درخواست شما بوجود آمده و یا رمز عبور تکراری است", 3));
+                        }
+                    } else {
+                        die(Helper::Json_Message('inf'));
                     }
-                }else{
+                } else {
                     die(Helper::Json_Message('inf'));
                 }
-            }else{
-                die(Helper::Json_Message('inf'));
-            }
             // if (isset($_POST['new_password']) && isset($_POST['new_password_confirm'])) {
             //     $_POST['new_password'] = Helper::str_trim($_POST['new_password']);
             //     $_POST['new_password_confirm'] = Helper::str_trim($_POST['new_password_confirm']);
@@ -1627,27 +1731,27 @@ class Bootstrap
         }
         if (isset($_POST['connection_log_form_request'])) {
             // parse_str($_POST[key($_POST)], $_POST);
-            $_POST=Helper::Create_Post_Array_Without_Key($_POST);
+            $_POST = Helper::Create_Post_Array_Without_Key($_POST);
             $_POST = Helper::xss_check_array($_POST);
-            if(! $_POST['service']) die(Helper::Custom_Msg('سرویس کاربر را مشخص کنید'));
-            if(! $_POST['noe_masraf']) die(Helper::Custom_Msg('نوع مصرف را مشخص کنید'));
-            if(! $_POST['time_from']) die(Helper::Custom_Msg('تاریخ شروع را مشخص کنید'));
-            if(! $_POST['time_to']) die(Helper::Custom_Msg('تاریخ پایان را مشخص کنید'));
+            if (!$_POST['service']) die(Helper::Custom_Msg('سرویس کاربر را مشخص کنید'));
+            if (!$_POST['noe_masraf']) die(Helper::Custom_Msg('نوع مصرف را مشخص کنید'));
+            if (!$_POST['time_from']) die(Helper::Custom_Msg('تاریخ شروع را مشخص کنید'));
+            if (!$_POST['time_to']) die(Helper::Custom_Msg('تاریخ پایان را مشخص کنید'));
             $noemasraf = Helper::Select_By_Id('bnm_connection_log', $_POST['noe_masraf']);
-            if(! $noemasraf) die(Helper::Custom_Msg('نوع مصرف با اطلاعات از پیش ساخته شده پایگاه داده مطابقت ندارد.'));
-            $factor=Helper::getServiceInfoByFactorid($_POST['service']);
-            if(! $factor) die(Helper::Custom_Msg('اطلاعات سرویس مشترک در پایگاه داده ثبت نشده است.'));
-            if(! isset($factor[0]['ibsusername'])) die(Helper::Custom_Msg('اطلاعات سرویس مشترک در پایگاه داده ثبت نشده است.'));
-            
+            if (!$noemasraf) die(Helper::Custom_Msg('نوع مصرف با اطلاعات از پیش ساخته شده پایگاه داده مطابقت ندارد.'));
+            $factor = Helper::getServiceInfoByFactorid($_POST['service']);
+            if (!$factor) die(Helper::Custom_Msg('اطلاعات سرویس مشترک در پایگاه داده ثبت نشده است.'));
+            if (!isset($factor[0]['ibsusername'])) die(Helper::Custom_Msg('اطلاعات سرویس مشترک در پایگاه داده ثبت نشده است.'));
+
             switch ($factor[0]['sertype']) {
                 case 'adsl':
                 case 'vdsl':
                 case 'wireless':
                 case 'tdlte':
                 case 'bitstream':
-                    $logs=Helper::getIbsLogsByArrayUsernamesDesc([$factor[0]['ibsusername']], Helper::regulateNumber($_POST['time_from']), Helper::regulateNumber($_POST['time_to']), 10000, 'jalali');
-                    if(! $logs) die(Helper::Custom_Msg('مشترک لاگی در بازه مشخص شده ندارند.'));
-                    $logs=$logs[1][1];
+                    $logs = Helper::getIbsLogsByArrayUsernamesDesc([$factor[0]['ibsusername']], Helper::regulateNumber($_POST['time_from']), Helper::regulateNumber($_POST['time_to']), 10000, 'jalali');
+                    if (!$logs) die(Helper::Custom_Msg('مشترک لاگی در بازه مشخص شده ندارند.'));
+                    $logs = $logs[1][1];
                     // die(json_encode($logs));
                     foreach ($logs as $k => $v) {
                         $v['in_bytes']              = Helper::byteConvert($v['in_bytes']);
@@ -1657,10 +1761,10 @@ class Bootstrap
                         $v['login_time_formatted']  = Helper::tabdileTarikh($v['login_time_formatted'], 2, '-', '-', true);
                         $v['logout_time_formatted'] = Helper::tabdileTarikh($v['logout_time_formatted'], 2, '-', '-', true);
                     }
-                    $noeservice='internet';
-                break;
+                    $noeservice = 'internet';
+                    break;
                 case 'voip':
-                    $noeservice='voip';
+                    $noeservice = 'voip';
                     die(Helper::Custom_Msg('ارایه لاگین این سرویس در حال حاضر امکانپذیر نیست'));
                     // foreach ($logs as $k => $v) {
                     //     $v['in_bytes']              = Helper::byteConvert($v['in_bytes']);
@@ -1670,20 +1774,19 @@ class Bootstrap
                     //     $v['login_time_formatted']  = Helper::tabdileTarikh($v['login_time_formatted'], 2, '-', '-', true);
                     //     $v['logout_time_formatted'] = Helper::tabdileTarikh($v['logout_time_formatted'], 2, '-', '-', true);
                     // }
-                break;
+                    break;
                 default:
                     die(Helper::Custom_Msg('ارایه لاگین این سرویس در حال حاضر امکانپذیر نیست'));
-                break;
+                    break;
             }
 
-            if(! $logs) die(Helper::Custom_Msg('مشترک لاگ معتبری در بازه مشخص شده ندارند.'));
-            $logs=array_values($logs);
+            if (!$logs) die(Helper::Custom_Msg('مشترک لاگ معتبری در بازه مشخص شده ندارند.'));
+            $logs = array_values($logs);
             $logs = Helper::ibsConnectionlogFilterByNoeMasraf($logs, $noemasraf[0]['name']);
-            $res=[];
-            $res['result']=$logs;
-            $res['noe_service']=$noeservice;
+            $res = [];
+            $res['result'] = $logs;
+            $res['noe_service'] = $noeservice;
             die(json_encode($res));
-
         }
         // if (isset($_POST['connection_log_form_request'])) {
         //     parse_str($_POST[key($_POST)], $_POST);
@@ -1711,11 +1814,11 @@ class Bootstrap
         //                 // die(json_encode($factor));
         //                 $res_ibs_init = $GLOBALS['ibs_internet']->getUserIdByNormalUsername($factor[0]['ibsusername']);
         //                 if ($res_ibs_init) {
-                            
+
         //                     $res_ibs = $GLOBALS['ibs_internet']->getConnectionByUsernameAndDateTimeDesc((string) $factor[0]['ibsusername'], $_POST['time_from'], $_POST['time_to'], 10000);
         //                     if(! Helper::checkIbsResultStrict($res_ibs)) die(Helper::Custom_Msg("لاگی از این سرویس یافت نشد"));
         //                     $res_ibs=$res_ibs[1][1];
-                            
+
         //                     // $res_ibs = $GLOBALS['ibs_internet']->getConnectionLogs($_POST['time_from'], $_POST['time_to'], (string) $res_ibs_init);
         //                     $res_ibs=Helper::byteConvertArray($res_ibs, 'bytes_in');
         //                     $res_ibs=Helper::byteConvertArray($res_ibs, 'bytes_out');
@@ -1764,7 +1867,7 @@ class Bootstrap
         //                 if (count($res_ibs) > 0) {
         //                     // die(json_encode($res_ibs));
         //                     die(json_encode(['result' => $res_ibs, 'noe_service' => $flag_type]));
-                            
+
         //                 } else {
         //                     $msg="لاگی در بازه زمانی انتخاب شده وجود نداشت";
         //                     die(Helper::Custom_Msg($msg, 3));
@@ -2284,14 +2387,16 @@ class Bootstrap
                         die(Helper::Json_Message('na'));
                         break;
                 }
-                if(! isset($res)){ die(Helper::Json_Message('inf'));}
+                if (!isset($res)) {
+                    die(Helper::Json_Message('inf'));
+                }
                 if ($res) {
                     if (isset($res[0]['interfacetype'])) {
                         if ($res[0]['interfacetype'] === "adsl") {
                             $sql = "SELECT *,DATE_ADD(CURDATE(),INTERVAL zaname_estefade DAY) tarikhe_payane_service FROM bnm_services WHERE noe_khadamat=? AND namayeshe_service=? AND type=? AND tarikhe_shoroe_namayesh<=CURDATE() AND tarikhe_payane_namayesh >= CURDATE()";
                             $res = Db::secure_fetchall($sql, array('BITSTREAM_ADSL', 'yes', 'bitstream'), true);
                             if ($res) {
-                                $res=Helper::tabdileTarikhIndexArray($res, 'tarikhe_payane_service', 1, '-', '/');
+                                $res = Helper::tabdileTarikhIndexArray($res, 'tarikhe_payane_service', 1, '-', '/');
                                 die(json_encode($res));
                             } else {
                                 die(Helper::Custom_Msg('سرویسی جهت اختصاص به این فاکتور وجود ندارد!'));
@@ -2300,7 +2405,7 @@ class Bootstrap
                             $sql = "SELECT *,DATE_ADD(CURDATE(),INTERVAL zaname_estefade DAY) tarikhe_payane_service FROM bnm_services WHERE noe_khadamat=? AND namayeshe_service=? AND type=? AND tarikhe_shoroe_namayesh<=CURDATE() AND tarikhe_payane_namayesh >= CURDATE()";
                             $res = Db::secure_fetchall($sql, array('BITSTREAM_VDSL', 'yes', 'bitstream'), true);
                             if ($res) {
-                                $res=Helper::tabdileTarikhIndexArray($res, 'tarikhe_payane_service', 1, '-', '/');
+                                $res = Helper::tabdileTarikhIndexArray($res, 'tarikhe_payane_service', 1, '-', '/');
                                 die(json_encode($res));
                             } else {
                                 die(Helper::Custom_Msg('سرویسی جهت اختصاص به این فاکتور وجود ندارد!'));
@@ -2377,11 +2482,9 @@ class Bootstrap
                 } else {
                     die(Helper::Json_Message('f'));
                 }
-
             } else {
                 die(Helper::Json_Message('af'));
             }
-
         }
         /*========levels========*/
         if (isset($_POST['get_all_terminal'])) {
@@ -2463,11 +2566,9 @@ class Bootstrap
                 } else {
                     die(Helper::Json_Message('f'));
                 }
-
             } else {
                 die(Helper::Json_Message('af'));
             }
-
         }
         /*=========terminal by markaz=========== */
         if (isset($_POST['get_wireless_station_by_ap_where_station_eshterak_null'])) {
@@ -2717,7 +2818,7 @@ class Bootstrap
                             $res = Helper::bitstreamInfoByUserid((int) $_POST['filter1'], true);
                             break;
                         case 'wireless':
-                            $res=Helper::getIbsUsername($_SESSION['user_id'],'wireless');
+                            $res = Helper::getIbsUsername($_SESSION['user_id'], 'wireless');
                             // $res= Helper::wirelessInfoByUserid($_POST['filter1'], true);
                             break;
                         case 'tdlte':
@@ -3331,93 +3432,93 @@ class Bootstrap
 
                     break;
 
-                // case 'restrictions_menu':
-                //     if (Helper::Login_Just_Check()) {
-                //         switch ($_SESSION['user_type']) {
-                //             case __ADMINUSERTYPE__:
-                //                 $sql    = "select * from bnm_dashboard_menu";
-                //                 $result = Db::fetchall_Query($sql);
-                //                 die(json_encode($result));
-                //                 break;
-                //             case __MODIRUSERTYPE__:
-                //                 $where_menu_ids = "";
-                //                 $menu_access    = Db::secure_fetchall("SELECT * FROM bnm_dashboard_menu_access WHERE operator_id = ?", array($_SESSION['user_id']));
-                //                 if ($menu_access) {
-                //                     for ($i = 0; $i < count($menu_access); $i++) {
-                //                         if ($i == count($menu_access) - 1) {
-                //                             $where_menu_ids .= $menu_access[$i]['menu_id'];
-                //                         } else {
-                //                             $where_menu_ids .= $menu_access[$i]['menu_id'] . ',';
-                //                         }
-                //                     }
-                //                     $dashboard_access_list = Db::fetchall_Query("SELECT * FROM bnm_dashboard_menu WHERE id IN ($where_menu_ids)");
-                //                     if ($dashboard_access_list) {
-                //                         die(json_encode($dashboard_access_list));
-                //                     } else {
-                //                         die(Helper::Json_Message('f'));
-                //                     }
+                    // case 'restrictions_menu':
+                    //     if (Helper::Login_Just_Check()) {
+                    //         switch ($_SESSION['user_type']) {
+                    //             case __ADMINUSERTYPE__:
+                    //                 $sql    = "select * from bnm_dashboard_menu";
+                    //                 $result = Db::fetchall_Query($sql);
+                    //                 die(json_encode($result));
+                    //                 break;
+                    //             case __MODIRUSERTYPE__:
+                    //                 $where_menu_ids = "";
+                    //                 $menu_access    = Db::secure_fetchall("SELECT * FROM bnm_dashboard_menu_access WHERE operator_id = ?", array($_SESSION['user_id']));
+                    //                 if ($menu_access) {
+                    //                     for ($i = 0; $i < count($menu_access); $i++) {
+                    //                         if ($i == count($menu_access) - 1) {
+                    //                             $where_menu_ids .= $menu_access[$i]['menu_id'];
+                    //                         } else {
+                    //                             $where_menu_ids .= $menu_access[$i]['menu_id'] . ',';
+                    //                         }
+                    //                     }
+                    //                     $dashboard_access_list = Db::fetchall_Query("SELECT * FROM bnm_dashboard_menu WHERE id IN ($where_menu_ids)");
+                    //                     if ($dashboard_access_list) {
+                    //                         die(json_encode($dashboard_access_list));
+                    //                     } else {
+                    //                         die(Helper::Json_Message('f'));
+                    //                     }
 
-                //                 } else {
-                //                     die(Helper::Json_Message('f'));
-                //                 }
+                    //                 } else {
+                    //                     die(Helper::Json_Message('f'));
+                    //                 }
 
-                //                 break;
-                //             case __MODIR2USERTYPE__:
-                //                 $where_menu_ids = "";
-                //                 $menu_access    = Db::secure_fetchall("SELECT * FROM bnm_dashboard_menu_access WHERE operator_id = ?", array($_SESSION['user_id']));
-                //                 if ($menu_access) {
-                //                     for ($i = 0; $i < count($menu_access); $i++) {
-                //                         if ($i == count($menu_access) - 1) {
-                //                             $where_menu_ids .= $menu_access[$i]['menu_id'];
-                //                         } else {
-                //                             $where_menu_ids .= $menu_access[$i]['menu_id'] . ',';
-                //                         }
-                //                     }
-                //                     $dashboard_access_list = Db::fetchall_Query("SELECT * FROM bnm_dashboard_menu WHERE id IN ($where_menu_ids)");
-                //                     if ($dashboard_access_list) {
-                //                         die(json_encode($dashboard_access_list));
-                //                     } else {
-                //                         die(Helper::Json_Message('f'));
-                //                     }
+                    //                 break;
+                    //             case __MODIR2USERTYPE__:
+                    //                 $where_menu_ids = "";
+                    //                 $menu_access    = Db::secure_fetchall("SELECT * FROM bnm_dashboard_menu_access WHERE operator_id = ?", array($_SESSION['user_id']));
+                    //                 if ($menu_access) {
+                    //                     for ($i = 0; $i < count($menu_access); $i++) {
+                    //                         if ($i == count($menu_access) - 1) {
+                    //                             $where_menu_ids .= $menu_access[$i]['menu_id'];
+                    //                         } else {
+                    //                             $where_menu_ids .= $menu_access[$i]['menu_id'] . ',';
+                    //                         }
+                    //                     }
+                    //                     $dashboard_access_list = Db::fetchall_Query("SELECT * FROM bnm_dashboard_menu WHERE id IN ($where_menu_ids)");
+                    //                     if ($dashboard_access_list) {
+                    //                         die(json_encode($dashboard_access_list));
+                    //                     } else {
+                    //                         die(Helper::Json_Message('f'));
+                    //                     }
 
-                //                 } else {
-                //                     die(Helper::Json_Message('f'));
-                //                 }
+                    //                 } else {
+                    //                     die(Helper::Json_Message('f'));
+                    //                 }
 
-                //                 break;
-                //             case __ADMINOPERATORUSERTYPE__:
-                //                 $where_menu_ids = "";
-                //                 $menu_access    = Db::secure_fetchall("SELECT * FROM bnm_dashboard_menu_access WHERE operator_id = ?", array($_SESSION['user_id']));
-                //                 if ($menu_access) {
-                //                     for ($i = 0; $i < count($menu_access); $i++) {
-                //                         if ($i == count($menu_access) - 1) {
-                //                             $where_menu_ids .= $menu_access[$i]['menu_id'];
-                //                         } else {
-                //                             $where_menu_ids .= $menu_access[$i]['menu_id'] . ',';
-                //                         }
-                //                     }
-                //                     $dashboard_access_list = Db::fetchall_Query("SELECT * FROM bnm_dashboard_menu WHERE id IN ($where_menu_ids)");
-                //                     if ($dashboard_access_list) {
-                //                         die(json_encode($dashboard_access_list));
-                //                     } else {
-                //                         die(Helper::Json_Message('f'));
-                //                     }
+                    //                 break;
+                    //             case __ADMINOPERATORUSERTYPE__:
+                    //                 $where_menu_ids = "";
+                    //                 $menu_access    = Db::secure_fetchall("SELECT * FROM bnm_dashboard_menu_access WHERE operator_id = ?", array($_SESSION['user_id']));
+                    //                 if ($menu_access) {
+                    //                     for ($i = 0; $i < count($menu_access); $i++) {
+                    //                         if ($i == count($menu_access) - 1) {
+                    //                             $where_menu_ids .= $menu_access[$i]['menu_id'];
+                    //                         } else {
+                    //                             $where_menu_ids .= $menu_access[$i]['menu_id'] . ',';
+                    //                         }
+                    //                     }
+                    //                     $dashboard_access_list = Db::fetchall_Query("SELECT * FROM bnm_dashboard_menu WHERE id IN ($where_menu_ids)");
+                    //                     if ($dashboard_access_list) {
+                    //                         die(json_encode($dashboard_access_list));
+                    //                     } else {
+                    //                         die(Helper::Json_Message('f'));
+                    //                     }
 
-                //                 } else {
-                //                     die(Helper::Json_Message('f'));
-                //                 }
+                    //                 } else {
+                    //                     die(Helper::Json_Message('f'));
+                    //                 }
 
-                //                 break;
-                //             default:
-                //                 die(Helper::Json_Message('af'));
-                //                 break;
-                //         }
-                //     } else {
-                //         die(Helper::Json_Message('af'));
-                //     }
+                    //                 break;
+                    //             default:
+                    //                 die(Helper::Json_Message('af'));
+                    //                 break;
+                    //         }
+                    //     } else {
+                    //         die(Helper::Json_Message('af'));
+                    //     }
 
-                // break;
-                case 'restrictions_initialize'://dastresihaye namayande
+                    // break;
+                case 'restrictions_initialize': //dastresihaye namayande
                     if (Helper::Login_Just_Check()) {
                         switch ($_SESSION['user_type']) {
                             case __ADMINUSERTYPE__:
@@ -3672,7 +3773,7 @@ class Bootstrap
                                 } else {
                                     die(Helper::Json_Message('f'));
                                 }
-                            break;
+                                break;
                             case __MODIRUSERTYPE__:
                                 $sql = "SELECT o.id,o.name,o.name_khanevadegi,o.branch_id,o.user_type,b.baladasti_id baladasti_id
                                 FROM bnm_operator o
@@ -3847,7 +3948,6 @@ class Bootstrap
                         } else {
                             die(Helper::Json_Message('f'));
                         }
-
                     } else {
                         die(Helper::Json_Message('na'));
                     }
@@ -3863,7 +3963,6 @@ class Bootstrap
                         } else {
                             die(Helper::Json_Message('f'));
                         }
-
                     } else {
                         die(Helper::Json_Message('na'));
                     }
@@ -3879,7 +3978,6 @@ class Bootstrap
                         } else {
                             die(Helper::Json_Message('f'));
                         }
-
                     } else {
                         die(Helper::Json_Message('na'));
                     }
@@ -3921,7 +4019,7 @@ class Bootstrap
                     die($rows);
                     break;
                 case 'pre_number':
-                        $sql="SELECT
+                    $sql = "SELECT
                             pr.id,
                             pr.prenumber,
                             pr.markaze_mokhaberati
@@ -3944,7 +4042,7 @@ class Bootstrap
                 case 'modir':
                     // $sql = "SELECT * FROM bnm_operator WHERE id=? AND user_type=?";
                     // $result = Db::secure_fetchall($sql, array($_POST['condition'], __MODIRUSERTYPE__), true);
-                    $sql="SELECT
+                    $sql = "SELECT
                             s.*,
                             c.id AS city_id,
                             c.name city_name,
@@ -3962,7 +4060,7 @@ class Bootstrap
                             LEFT JOIN bnm_ostan os ON s.ostan_sokonat = os.id
                         WHERE
                             s.id = ?";
-                    $result= Db::secure_fetchall($sql, array($_POST['condition']));
+                    $result = Db::secure_fetchall($sql, array($_POST['condition']));
                     die(json_encode($result));
                     break;
                 case 'noe_terminal':
@@ -4042,6 +4140,72 @@ class Bootstrap
                     $rows = json_encode($result);
                     die($rows);
                     break;
+                case 'pre_internal_real_subscribers':
+                    $sql = "SELECT
+                                s.*,
+                                c.id AS city_id,
+                                c.name city_name,
+                                o.id ostan_id,
+                                o.name ostan_name,
+                                t1o.id tel1_ostan_id,
+                                t1o.name tel1_ostan_name,
+                                t2o.id tel2_ostan_id,
+                                t2o.name tel2_ostan_name,
+                                t3o.id tel3_ostan_id,
+                                t3o.name tel3_ostan_name,
+                                t1s.id tel1_shahr_id,
+                                t1s.name tel1_shahr_name,
+                                t2s.id tel2_shahr_id,
+                                t2s.name tel2_shahr_name,
+                                t3s.id tel3_shahr_id,
+                                t3s.name tel3_shahr_name,
+                                os.id ostane_sokonat_id,
+                                os.name ostane_sokonat_name,
+                                cs.id shahre_sokonat_id,
+                                cs.name shahre_sokonat_name
+                            FROM
+                                bnm_presubscribers s
+                                LEFT JOIN bnm_shahr c ON s.shahre_tavalod = c.id
+                                LEFT JOIN bnm_shahr cs ON s.shahre_sokonat = cs.id
+                                LEFT JOIN bnm_ostan o ON s.ostane_tavalod = o.id
+                                LEFT JOIN bnm_ostan os ON s.ostane_sokonat = os.id
+                                LEFT JOIN bnm_ostan t1o ON s.tel1_ostan = t1o.id
+                                LEFT JOIN bnm_ostan t2o ON s.tel2_ostan = t2o.id
+                                LEFT JOIN bnm_ostan t3o ON s.tel3_ostan = t3o.id
+                                LEFT JOIN bnm_shahr t1s ON s.tel1_ostan = t1s.id
+                                LEFT JOIN bnm_ostan t2s ON s.tel2_ostan = t2s.id
+                                LEFT JOIN bnm_ostan t3s ON s.tel3_ostan = t3s.id 
+                            WHERE
+                                s.id = ?
+                            ";
+                    $result = Db::secure_fetchall($sql, array($_POST['condition']));
+                    if ($result) {
+                        switch ($_SESSION['user_type']) {
+                            case __ADMINUSERTYPE__:
+                            case __ADMINOPERATORUSERTYPE__:
+                                $sql = "SELECT id,name_sherkat FROM bnm_branch";
+                                $branches = Db::fetchall_Query($sql);
+                                if (!$branches) die(Helper::Json_Message('e'));
+                                $result[0]['branches_list'] = $branches;
+                                $result[0]['branches_list'][] = ['id' => 0, 'name_sherkat' => __OWNERCOMPANYFA__];
+                                break;
+                            case __MODIRUSERTYPE__:
+                            case __MODIR2USERTYPE__:
+                            case __OPERATORUSERTYPE__:
+                            case __OPERATOR2USERTYPE__:
+                            case __MOSHTARAKUSERTYPE__:
+                                $sql = "SELECT id,name_sherkat FROM bnm_branch WHERE id = ?";
+                                $branches = Db::secure_fetchall($sql, array($_SESSION['branch_id']));
+                                if (!$branches) die(Helper::Json_Message('e'));
+                                $result[0]['branches_list'] = $branches;
+                                break;
+                        }
+                        die(json_encode($result));
+                    } else {
+                        die(Helper::Json_Message('f'));
+                    }
+
+                    break;
                 case 'real_subscribers':
                     $sql = "SELECT
                             s.*,
@@ -4085,22 +4249,88 @@ class Bootstrap
                         switch ($_SESSION['user_type']) {
                             case __ADMINUSERTYPE__:
                             case __ADMINOPERATORUSERTYPE__:
-                                $sql="SELECT id,name_sherkat FROM bnm_branch";
-                                $branches=Db::fetchall_Query($sql);
-                                if(! $branches) die(Helper::Json_Message('e'));
-                                $result[0]['branches_list']=$branches;
-                                $result[0]['branches_list'][]=['id'=>0, 'name_sherkat'=>__OWNERCOMPANYFA__];
-                            break;
+                                $sql = "SELECT id,name_sherkat FROM bnm_branch";
+                                $branches = Db::fetchall_Query($sql);
+                                if (!$branches) die(Helper::Json_Message('e'));
+                                $result[0]['branches_list'] = $branches;
+                                $result[0]['branches_list'][] = ['id' => 0, 'name_sherkat' => __OWNERCOMPANYFA__];
+                                break;
                             case __MODIRUSERTYPE__:
                             case __MODIR2USERTYPE__:
                             case __OPERATORUSERTYPE__:
                             case __OPERATOR2USERTYPE__:
                             case __MOSHTARAKUSERTYPE__:
-                                $sql="SELECT id,name_sherkat FROM bnm_branch WHERE id = ?";
-                                $branches=Db::secure_fetchall($sql, array($_SESSION['branch_id']));
-                                if(! $branches) die(Helper::Json_Message('e'));
-                                $result[0]['branches_list']=$branches;
-                            break;
+                                $sql = "SELECT id,name_sherkat FROM bnm_branch WHERE id = ?";
+                                $branches = Db::secure_fetchall($sql, array($_SESSION['branch_id']));
+                                if (!$branches) die(Helper::Json_Message('e'));
+                                $result[0]['branches_list'] = $branches;
+                                break;
+                        }
+                        die(json_encode($result));
+                    } else {
+                        die(Helper::Json_Message('f'));
+                    }
+
+                    break;
+                case 'pre_internal_legal_subscribers':
+                    $sql = "SELECT
+                                s.*,
+                                c.id AS city_id,
+                                c.name city_name,
+                                o.id ostan_id,
+                                o.name ostan_name,
+                                t1o.id tel1_ostan_id,
+                                t1o.name tel1_ostan_name,
+                                t2o.id tel2_ostan_id,
+                                t2o.name tel2_ostan_name,
+                                t3o.id tel3_ostan_id,
+                                t3o.name tel3_ostan_name,
+                                t1s.id tel1_shahr_id,
+                                t1s.name tel1_shahr_name,
+                                t2s.id tel2_shahr_id,
+                                t2s.name tel2_shahr_name,
+                                t3s.id tel3_shahr_id,
+                                t3s.name tel3_shahr_name,
+                                os.id ostane_sokonat_id,
+                                os.name ostane_sokonat_name,
+                                cs.id shahre_sokonat_id,
+                                cs.name shahre_sokonat_name
+                            FROM
+                                bnm_presubscribers s
+                                LEFT JOIN bnm_shahr c ON s.shahre_tavalod = c.id
+                                LEFT JOIN bnm_shahr cs ON s.shahre_sokonat = cs.id
+                                LEFT JOIN bnm_ostan o ON s.ostane_tavalod = o.id
+                                LEFT JOIN bnm_ostan os ON s.ostane_sokonat = os.id
+                                LEFT JOIN bnm_ostan t1o ON s.tel1_ostan = t1o.id
+                                LEFT JOIN bnm_ostan t2o ON s.tel2_ostan = t2o.id
+                                LEFT JOIN bnm_ostan t3o ON s.tel3_ostan = t3o.id
+                                LEFT JOIN bnm_shahr t1s ON s.tel1_ostan = t1s.id
+                                LEFT JOIN bnm_ostan t2s ON s.tel2_ostan = t2s.id
+                                LEFT JOIN bnm_ostan t3s ON s.tel3_ostan = t3s.id 
+                            WHERE
+                                s.id = ?
+                            ";
+                    $result = Db::secure_fetchall($sql, array($_POST['condition']));
+                    if ($result) {
+                        switch ($_SESSION['user_type']) {
+                            case __ADMINUSERTYPE__:
+                            case __ADMINOPERATORUSERTYPE__:
+                                $sql = "SELECT id,name_sherkat FROM bnm_branch";
+                                $branches = Db::fetchall_Query($sql);
+                                if (!$branches) die(Helper::Json_Message('e'));
+                                $result[0]['branches_list'] = $branches;
+                                $result[0]['branches_list'][] = ['id' => 0, 'name_sherkat' => __OWNERCOMPANYFA__];
+                                break;
+                            case __MODIRUSERTYPE__:
+                            case __MODIR2USERTYPE__:
+                            case __OPERATORUSERTYPE__:
+                            case __OPERATOR2USERTYPE__:
+                            case __MOSHTARAKUSERTYPE__:
+                                $sql = "SELECT id,name_sherkat FROM bnm_branch WHERE id = ?";
+                                $branches = Db::secure_fetchall($sql, array($_SESSION['branch_id']));
+                                if (!$branches) die(Helper::Json_Message('e'));
+                                $result[0]['branches_list'] = $branches;
+                                break;
                         }
                         die(json_encode($result));
                     } else {
@@ -4151,22 +4381,22 @@ class Bootstrap
                         switch ($_SESSION['user_type']) {
                             case __ADMINUSERTYPE__:
                             case __ADMINOPERATORUSERTYPE__:
-                                $sql="SELECT id,name_sherkat FROM bnm_branch";
-                                $branches=Db::fetchall_Query($sql);
-                                if(! $branches) die(Helper::Json_Message('e'));
-                                $result[0]['branches_list']=$branches;
-                                $result[0]['branches_list'][]=['id'=>0, 'name_sherkat'=>__OWNERCOMPANYFA__];
-                            break;
+                                $sql = "SELECT id,name_sherkat FROM bnm_branch";
+                                $branches = Db::fetchall_Query($sql);
+                                if (!$branches) die(Helper::Json_Message('e'));
+                                $result[0]['branches_list'] = $branches;
+                                $result[0]['branches_list'][] = ['id' => 0, 'name_sherkat' => __OWNERCOMPANYFA__];
+                                break;
                             case __MODIRUSERTYPE__:
                             case __MODIR2USERTYPE__:
                             case __OPERATORUSERTYPE__:
                             case __OPERATOR2USERTYPE__:
                             case __MOSHTARAKUSERTYPE__:
-                                $sql="SELECT id,name_sherkat FROM bnm_branch WHERE id = ?";
-                                $branches=Db::secure_fetchall($sql, array($_SESSION['branch_id']));
-                                if(! $branches) die(Helper::Json_Message('e'));
-                                $result[0]['branches_list']=$branches;
-                            break;
+                                $sql = "SELECT id,name_sherkat FROM bnm_branch WHERE id = ?";
+                                $branches = Db::secure_fetchall($sql, array($_SESSION['branch_id']));
+                                if (!$branches) die(Helper::Json_Message('e'));
+                                $result[0]['branches_list'] = $branches;
+                                break;
                         }
                         die(json_encode($result));
                     } else {
@@ -4209,16 +4439,22 @@ class Bootstrap
                 case 'port':
                     $sql = "SELECT * FROM bnm_port WHERE id=?";
                     $result = Db::secure_fetchall($sql, array($_POST['condition']));
-                    if($result){
+                    if ($result) {
                         die(json_encode($result, JSON_UNESCAPED_UNICODE));
-                    }else{
-                        $msg="اطلاعات پورت یافت نشد";
-                        die(Helper::Custom_Msg($msg,2));
+                    } else {
+                        $msg = "اطلاعات پورت یافت نشد";
+                        die(Helper::Custom_Msg($msg, 2));
                     }
-                    
+
                     break;
                 case 'branch':
                     $sql = "SELECT * FROM bnm_branch WHERE id= ?";
+                    $result = Db::secure_fetchall($sql, array($_POST['condition']));
+                    $rows = json_encode($result);
+                    die($rows);
+                    break;
+                case 'pre_internal_branch':
+                    $sql = "SELECT * FROM bnm_prebranch WHERE id= ?";
                     $result = Db::secure_fetchall($sql, array($_POST['condition']));
                     $rows = json_encode($result);
                     die($rows);
@@ -4255,7 +4491,6 @@ class Bootstrap
                         } else {
                             die(Helper::Json_Message('f'));
                         }
-
                     } else {
                         echo Helper::Json_Message('na');
                     }
@@ -4305,7 +4540,6 @@ class Bootstrap
                         } else {
                             die(Helper::Json_Message('f'));
                         }
-
                     } else {
                         echo Helper::Alert_Message('na');
                     }
@@ -4469,7 +4703,6 @@ class Bootstrap
                         } else {
                             echo Helper::Alert_Message('na');
                         }
-
                     }
                     echo Helper::Alert_Message('af');
                     break;
@@ -4634,7 +4867,7 @@ class Bootstrap
                         $sql = "delete FROM bnm_subscribers WHERE id = ?";
                         $result = Db::secure_fetchall($sql, [$id]);
                         $sql = "delete FROM bnm_users WHERE user_id = ? AND user_type= ?";
-                        $result= Db::secure_fetchall($sql, [$id, __MOSHTARAKUSERTYPE__]);
+                        $result = Db::secure_fetchall($sql, [$id, __MOSHTARAKUSERTYPE__]);
                         if ($result) {
                             die(true);
                         } else {
@@ -4652,7 +4885,7 @@ class Bootstrap
                         $sql = "delete FROM bnm_subscribers WHERE id = ?";
                         $result = Db::secure_fetchall($sql, [$id]);
                         $sql = "delete FROM bnm_users WHERE user_id = ? AND user_type= ?";
-                        $result= Db::secure_fetchall($sql, [$id, __MOSHTARAKUSERTYPE__]);
+                        $result = Db::secure_fetchall($sql, [$id, __MOSHTARAKUSERTYPE__]);
                         if ($result) {
                             die(true);
                         } else {
@@ -4764,7 +4997,6 @@ class Bootstrap
                         } else {
                             die(Helper::Json_Message('af'));
                         }
-
                     } else {
                         die(Helper::Json_Message('f'));
                     }
@@ -4788,15 +5020,15 @@ class Bootstrap
                                             if ($res[0]['branch_id'] === 0) {
                                                 ///user sherkat ".__OPERATORUSERTYPE__."
                                                 $sql = "SELECT
-                                                '".__OWNER__."' AS fo_name,
-                                                '".__OWNERTELEPHONE__."' AS fo_telephone,
-                                                '".__OWNERCODEPOSTI__."' AS fo_code_posti,
-                                                '".__OWNERCODEEGHTESADI__."' AS fo_code_eghtesadi,
-                                                '".__OWNEROSTAN__."' AS fo_ostan,
-                                                '".__OWNERSHOMARESABT__."' AS fo_shomare_sabt,
-                                                '".__OWNERSHAHR__."' AS fo_shahr,
-                                                '".__OWNERADDRESS__."' fo_address,
-                                                '".__OWNERMOBILE__."' AS fo_mobile,
+                                                '" . __OWNER__ . "' AS fo_name,
+                                                '" . __OWNERTELEPHONE__ . "' AS fo_telephone,
+                                                '" . __OWNERCODEPOSTI__ . "' AS fo_code_posti,
+                                                '" . __OWNERCODEEGHTESADI__ . "' AS fo_code_eghtesadi,
+                                                '" . __OWNEROSTAN__ . "' AS fo_ostan,
+                                                '" . __OWNERSHOMARESABT__ . "' AS fo_shomare_sabt,
+                                                '" . __OWNERSHAHR__ . "' AS fo_shahr,
+                                                '" . __OWNERADDRESS__ . "' fo_address,
+                                                '" . __OWNERMOBILE__ . "' AS fo_mobile,
                                                 bf.id id,
                                                 bf.pin_code,
                                                 bf.shomare_factor shomare_factor,
@@ -4843,7 +5075,7 @@ class Bootstrap
                                                 ser.type type,
                                                 ser.onvane_service,
                                                 ser.tozihate_faktor,
-                                                CONCAT( '".__OWNER__."', ' ', 'تلفن : ', '".__OWNERTELEPHONE__."' ) AS name_sherkat
+                                                CONCAT( '" . __OWNER__ . "', ' ', 'تلفن : ', '" . __OWNERTELEPHONE__ . "' ) AS name_sherkat
                                             FROM
                                                 bnm_factor bf
                                                 INNER JOIN bnm_subscribers bs ON bf.subscriber_id = bs.id
@@ -4857,28 +5089,27 @@ class Bootstrap
                                                 if ($res) {
                                                     die(json_encode($res));
                                                 } else {
-                                                    $msg=':خطا در برنامه لطفا موارد ذیل را بررسی نمایید';
-                                                    $msg.="<br/>";
-                                                    $msg.="اطلاعات استان و شهر مشترک";
-                                                    $msg.="<br/>";
-                                                    $msg.="اطلاعات سرویس باید کامل باشد";
-                                                    $msg.="<br/>";
-                                                    $msg.="فاکتور تسویه شده باشد";
-                                                    die(Helper::Custom_Msg($msg,2));
-
+                                                    $msg = ':خطا در برنامه لطفا موارد ذیل را بررسی نمایید';
+                                                    $msg .= "<br/>";
+                                                    $msg .= "اطلاعات استان و شهر مشترک";
+                                                    $msg .= "<br/>";
+                                                    $msg .= "اطلاعات سرویس باید کامل باشد";
+                                                    $msg .= "<br/>";
+                                                    $msg .= "فاکتور تسویه شده باشد";
+                                                    die(Helper::Custom_Msg($msg, 2));
                                                 }
                                             } elseif (isset($res[0]['branch_id'])) {
                                                 ///user namayande
                                                 $sql = "SELECT
-                                                '".__OWNER__."' AS fo_name,
-                                                '".__OWNERTELEPHONE__."' AS fo_telephone,
-                                                '".__OWNERCODEPOSTI__."' AS fo_code_posti,
-                                                '".__OWNERCODEEGHTESADI__."' AS fo_code_eghtesadi,
-                                                '".__OWNEROSTAN__."' AS fo_ostan,
-                                                '".__OWNERSHOMARESABT__."' AS fo_shomare_sabt,
-                                                '".__OWNERSHAHR__."' AS fo_shahr,
-                                                '".__OWNERADDRESS__."' fo_address,
-                                                '".__OWNERMOBILE__."' AS fo_mobile,
+                                                '" . __OWNER__ . "' AS fo_name,
+                                                '" . __OWNERTELEPHONE__ . "' AS fo_telephone,
+                                                '" . __OWNERCODEPOSTI__ . "' AS fo_code_posti,
+                                                '" . __OWNERCODEEGHTESADI__ . "' AS fo_code_eghtesadi,
+                                                '" . __OWNEROSTAN__ . "' AS fo_ostan,
+                                                '" . __OWNERSHOMARESABT__ . "' AS fo_shomare_sabt,
+                                                '" . __OWNERSHAHR__ . "' AS fo_shahr,
+                                                '" . __OWNERADDRESS__ . "' fo_address,
+                                                '" . __OWNERMOBILE__ . "' AS fo_mobile,
                                                 bf.id id,
                                                 bf.pin_code,
                                                 bf.shomare_factor shomare_factor,
@@ -4920,7 +5151,7 @@ class Bootstrap
                                                     'واحد ',
                                                     bs.tel1_vahed 
                                                 ) AS address,
-                                                CONCAT( '".__OWNER__."', ' ', 'تلفن : ', '".__OWNERTELEPHONE__."' ) AS name_sherkat,
+                                                CONCAT( '" . __OWNER__ . "', ' ', 'تلفن : ', '" . __OWNERTELEPHONE__ . "' ) AS name_sherkat,
                                                 subostan.name ostane_sokonat,
                                                 subshahr.name shahre_sokonat,
                                                 ser.type type,
@@ -4941,14 +5172,14 @@ class Bootstrap
                                                 if ($res) {
                                                     die(json_encode($res));
                                                 } else {
-                                                    $msg=':خطا در برنامه لطفا موارد ذیل را بررسی نمایید';
-                                                    $msg.="<br/>";
-                                                    $msg.="اطلاعات استان و شهر مشترک";
-                                                    $msg.="<br/>";
-                                                    $msg.="اطلاعات سرویس باید کامل باشد";
-                                                    $msg.="<br/>";
-                                                    $msg.="فاکتور تسویه شده باشد";
-                                                    die(Helper::Custom_Msg($msg,2));
+                                                    $msg = ':خطا در برنامه لطفا موارد ذیل را بررسی نمایید';
+                                                    $msg .= "<br/>";
+                                                    $msg .= "اطلاعات استان و شهر مشترک";
+                                                    $msg .= "<br/>";
+                                                    $msg .= "اطلاعات سرویس باید کامل باشد";
+                                                    $msg .= "<br/>";
+                                                    $msg .= "فاکتور تسویه شده باشد";
+                                                    die(Helper::Custom_Msg($msg, 2));
                                                 }
                                             } else {
                                                 die(Helper::Json_Message('f'));
@@ -4967,7 +5198,6 @@ class Bootstrap
                         } else {
                             die(Helper::Json_Message('rinf'));
                         }
-
                     } else {
                         die(Helper::Json_Message('rinf'));
                     }
@@ -5026,31 +5256,31 @@ class Bootstrap
                     if (Helper::Login_Just_Check()) {
                         $sql_factor = "SELECT id,service_id,subscriber_id,tarikhe_factor,mablaghe_ghabele_pardakht,type FROM bnm_factor WHERE id=? AND DATE(tarikhe_factor)=CURDATE() AND tasvie_shode<>'1'";
                         $res_factor = Db::secure_fetchall($sql_factor, array($_POST['condition']), true);
-                        $res_subscriber=false;
+                        $res_subscriber = false;
                         if ($res_factor) {
                             switch ($_SESSION['user_type']) {
                                 case __ADMINUSERTYPE__:
                                 case __ADMINOPERATORUSERTYPE__:
                                     $sql_subscriber = "SELECT id,name,f_name,branch_id FROM bnm_subscribers WHERE id=?";
                                     $res_subscriber = Db::secure_fetchall($sql_subscriber, array($res_factor[0]['subscriber_id']), true);
-                                break;
+                                    break;
                                 case __MODIRUSERTYPE__:
                                 case __MODIR2USERTYPE__:
                                 case __OPERATORUSERTYPE__:
                                 case __OPERATOR2USERTYPE__:
                                     $sql_subscriber = "SELECT id,name,f_name,branch_id FROM bnm_subscribers WHERE id=? AND branch_id= ?";
                                     $res_subscriber = Db::secure_fetchall($sql_subscriber, array($res_factor[0]['subscriber_id'], $_SESSION['branch_id']), true);
-                                break;
+                                    break;
                                 case __MOSHTARAKUSERTYPE__:
                                     $sql_subscriber = "SELECT id,name,f_name,branch_id FROM bnm_subscribers WHERE id=?";
                                     $res_subscriber = Db::secure_fetchall($sql_subscriber, array($_SESSION['user_id']), true);
-                                break;
-                                
+                                    break;
+
                                 default:
                                     die(Helper::Json_Message('af'));
                                     break;
                             }
-                            
+
                             if ($res_subscriber) {
                                 //check subscriber info
                                 if ($res_subscriber[0]['branch_id'] !== 0) {
@@ -5082,7 +5312,7 @@ class Bootstrap
                                             }
                                         }
                                         //get credit branch info
-                                        if($_SESSION['user_type'] !== __MOSHTARAKUSERTYPE__){
+                                        if ($_SESSION['user_type'] !== __MOSHTARAKUSERTYPE__) {
                                             $sql_credit_branch = "SELECT * FROM bnm_credits WHERE user_or_branch_id = ? AND noe_user= ? ORDER BY update_time DESC LIMIT 1";
                                             $res_credit_branch = Db::secure_fetchall($sql_credit_branch, array($res_branch[0]['id'], '2'));
 
@@ -5419,7 +5649,7 @@ class Bootstrap
                         $res = Db::secure_fetchall($sql, array('adsl', 'yes'));
                         if ($res) {
                             for ($i = 0; $i < count($res); $i++) {
-                                $shamsi1 = Helper::regulateNumber(Helper::tabdileTarikh($res[$i]['zamane_estefade_betarikh'], 1, '-', '/'),2);
+                                $shamsi1 = Helper::regulateNumber(Helper::tabdileTarikh($res[$i]['zamane_estefade_betarikh'], 1, '-', '/'), 2);
                                 $res[$i]['zamane_estefade_betarikh'] = $shamsi1;
                             }
                             die(json_encode($res));
@@ -5439,7 +5669,7 @@ class Bootstrap
                         if ($res) {
                             for ($i = 0; $i < count($res); $i++) {
                                 $shamsi1 = Helper::tabdileTarikh($res[$i]['zamane_estefade_betarikh'], 1, '-', '/');
-                                $shamsi1 = Helper::regulateNumber($shamsi1,2);
+                                $shamsi1 = Helper::regulateNumber($shamsi1, 2);
                                 $res[$i]['zamane_estefade_betarikh'] = $shamsi1;
                             }
                             die(json_encode($res));
@@ -5459,7 +5689,7 @@ class Bootstrap
                         if ($res) {
                             for ($i = 0; $i < count($res); $i++) {
                                 $shamsi1 = Helper::tabdileTarikh($res[$i]['zamane_estefade_betarikh'], 1, '-', '/');
-                                $shamsi1 = Helper::regulateNumber($shamsi1,2);
+                                $shamsi1 = Helper::regulateNumber($shamsi1, 2);
                                 $res[$i]['zamane_estefade_betarikh'] = $shamsi1;
                             }
                             die(json_encode($res));
@@ -5480,7 +5710,7 @@ class Bootstrap
                         if ($res) {
                             for ($i = 0; $i < count($res); $i++) {
                                 $shamsi1 = Helper::tabdileTarikh($res[$i]['zamane_estefade_betarikh'], 1, '-', '/');
-                                $shamsi1 = Helper::regulateNumber($shamsi1,2);
+                                $shamsi1 = Helper::regulateNumber($shamsi1, 2);
                                 $res[$i]['zamane_estefade_betarikh'] = $shamsi1;
                             }
                             die(json_encode($res));
@@ -5922,10 +6152,14 @@ class Bootstrap
                             die(Helper::Json_Message('af'));
                             break;
                     }
-                    
 
-                    if(! isset($res_services)){die(Helper::Json_Message('inf'));}
-                    if(! isset($res_subscriber)){die(Helper::Json_Message('inf'));}
+
+                    if (!isset($res_services)) {
+                        die(Helper::Json_Message('inf'));
+                    }
+                    if (!isset($res_subscriber)) {
+                        die(Helper::Json_Message('inf'));
+                    }
                     if ($res_services) {
                         if ($res_subscriber) {
                             if (isset($res_services[0]['zaname_estefade_be_tarikh']) && isset($res_services[0]['onvane_service']) && isset($res_subscriber[0]['code_eshterak'])) {
@@ -5948,15 +6182,15 @@ class Bootstrap
                                 $_POST['sazande_factor_username'] = $_SESSION['username'];
                                 $_POST['sazande_factor_user_type'] = $_SESSION['user_type'];
                                 $_POST['tarikhe_akharin_virayesh'] = Helper::Today_Miladi_Date('/');
-                                $_POST['tarikhe_payane_service'] = Helper::Add_Or_Minus_Day_To_Date($res_services[0]['zaname_estefade'])." ". Helper::nowTimeTehran(':', true, true);
-                                $_POST['tarikhe_shoroe_service'] = Helper::Today_Miladi_Date()." ". Helper::nowTimeTehran(':', true, true);
+                                $_POST['tarikhe_payane_service'] = Helper::Add_Or_Minus_Day_To_Date($res_services[0]['zaname_estefade']) . " " . Helper::nowTimeTehran(':', true, true);
+                                $_POST['tarikhe_shoroe_service'] = Helper::Today_Miladi_Date() . " " . Helper::nowTimeTehran(':', true, true);
                                 $_POST['mablaghe_ghabele_pardakht'] = 0;
                                 $_POST['gheymate_service'] = floatval($res_services[0]['gheymat']);
                                 $_POST['noe_khadamat'] = $res_services[0]['noe_khadamat'];
                                 $_POST['takhfif'] = floatval($res_services[0]['takhfif']);
                                 switch ($res_services[0]['type']) {
                                     case 'bitstream':
-                                        $internal_message_karbord = 'sfadm';                                        
+                                        $internal_message_karbord = 'sfadm';
                                         $checkpreviousefactorexist = Helper::checkNormalPreviousFactorExist($res_subscriber[0]['id'], $_POST['telephone'], $res_services[0]['type']);
                                         if ($checkpreviousefactorexist[0]['tedad'] === 0) {
                                             //factore aval hazine ranzhe & dranzhe & hazine_nasb hesab shavad
@@ -5977,9 +6211,9 @@ class Bootstrap
                                             $gheymat = $_POST['gheymate_service'];
                                         }
                                         $_POST['mablaghe_ghabele_pardakht'] = $gheymat + floatval($_POST['hazine_ranzhe'])
-                                        + floatval($_POST['hazine_nasb']) + floatval($_POST['hazine_dranzhe'])
-                                        + floatval($res_services[0]['port']) + floatval($res_services[0]['faza'])
-                                        + floatval($res_services[0]['tajhizat']);
+                                            + floatval($_POST['hazine_nasb']) + floatval($_POST['hazine_dranzhe'])
+                                            + floatval($res_services[0]['port']) + floatval($res_services[0]['faza'])
+                                            + floatval($res_services[0]['tajhizat']);
                                         $_POST['darsade_avareze_arzeshe_afzode']    = (floatval($_POST['mablaghe_ghabele_pardakht']) * floatval($_POST['darsade_avareze_arzeshe_afzode'])) / 100;
                                         $_POST['maliate_arzeshe_afzode']            = (floatval($_POST['mablaghe_ghabele_pardakht']) * floatval($_POST['maliate_arzeshe_afzode'])) / 100;
                                         $_POST['mablaghe_ghabele_pardakht']         = $_POST['mablaghe_ghabele_pardakht'] + $_POST['darsade_avareze_arzeshe_afzode'] + $_POST['maliate_arzeshe_afzode'];
@@ -6009,17 +6243,17 @@ class Bootstrap
                                             $gheymat = $_POST['gheymate_service'];
                                         }
                                         $_POST['mablaghe_ghabele_pardakht'] = $gheymat + floatval($_POST['hazine_ranzhe'])
-                                         + floatval($_POST['hazine_nasb']) + floatval($_POST['hazine_dranzhe'])
-                                         + floatval($res_services[0]['port']) + floatval($res_services[0]['faza'])
-                                         + floatval($res_services[0]['tajhizat']);
-                                         
+                                            + floatval($_POST['hazine_nasb']) + floatval($_POST['hazine_dranzhe'])
+                                            + floatval($res_services[0]['port']) + floatval($res_services[0]['faza'])
+                                            + floatval($res_services[0]['tajhizat']);
+
                                         $_POST['darsade_avareze_arzeshe_afzode'] = (floatval($_POST['mablaghe_ghabele_pardakht']) * floatval($_POST['darsade_avareze_arzeshe_afzode'])) / 100;
                                         $_POST['maliate_arzeshe_afzode'] = (floatval($_POST['mablaghe_ghabele_pardakht']) * floatval($_POST['maliate_arzeshe_afzode'])) / 100;
                                         $_POST['mablaghe_ghabele_pardakht'] = $_POST['mablaghe_ghabele_pardakht'] + $_POST['darsade_avareze_arzeshe_afzode'] + $_POST['maliate_arzeshe_afzode'];
                                         $_POST['gheymate_service'] = floatval($res_services[0]['gheymat']);
                                         $_POST['emkanat_id'] = $_POST['port_id'];
                                         unset($_POST['port_id']);
-                                        
+
                                         break;
                                     case 'vdsl':
                                         $internal_message_karbord = 'sfvdm';
@@ -6043,11 +6277,11 @@ class Bootstrap
                                             $gheymat = $_POST['gheymate_service'];
                                         }
                                         $_POST['mablaghe_ghabele_pardakht'] = $gheymat + floatval($_POST['hazine_ranzhe'])
-                                        + floatval($_POST['hazine_nasb']) + floatval($_POST['hazine_dranzhe'])
-                                         + floatval($res_services[0]['port']) + floatval($res_services[0]['faza'])
-                                         + floatval($res_services[0]['tajhizat']);
-                                         $_POST['darsade_avareze_arzeshe_afzode']   = (floatval($_POST['mablaghe_ghabele_pardakht']) * floatval($_POST['darsade_avareze_arzeshe_afzode'])) / 100;
-                                         $_POST['maliate_arzeshe_afzode']           = (floatval($_POST['mablaghe_ghabele_pardakht']) * floatval($_POST['maliate_arzeshe_afzode'])) / 100;
+                                            + floatval($_POST['hazine_nasb']) + floatval($_POST['hazine_dranzhe'])
+                                            + floatval($res_services[0]['port']) + floatval($res_services[0]['faza'])
+                                            + floatval($res_services[0]['tajhizat']);
+                                        $_POST['darsade_avareze_arzeshe_afzode']   = (floatval($_POST['mablaghe_ghabele_pardakht']) * floatval($_POST['darsade_avareze_arzeshe_afzode'])) / 100;
+                                        $_POST['maliate_arzeshe_afzode']           = (floatval($_POST['mablaghe_ghabele_pardakht']) * floatval($_POST['maliate_arzeshe_afzode'])) / 100;
                                         $_POST['mablaghe_ghabele_pardakht']         = $_POST['mablaghe_ghabele_pardakht'] + $_POST['darsade_avareze_arzeshe_afzode'] + $_POST['maliate_arzeshe_afzode'];
                                         $_POST['gheymate_service']                  = floatval($res_services[0]['gheymat']);
                                         $_POST['emkanat_id']                        = $_POST['port_id'];
@@ -6073,10 +6307,10 @@ class Bootstrap
                                             $gheymat = $_POST['gheymate_service'];
                                         }
                                         $_POST['mablaghe_ghabele_pardakht'] = $gheymat
-                                         + floatval($_POST['hazine_nasb']) + floatval($res_services[0]['faza'])
-                                         + floatval($res_services[0]['port']) + floatval($res_services[0]['tajhizat']);
-                                         $_POST['darsade_avareze_arzeshe_afzode'] = (floatval($_POST['mablaghe_ghabele_pardakht']) * floatval($_POST['darsade_avareze_arzeshe_afzode'])) / 100;
-                                         $_POST['maliate_arzeshe_afzode'] = (floatval($_POST['mablaghe_ghabele_pardakht']) * floatval($_POST['maliate_arzeshe_afzode'])) / 100;
+                                            + floatval($_POST['hazine_nasb']) + floatval($res_services[0]['faza'])
+                                            + floatval($res_services[0]['port']) + floatval($res_services[0]['tajhizat']);
+                                        $_POST['darsade_avareze_arzeshe_afzode'] = (floatval($_POST['mablaghe_ghabele_pardakht']) * floatval($_POST['darsade_avareze_arzeshe_afzode'])) / 100;
+                                        $_POST['maliate_arzeshe_afzode'] = (floatval($_POST['mablaghe_ghabele_pardakht']) * floatval($_POST['maliate_arzeshe_afzode'])) / 100;
                                         $_POST['mablaghe_ghabele_pardakht'] = $_POST['mablaghe_ghabele_pardakht'] + $_POST['darsade_avareze_arzeshe_afzode'] + $_POST['maliate_arzeshe_afzode'];
                                         $_POST['gheymate_service'] = floatval($res_services[0]['gheymat']);
                                         break;
@@ -6100,8 +6334,8 @@ class Bootstrap
                                             $gheymat = $_POST['gheymate_service'];
                                         }
                                         $_POST['mablaghe_ghabele_pardakht'] = $gheymat
-                                         + floatval($_POST['hazine_nasb']) + floatval($res_services[0]['faza'])
-                                         + floatval($res_services[0]['port']) + floatval($res_services[0]['tajhizat']);
+                                            + floatval($_POST['hazine_nasb']) + floatval($res_services[0]['faza'])
+                                            + floatval($res_services[0]['port']) + floatval($res_services[0]['tajhizat']);
                                         $_POST['darsade_avareze_arzeshe_afzode']    = (floatval($_POST['mablaghe_ghabele_pardakht']) * floatval($_POST['darsade_avareze_arzeshe_afzode'])) / 100;
                                         $_POST['maliate_arzeshe_afzode']            = (floatval($_POST['mablaghe_ghabele_pardakht']) * floatval($_POST['maliate_arzeshe_afzode'])) / 100;
                                         $_POST['mablaghe_ghabele_pardakht']         = $_POST['mablaghe_ghabele_pardakht'] + $_POST['darsade_avareze_arzeshe_afzode'] + $_POST['maliate_arzeshe_afzode'];
@@ -6233,9 +6467,9 @@ class Bootstrap
                                                 $res_checkbulks = Db::secure_fetchall($sql, [$res2[0]['tarikhe_factor'], $res_subscriber[0]['id'], $_POST['emkanat_id'], $res_services[0]['type']]);
                                                 if ($res_checkbulks) {
                                                     $ibsusername = Helper::getIbsUsername($res_subscriber[0]['id'], $res_services[0]['type'], $_POST['emkanat_id']);
-                                                    
+
                                                     if ($ibsusername) {
-                                                        
+
                                                         // mohasebe etebare ghabele enteghal ba tavajoh be credit baghimande
                                                         $res_ibs = $GLOBALS['ibs_internet']->getUserInfoByNormalUserName($ibsusername[0]['ibsusername']);
                                                         // die(json_encode($res_ibs));
@@ -6259,7 +6493,6 @@ class Bootstrap
                                                     } else {
                                                         die(Helper::Custom_Msg(Helper::Messages('inf'), 3));
                                                     }
-
                                                 } else {
                                                     //user bulk nakharide pas hich hajmi be baste jadid enteghal peyda nemikone
                                                     $_POST['etebare_ghabele_enteghal'] = 0;
@@ -6537,20 +6770,20 @@ class Bootstrap
                 $sql_credit_subscriber  = "SELECT * FROM bnm_credits WHERE user_or_branch_id=? AND noe_user= ? ORDER BY id DESC LIMIT 1";
                 $res_credit_subscriber  = Db::secure_fetchall($sql_credit_subscriber, array($res_subscriber[0]['id'], 1));
                 $res_ibsusername        = Helper::getIbsUsername($res_subscriber[0]['id'], $res_service[0]['type'], $res_factor[0]['emkanat_id']);
-                if($res_ibsusername){
-                    if($res_service[0]['type']!=='voip'){
-                        $userunfoinibs=$GLOBALS['ibs_internet']->getUserInfoByNormalUserName($res_ibsusername);
-                    }else{
-                        $userunfoinibs=$GLOBALS['ibs_voip']->getUserInfoByViopUserName($res_ibsusername);
+                if ($res_ibsusername) {
+                    if ($res_service[0]['type'] !== 'voip') {
+                        $userunfoinibs = $GLOBALS['ibs_internet']->getUserInfoByNormalUserName($res_ibsusername);
+                    } else {
+                        $userunfoinibs = $GLOBALS['ibs_voip']->getUserInfoByViopUserName($res_ibsusername);
                     }
-                }else{
-                    die(Helper::Custom_Msg(Helper::Messages('inf'),2));
+                } else {
+                    die(Helper::Custom_Msg(Helper::Messages('inf'), 2));
                 }
                 //check ibs & crm info for any conflict
                 //check if sub exist in ibs but doesnt exist in crm
-                if(Helper::ibsCheckUserinfoExist($userunfoinibs)){
-                    if($res_factor_noe_kharid[0]['tedad']===0){
-                        die(Helper::Custom_Msg(Helper::Messages('siescne'),2));
+                if (Helper::ibsCheckUserinfoExist($userunfoinibs)) {
+                    if ($res_factor_noe_kharid[0]['tedad'] === 0) {
+                        die(Helper::Custom_Msg(Helper::Messages('siescne'), 2));
                     }
                 }
                 // $sql="SELECT response FROM shahkar_log WHERE subscriber_id = ? AND requestname = ? ORDER BY date DESC LIMIT 1";
@@ -6559,20 +6792,7 @@ class Bootstrap
                 // if(! $shahkar){
                 //     die(Helper::Json_Message('sap'));
                 // }
-                $result=[];
-
-
-
-
-
-
-
-
-
-
-
-
-
+                $result = [];
 
 
 
@@ -6632,7 +6852,7 @@ class Bootstrap
                                                                 if ($res_credit_branch) {
                                                                     //pardakhte porsante namayande baraye sharje mojadad zamani ke namayande hesabe bank darad
                                                                     $branch_credit_array = array();
-                                                                    $branch_credit_array['credit'] = $res_credit_branch[0]['credit']+($res_factor[0]['mablaghe_ghabele_pardakht'] * ($res_noe_hamkari[0]['foroshe_service_sharje_mojadad'] / 100));
+                                                                    $branch_credit_array['credit'] = $res_credit_branch[0]['credit'] + ($res_factor[0]['mablaghe_ghabele_pardakht'] * ($res_noe_hamkari[0]['foroshe_service_sharje_mojadad'] / 100));
                                                                     $branch_credit_array['bestankar'] = ($res_factor[0]['mablaghe_ghabele_pardakht'] * ($res_noe_hamkari[0]['foroshe_service_sharje_mojadad'] / 100));
                                                                     $branch_credit_array['bedehkar'] = 0;
                                                                     $branch_credit_array['user_or_branch_id'] = $res_subscriber[0]['branch_id'];
@@ -6922,7 +7142,7 @@ class Bootstrap
                             } elseif ($res_subscriber[0]['branch_id'] === 0) {
                                 //user sahar
                                 if ($res_credit_subscriber) {
-                                    if (Helper::checkSubscriberCreditForPay($res_credit_subscriber[0]['credit'], $res_factor[0]['mablaghe_ghabele_pardakht'])){
+                                    if (Helper::checkSubscriberCreditForPay($res_credit_subscriber[0]['credit'], $res_factor[0]['mablaghe_ghabele_pardakht'])) {
                                         //kasre mablaghe factor az moshtarak
                                         $subscriber_credit_array = array();
                                         // $subscriber_credit_array['change_amount']  = $res_credit_subscriber[0]['credit'] - ($res_factor[0]['mablaghe_ghabele_pardakht'] - ($res_factor[0]['maliate_arzeshe_afzode'] + $res_factor[0]['darsade_avareze_arzeshe_afzode']));
@@ -6950,7 +7170,6 @@ class Bootstrap
                                             $subscriber_credit_array['modifier_id'] = $_SESSION['user_id'];
                                             $sql = Helper::Insert_Generator($subscriber_credit_array, 'bnm_credits');
                                             $result = Db::secure_insert_array($sql, $subscriber_credit_array);
-
                                         } else {
                                             die(Helper::Json_Message('credit_operation_fail'));
                                         }
@@ -6979,386 +7198,386 @@ class Bootstrap
                                     case __MODIR2USERTYPE__:
                                     case __OPERATORUSERTYPE__:
                                     case __OPERATOR2USERTYPE__:
-                                            if ($res_credit_branch) {
-                                                // if ($res_credit_branch[0]['credit'] >= ($res_factor[0]['mablaghe_ghabele_pardakht'] + ($res_factor[0]['mablaghe_ghabele_pardakht'] * __BRANCHESACCEPTABLEBALANCEFORPAY__))) {
-                                                if (Helper::checkbranchCreditForpay($res_credit_branch[0]['credit'], $res_factor[0]['mablaghe_ghabele_pardakht'],__BRANCHESACCEPTABLEBALANCEFORPAY__ )) {
-                                                    //namayande credite kafi darad
-                                                    if ($res_noe_hamkari) {
-                                                        //etelaate noe hamkarie namayande mojod ast
-                                                        if (isset($res_noe_hamkari[0]['cooperation_type']) && isset($res_noe_hamkari[0]['service_type']) && isset($res_noe_hamkari[0]['foroshe_service_jadid']) && isset($res_noe_hamkari[0]['foroshe_service_sharje_mojadad']) && isset($res_noe_hamkari[0]['foroshe_service_jashnvare']) && isset($res_noe_hamkari[0]['hazine_sazmane_tanzim']) && isset($res_noe_hamkari[0]['hazine_servco']) && isset($res_noe_hamkari[0]['hazine_mansobe'])) {
-                                                            if ($res_noe_hamkari[0]['cooperation_type'] === 1) {
-                                                                //pardakht az namayande->darsadi
-                                                                //all branch info exists so we can continue
-                                                                //pardakhte az hesabe namayande kole mablaghe ghabele pardakht
-                                                                $branch_credit_array = array();
-                                                                $branch_credit_array['credit'] = $res_credit_branch[0]['credit'] - ($res_factor[0]['mablaghe_ghabele_pardakht'] - ($res_factor[0]['maliate_arzeshe_afzode'] + $res_factor[0]['darsade_avareze_arzeshe_afzode']));
-                                                                $branch_credit_array['bestankar'] = 0;
-                                                                $branch_credit_array['bedehkar'] = ($res_factor[0]['mablaghe_ghabele_pardakht'] - ($res_factor[0]['maliate_arzeshe_afzode'] + $res_factor[0]['darsade_avareze_arzeshe_afzode']));
-                                                                $branch_credit_array['user_or_branch_id'] = $res_subscriber[0]['branch_id'];
-                                                                $branch_credit_array['noe_user'] = '2';
-                                                                $branch_credit_array['modifier_username'] = $_SESSION['username'];
-                                                                $branch_credit_array['modifier_id'] = $_SESSION['user_id'];
-                                                                $branch_credit_array['tozihat'] = 'پرداخت مبلغ فاکتور توسط نماینده/شرکت برای شماره : ' . $res_factor[0]['id'] . ' مورخ : ' . Helper::Today_Shamsi_Date();
-                                                                $sql = Helper::Insert_Generator($branch_credit_array, 'bnm_credits');
-                                                                $result = Db::secure_insert_array($sql, $branch_credit_array);
-                                                                //kasre maliat az hesabe namayande
-                                                                $sql_credit_branch = "SELECT * FROM bnm_credits WHERE user_or_branch_id=? AND noe_user= ? ORDER BY id DESC LIMIT 1";
-                                                                $res_credit_branch = Db::secure_fetchall($sql_credit_branch, array($res_subscriber[0]['branch_id'], 2));
-                                                                $branch_credit_array = array();
-                                                                $branch_credit_array['credit'] = $res_credit_branch[0]['credit'] - ($res_factor[0]['maliate_arzeshe_afzode'] + $res_factor[0]['darsade_avareze_arzeshe_afzode']);
-                                                                $branch_credit_array['bestankar'] = 0;
-                                                                $branch_credit_array['bedehkar'] = ($res_factor[0]['maliate_arzeshe_afzode'] + $res_factor[0]['darsade_avareze_arzeshe_afzode']);
-                                                                $branch_credit_array['user_or_branch_id'] = $res_subscriber[0]['branch_id'];
-                                                                $branch_credit_array['noe_user'] = '2';
-                                                                $branch_credit_array['modifier_username'] = $_SESSION['username'];
-                                                                $branch_credit_array['modifier_id'] = $_SESSION['user_id'];
-                                                                $branch_credit_array['tozihat'] = 'کسر مالیات توسط سیستم برای شماره فاکتور : ' . $res_factor[0]['id'] . ' مورخ : ' . Helper::Today_Shamsi_Date();
-                                                                $sql = Helper::Insert_Generator($branch_credit_array, 'bnm_credits');
-                                                                $result = Db::secure_insert_array($sql, $branch_credit_array);
-                                                                if ($res_credit_subscriber) {
-                                                                    // user has an account already
-                                                                    //add mablaghe kol to user credit
-                                                                    $subscriber_credit_array = array();
-                                                                    $subscriber_credit_array['credit'] = $res_credit_subscriber[0]['credit'] + $res_factor[0]['mablaghe_ghabele_pardakht'];
-                                                                    $subscriber_credit_array['bedehkar'] = 0;
-                                                                    $subscriber_credit_array['bestankar'] = $res_factor[0]['mablaghe_ghabele_pardakht'];
-                                                                    $subscriber_credit_array['user_or_branch_id'] = $res_credit_subscriber[0]['user_or_branch_id'];
-                                                                    $subscriber_credit_array['noe_user'] = '1';
-                                                                    $subscriber_credit_array['tozihat'] = 'بدهکاری مشترک به نماینده در تاریخ : ' . Helper::Today_Shamsi_Date('-') . 'برای شماره فاکتور : ' . $res_factor[0]['id'];
-                                                                    $subscriber_credit_array['modifier_username'] = $_SESSION['username'];
-                                                                    $subscriber_credit_array['modifier_id'] = $_SESSION['user_id'];
-                                                                    $sql = Helper::Insert_Generator($subscriber_credit_array, 'bnm_credits');
-                                                                    $result = Db::secure_insert_array($sql, $subscriber_credit_array);
-                                                                    //kasre asle mablaghe kol az moshtarak
-                                                                    $sql_credit_subscriber = "SELECT * FROM bnm_credits WHERE user_or_branch_id=? AND noe_user= ? ORDER BY id DESC LIMIT 1";
-                                                                    $res_credit_subscriber = Db::secure_fetchall($sql_credit_subscriber, array($res_subscriber[0]['id'], 1));
-                                                                    $subscriber_credit_array = array();
-                                                                    $subscriber_credit_array['credit'] = $res_credit_subscriber[0]['credit'] - ($res_factor[0]['mablaghe_ghabele_pardakht'] - ($res_factor[0]['maliate_arzeshe_afzode'] + $res_factor[0]['darsade_avareze_arzeshe_afzode']));
-                                                                    $subscriber_credit_array['bedehkar'] = $res_factor[0]['mablaghe_ghabele_pardakht'] - ($res_factor[0]['maliate_arzeshe_afzode'] + $res_factor[0]['darsade_avareze_arzeshe_afzode']);
-                                                                    $subscriber_credit_array['bestankar'] = 0;
-                                                                    $subscriber_credit_array['user_or_branch_id'] = $res_credit_subscriber[0]['user_or_branch_id'];
-                                                                    $subscriber_credit_array['noe_user'] = '1';
-                                                                    $subscriber_credit_array['tozihat'] = 'کسر اصل مبلغ فاکتور توسط سیستم در تاریخ : ' . Helper::Today_Shamsi_Date('-') . 'برای شماره فاکتور : ' . $res_factor[0]['id'];
-                                                                    $subscriber_credit_array['modifier_username'] = $_SESSION['username'];
-                                                                    $subscriber_credit_array['modifier_id'] = $_SESSION['user_id'];
-                                                                    $sql = Helper::Insert_Generator($subscriber_credit_array, 'bnm_credits');
-                                                                    $result = Db::secure_insert_array($sql, $subscriber_credit_array);
-                                                                    //kasre credit - maliat+arzeshe afzoode az moshtarak
-                                                                    $sql_credit_subscriber = "SELECT * FROM bnm_credits WHERE user_or_branch_id=? AND noe_user= ? ORDER BY id DESC LIMIT 1";
-                                                                    $res_credit_subscriber = Db::secure_fetchall($sql_credit_subscriber, array($res_subscriber[0]['id'], 1));
-                                                                    $subscriber_credit_array = array();
-                                                                    $subscriber_credit_array['credit'] = $res_credit_subscriber[0]['credit'] - ($res_factor[0]['maliate_arzeshe_afzode'] + $res_factor[0]['darsade_avareze_arzeshe_afzode']);
-                                                                    $subscriber_credit_array['bedehkar'] = ($res_factor[0]['maliate_arzeshe_afzode'] + $res_factor[0]['darsade_avareze_arzeshe_afzode']);
-                                                                    $subscriber_credit_array['bestankar'] = 0;
-                                                                    $subscriber_credit_array['user_or_branch_id'] = $res_credit_subscriber[0]['user_or_branch_id'];
-                                                                    $subscriber_credit_array['noe_user'] = '1';
-                                                                    $subscriber_credit_array['tozihat'] = 'کسر مالیات و ارزش افزوده توسط نماینده/شرکت در تاریخ : ' . Helper::Today_Shamsi_Date('-') . 'برای شماره فاکتور : ' . $res_factor[0]['id'];
-                                                                    $subscriber_credit_array['modifier_username'] = $_SESSION['username'];
-                                                                    $subscriber_credit_array['modifier_id'] = $_SESSION['user_id'];
-                                                                    $sql = Helper::Insert_Generator($subscriber_credit_array, 'bnm_credits');
-                                                                    $result = Db::secure_insert_array($sql, $subscriber_credit_array);
-                                                                } else {
-                                                                    //create user account
-                                                                    //add mablaghe kol to user credit
-                                                                    $subscriber_credit_array = array();
-                                                                    $subscriber_credit_array['credit'] = $res_factor[0]['mablaghe_ghabele_pardakht'];
-                                                                    $subscriber_credit_array['bedehkar'] = 0;
-                                                                    $subscriber_credit_array['bestankar'] = $res_factor[0]['mablaghe_ghabele_pardakht'];
-                                                                    $subscriber_credit_array['user_or_branch_id'] = $res_subscriber[0]['id'];
-                                                                    $subscriber_credit_array['noe_user'] = '1';
-                                                                    $subscriber_credit_array['tozihat'] = 'بدهکاری مشترک به نماینده در تاریخ : ' . Helper::Today_Shamsi_Date('-') . 'برای شماره فاکتور : ' . $res_factor[0]['id'];
-                                                                    $subscriber_credit_array['modifier_username'] = $_SESSION['username'];
-                                                                    $subscriber_credit_array['modifier_id'] = $_SESSION['user_id'];
-                                                                    $sql = Helper::Insert_Generator($subscriber_credit_array, 'bnm_credits');
-                                                                    $result = Db::secure_insert_array($sql, $subscriber_credit_array);
-                                                                    //kasre asle mablaghe kol az moshtarak
-                                                                    $sql_credit_subscriber = "SELECT * FROM bnm_credits WHERE user_or_branch_id=? AND noe_user= ? ORDER BY id DESC LIMIT 1";
-                                                                    $res_credit_subscriber = Db::secure_fetchall($sql_credit_subscriber, array($res_subscriber[0]['id'], 1));
-                                                                    $subscriber_credit_array = array();
-                                                                    $subscriber_credit_array['credit'] = $res_credit_subscriber[0]['credit'] - ($res_factor[0]['mablaghe_ghabele_pardakht'] - ($res_factor[0]['maliate_arzeshe_afzode'] + $res_factor[0]['darsade_avareze_arzeshe_afzode']));
-                                                                    $subscriber_credit_array['bedehkar'] = $res_factor[0]['mablaghe_ghabele_pardakht'] - ($res_factor[0]['maliate_arzeshe_afzode'] + $res_factor[0]['darsade_avareze_arzeshe_afzode']);
-                                                                    $subscriber_credit_array['bestankar'] = 0;
-                                                                    $subscriber_credit_array['user_or_branch_id'] = $res_subscriber[0]['id'];
-                                                                    $subscriber_credit_array['noe_user'] = '1';
-                                                                    $subscriber_credit_array['tozihat'] = 'کسر اصل مبلغ فاکتور توسط سیستم در تاریخ : ' . Helper::Today_Shamsi_Date('-') . 'برای شماره فاکتور : ' . $res_factor[0]['id'];
-                                                                    $subscriber_credit_array['modifier_username'] = $_SESSION['username'];
-                                                                    $subscriber_credit_array['modifier_id'] = $_SESSION['user_id'];
-                                                                    $sql = Helper::Insert_Generator($subscriber_credit_array, 'bnm_credits');
-                                                                    $result = Db::secure_insert_array($sql, $subscriber_credit_array);
-                                                                    // $sql_credit_subscriber = "SELECT * FROM bnm_credits WHERE user_or_branch_id=? AND noe_user= ? ORDER BY id DESC LIMIT 1";
-                                                                    // $res_credit_subscriber = Db::secure_fetchall($sql_credit_subscriber, array($res_subscriber[0]['id'], 1));
-                                                                    //kasre credit - maliat+arzeshe afzoode az moshtarak
-                                                                    $sql_credit_subscriber = "SELECT * FROM bnm_credits WHERE user_or_branch_id=? AND noe_user= ? ORDER BY id DESC LIMIT 1";
-                                                                    $res_credit_subscriber = Db::secure_fetchall($sql_credit_subscriber, array($res_subscriber[0]['id'], 1));
-                                                                    $subscriber_credit_array = array();
-                                                                    $subscriber_credit_array['credit'] = $res_credit_subscriber[0]['credit'] - ($res_factor[0]['maliate_arzeshe_afzode'] + $res_factor[0]['darsade_avareze_arzeshe_afzode']);
-                                                                    $subscriber_credit_array['bedehkar'] = ($res_factor[0]['maliate_arzeshe_afzode'] + $res_factor[0]['darsade_avareze_arzeshe_afzode']);
-                                                                    $subscriber_credit_array['bestankar'] = 0;
-                                                                    $subscriber_credit_array['user_or_branch_id'] = $res_subscriber[0]['id'];
-                                                                    $subscriber_credit_array['noe_user'] = '1';
-                                                                    $subscriber_credit_array['tozihat'] = 'کسر مالیات و ارزش افزوده توسط نماینده/شرکت در تاریخ : ' . Helper::Today_Shamsi_Date('-') . 'برای شماره فاکتور : ' . $res_factor[0]['id'];
-                                                                    $subscriber_credit_array['modifier_username'] = $_SESSION['username'];
-                                                                    $subscriber_credit_array['modifier_id'] = $_SESSION['user_id'];
-                                                                    $sql = Helper::Insert_Generator($subscriber_credit_array, 'bnm_credits');
-                                                                    $result = Db::secure_insert_array($sql, $subscriber_credit_array);
-                                                                }
-                                                                $flag_noe_kharid = "service_jadid";
-                                                                if ($res_factor_noe_kharid[0]['tedad'] === 0) {
-                                                                    $flag_noe_kharid = "service_jadid";
-                                                                } else {
-                                                                    $flag_noe_kharid = "sharje_mojadad";
-                                                                }
-
-                                                                switch ($res_service[0]['noe_forosh']) {
-                                                                    case 'adi':
-                                                                        $sql_credit_branch = "SELECT * FROM bnm_credits WHERE user_or_branch_id=? AND noe_user= ? ORDER BY id DESC LIMIT 1";
-                                                                        $res_credit_branch = Db::secure_fetchall($sql_credit_branch, array($res_subscriber[0]['branch_id'], 2));
-                                                                        if ($flag_noe_kharid == "sharje_mojadad") {
-                                                                            //pardakhte porsante namayande baraye sharje mojadad zamani ke namayande hesabe bank darad
-                                                                            $branch_credit_array = array();
-                                                                            $branch_credit_array['credit'] = $res_credit_branch[0]['credit'] + ($res_factor[0]['mablaghe_ghabele_pardakht'] + ($res_factor[0]['maliate_arzeshe_afzode'] + $res_factor[0]['darsade_avareze_arzeshe_afzode'])) * ($res_noe_hamkari[0]['foroshe_service_sharje_mojadad'] / 100);
-                                                                            $branch_credit_array['bestankar'] = ($res_factor[0]['mablaghe_ghabele_pardakht'] - ($res_factor[0]['maliate_arzeshe_afzode'] + $res_factor[0]['darsade_avareze_arzeshe_afzode'])) * ($res_noe_hamkari[0]['foroshe_service_sharje_mojadad'] / 100);
-                                                                            $branch_credit_array['bedehkar'] = 0;
-                                                                            $branch_credit_array['user_or_branch_id'] = $res_subscriber[0]['branch_id'];
-                                                                            $branch_credit_array['noe_user'] = '2';
-                                                                            $branch_credit_array['modifier_username'] = $_SESSION['username'];
-                                                                            $branch_credit_array['modifier_id'] = $_SESSION['user_id'];
-                                                                            $branch_credit_array['tozihat'] = 'پرداخت پورسانت برای شماره فاکتور : ' . $res_factor[0]['id'] . ' مورخ : ' . Helper::Today_Shamsi_Date();
-                                                                            $sql = Helper::Insert_Generator($branch_credit_array, 'bnm_credits');
-                                                                            $result = Db::secure_insert_array($sql, $branch_credit_array);
-                                                                        } elseif ($flag_noe_kharid == "service_jadid") {
-                                                                            //pardakhte porsante namayande baraye service jadid zamani ke namayande hesabe bank darad
-                                                                            $branch_credit_array = array();
-                                                                            $branch_credit_array['credit'] = $res_credit_branch[0]['credit'] + ($res_factor[0]['mablaghe_ghabele_pardakht'] + ($res_factor[0]['maliate_arzeshe_afzode'] + $res_factor[0]['darsade_avareze_arzeshe_afzode'])) * ($res_noe_hamkari[0]['foroshe_service_jadid'] / 100);
-                                                                            $branch_credit_array['bestankar'] = ($res_factor[0]['mablaghe_ghabele_pardakht'] - ($res_factor[0]['maliate_arzeshe_afzode'] + $res_factor[0]['darsade_avareze_arzeshe_afzode'])) * ($res_noe_hamkari[0]['foroshe_service_jadid'] / 100);
-                                                                            $branch_credit_array['bedehkar'] = 0;
-                                                                            $branch_credit_array['user_or_branch_id'] = $res_subscriber[0]['branch_id'];
-                                                                            $branch_credit_array['noe_user'] = '2';
-                                                                            $branch_credit_array['modifier_username'] = $_SESSION['username'];
-                                                                            $branch_credit_array['modifier_id'] = $_SESSION['user_id'];
-                                                                            $branch_credit_array['tozihat'] = 'پرداخت پورسانت برای شماره فاکتور : ' . $res_factor[0]['id'] . ' مورخ : ' . Helper::Today_Shamsi_Date();
-                                                                            $sql = Helper::Insert_Generator($branch_credit_array, 'bnm_credits');
-                                                                            $result = Db::secure_insert_array($sql, $branch_credit_array);
-                                                                        }
-                                                                        // Helper::Set_Factor_Tasvie_Shode($res_factor[0]['id']);
-                                                                        // die(Helper::Json_Message('pardakht_success'));
-                                                                        break;
-                                                                    case 'bulk':
-                                                                        $sql_credit_branch = "SELECT * FROM bnm_credits WHERE user_or_branch_id=? AND noe_user= ? ORDER BY id DESC LIMIT 1";
-                                                                        $res_credit_branch = Db::secure_fetchall($sql_credit_branch, array($res_subscriber[0]['branch_id'], 2));
-                                                                        //pardakhte porsante namayande baraye bulk zamani ke namayande hesabe bank darad
-                                                                        $branch_credit_array = array();
-                                                                        $branch_credit_array['credit'] = $res_credit_branch[0]['credit'] + ($res_factor[0]['mablaghe_ghabele_pardakht'] - ($res_factor[0]['maliate_arzeshe_afzode'] + $res_factor[0]['darsade_avareze_arzeshe_afzode'])) * ($res_noe_hamkari[0]['foroshe_service_bulk'] / 100);
-                                                                        $branch_credit_array['bestankar'] = ($res_factor[0]['mablaghe_ghabele_pardakht'] - ($res_factor[0]['maliate_arzeshe_afzode'] + $res_factor[0]['darsade_avareze_arzeshe_afzode'])) * ($res_noe_hamkari[0]['foroshe_service_bulk'] / 100);
-                                                                        $branch_credit_array['bedehkar'] = 0;
-                                                                        $branch_credit_array['user_or_branch_id'] = $res_subscriber[0]['branch_id'];
-                                                                        $branch_credit_array['noe_user'] = '2';
-                                                                        $branch_credit_array['modifier_username'] = $_SESSION['username'];
-                                                                        $branch_credit_array['modifier_id'] = $_SESSION['user_id'];
-                                                                        $branch_credit_array['tozihat'] = 'پرداخت پورسانت برای شماره فاکتور : ' . $res_factor[0]['id'] . ' مورخ : ' . Helper::Today_Shamsi_Date();
-                                                                        $sql = Helper::Insert_Generator($branch_credit_array, 'bnm_credits');
-                                                                        $result = Db::secure_insert_array($sql, $branch_credit_array);
-                                                                        // Helper::Set_Factor_Tasvie_Shode($res_factor[0]['id']);
-                                                                        // die(Helper::Json_Message('pardakht_success'));
-                                                                        break;
-                                                                    case 'jashnvare':
-                                                                        $sql_credit_branch = "SELECT * FROM bnm_credits WHERE user_or_branch_id=? AND noe_user= ? ORDER BY id DESC LIMIT 1";
-                                                                        $res_credit_branch = Db::secure_fetchall($sql_credit_branch, array($res_subscriber[0]['branch_id'], 2));
-                                                                        //pardakhte porsante namayande baraye jashnvare zamani ke namayande hesabe bank darad
-                                                                        $branch_credit_array = array();
-                                                                        $branch_credit_array['credit'] = $res_credit_branch[0]['credit'] + ($res_factor[0]['mablaghe_ghabele_pardakht'] - ($res_factor[0]['maliate_arzeshe_afzode'] + $res_factor[0]['darsade_avareze_arzeshe_afzode'])) * ($res_noe_hamkari[0]['foroshe_service_jashnvare'] / 100);
-                                                                        $branch_credit_array['bestankar'] = ($res_factor[0]['mablaghe_ghabele_pardakht'] - ($res_factor[0]['maliate_arzeshe_afzode'] + $res_factor[0]['darsade_avareze_arzeshe_afzode'])) * ($res_noe_hamkari[0]['foroshe_service_jashnvare'] / 100);
-                                                                        $branch_credit_array['bedehkar'] = 0;
-                                                                        $branch_credit_array['user_or_branch_id'] = $res_subscriber[0]['branch_id'];
-                                                                        $branch_credit_array['noe_user'] = '2';
-                                                                        $branch_credit_array['modifier_username'] = $_SESSION['username'];
-                                                                        $branch_credit_array['modifier_id'] = $_SESSION['user_id'];
-                                                                        $branch_credit_array['tozihat'] = 'پرداخت پورسانت برای شماره فاکتور : ' . $res_factor[0]['id'] . ' مورخ : ' . Helper::Today_Shamsi_Date();
-                                                                        $sql = Helper::Insert_Generator($branch_credit_array, 'bnm_credits');
-                                                                        $result = Db::secure_insert_array($sql, $branch_credit_array);
-                                                                        // Helper::Set_Factor_Tasvie_Shode($res_factor[0]['id']);
-                                                                        // die(Helper::Json_Message('pardakht_success'));
-                                                                        break;
-                                                                    default:
-                                                                        die(Helper::Json_Message('service_info_not_right'));
-                                                                        break;
-                                                                }
-                                                            } elseif ($res_noe_hamkari[0]['cooperation_type'] === 2) {
-                                                                //pardakht az namayande->license
-                                                                $sql_credit_branch = "SELECT * FROM bnm_credits WHERE user_or_branch_id=? AND noe_user= ? ORDER BY id DESC LIMIT 1";
-                                                                $res_credit_branch = Db::secure_fetchall($sql_credit_branch, array($res_subscriber[0]['branch_id'], 2));
-                                                                //pardakhte porsante(lisence) namayande zamani ke namayande hesabe bank darad
-                                                                //insert credit ghabli
-                                                                $branch_credit_array = array();
-                                                                $branch_credit_array['credit'] = $res_credit_branch[0]['credit']-($res_factor[0]['mablaghe_ghabele_pardakht'] - ($res_factor[0]['maliate_arzeshe_afzode'] + $res_factor[0]['darsade_avareze_arzeshe_afzode']));;
-                                                                $branch_credit_array['bestankar'] = 0;
-                                                                $branch_credit_array['bedehkar'] = ($res_factor[0]['mablaghe_ghabele_pardakht'] - ($res_factor[0]['maliate_arzeshe_afzode'] + $res_factor[0]['darsade_avareze_arzeshe_afzode']));
-                                                                $branch_credit_array['user_or_branch_id'] = $res_subscriber[0]['branch_id'];
-                                                                $branch_credit_array['noe_user'] = '2';
-                                                                $branch_credit_array['modifier_username'] = $_SESSION['username'];
-                                                                $branch_credit_array['modifier_id'] = $_SESSION['user_id'];
-                                                                $branch_credit_array['tozihat'] = 'پرداخت مبلغ فاکتور برای شماره فاکتور : ' . $res_factor[0]['id'] . ' مورخ : ' . Helper::Today_Shamsi_Date();
-                                                                $sql = Helper::Insert_Generator($branch_credit_array, 'bnm_credits');
-                                                                $result = Db::secure_insert_array($sql, $branch_credit_array);
-                                                                //insert credit - maliat /update tozihat
-                                                                $sql_credit_branch = "SELECT * FROM bnm_credits WHERE user_or_branch_id=? AND noe_user= ? ORDER BY id DESC LIMIT 1";
-                                                                $res_credit_branch = Db::secure_fetchall($sql_credit_branch, array($res_subscriber[0]['branch_id'], 2));
-                                                                $branch_credit_array = array();
-                                                                $branch_credit_array['credit'] = $res_credit_branch[0]['credit'] - ($res_factor[0]['maliate_arzeshe_afzode'] + $res_factor[0]['darsade_avareze_arzeshe_afzode']); //-maliat
-                                                                $branch_credit_array['bestankar'] = 0;
-                                                                $branch_credit_array['bedehkar'] = ($res_factor[0]['maliate_arzeshe_afzode'] + $res_factor[0]['darsade_avareze_arzeshe_afzode']); //-maliat
-                                                                $branch_credit_array['user_or_branch_id'] = $res_subscriber[0]['branch_id'];
-                                                                $branch_credit_array['noe_user'] = '2';
-                                                                $branch_credit_array['modifier_username'] = $_SESSION['username'];
-                                                                $branch_credit_array['modifier_id'] = $_SESSION['user_id'];
-                                                                $branch_credit_array['tozihat'] = 'کسر مالیات برای شماره فاکتور : ' . $res_factor[0]['id'] . ' مورخ : ' . Helper::Today_Shamsi_Date();
-                                                                $sql = Helper::Insert_Generator($branch_credit_array, 'bnm_credits');
-                                                                $result = Db::secure_insert_array($sql, $branch_credit_array);
-                                                                //insert credit - darsade hazine_sazmane_tanzim /update tozihat
-                                                                $sql_credit_branch = "SELECT * FROM bnm_credits WHERE user_or_branch_id=? AND noe_user= ? ORDER BY id DESC LIMIT 1";
-                                                                $res_credit_branch = Db::secure_fetchall($sql_credit_branch, array($res_subscriber[0]['branch_id'], 2));
-                                                                $branch_credit_array = array();
-                                                                $branch_credit_array['credit'] = $res_credit_branch[0]['credit'] - (($res_factor[0]['mablaghe_ghabele_pardakht'] - ($res_factor[0]['maliate_arzeshe_afzode'] + $res_factor[0]['darsade_avareze_arzeshe_afzode'])) * floatval($res_noe_hamkari[0]['hazine_sazmane_tanzim']) / 100); //-hazine_sazmane_tanzim
-                                                                $branch_credit_array['bestankar'] = 0;
-                                                                $branch_credit_array['bedehkar'] = ($res_factor[0]['mablaghe_ghabele_pardakht'] - ($res_factor[0]['maliate_arzeshe_afzode'] + $res_factor[0]['darsade_avareze_arzeshe_afzode'])) * floatval($res_noe_hamkari[0]['hazine_sazmane_tanzim']) / 100;
-                                                                $branch_credit_array['user_or_branch_id'] = $res_subscriber[0]['branch_id'];
-                                                                $branch_credit_array['noe_user'] = '2';
-                                                                $branch_credit_array['modifier_username'] = $_SESSION['username'];
-                                                                $branch_credit_array['modifier_id'] = $_SESSION['user_id'];
-                                                                $branch_credit_array['tozihat'] = 'کسر هزینه سازمان تنظیم برای شماره فاکتور : ' . $res_factor[0]['id'] . ' مورخ : ' . Helper::Today_Shamsi_Date();
-                                                                $sql = Helper::Insert_Generator($branch_credit_array, 'bnm_credits');
-                                                                $result = Db::secure_insert_array($sql, $branch_credit_array);
-                                                                //insert credit - darsade hazine_servco /update tozihat
-                                                                $sql_credit_branch = "SELECT * FROM bnm_credits WHERE user_or_branch_id=? AND noe_user= ? ORDER BY id DESC LIMIT 1";
-                                                                $res_credit_branch = Db::secure_fetchall($sql_credit_branch, array($res_subscriber[0]['branch_id'], 2));
-                                                                $branch_credit_array = array();
-                                                                $branch_credit_array['credit'] = $res_credit_branch[0]['credit'] - (($res_factor[0]['mablaghe_ghabele_pardakht'] - ($res_factor[0]['maliate_arzeshe_afzode'] + $res_factor[0]['darsade_avareze_arzeshe_afzode'])) * floatval($res_noe_hamkari[0]['hazine_servco']) / 100); //-hazine_servco
-                                                                $branch_credit_array['bestankar'] = 0;
-                                                                $branch_credit_array['bedehkar'] = ($res_factor[0]['mablaghe_ghabele_pardakht'] - ($res_factor[0]['maliate_arzeshe_afzode'] + $res_factor[0]['darsade_avareze_arzeshe_afzode'])) * floatval($res_noe_hamkari[0]['hazine_servco']) / 100; //-hazine_servco
-                                                                $branch_credit_array['user_or_branch_id'] = $res_subscriber[0]['branch_id'];
-                                                                $branch_credit_array['noe_user'] = '2';
-                                                                $branch_credit_array['modifier_username'] = $_SESSION['username'];
-                                                                $branch_credit_array['modifier_id'] = $_SESSION['user_id'];
-                                                                $branch_credit_array['tozihat'] = 'کسر هزینه سروکو برای شماره فاکتور : ' . $res_factor[0]['id'] . ' مورخ : ' . Helper::Today_Shamsi_Date();
-                                                                $sql = Helper::Insert_Generator($branch_credit_array, 'bnm_credits');
-                                                                $result = Db::secure_insert_array($sql, $branch_credit_array);
-                                                                //insert credit - darsade hazine_mansobe /update tozihat
-                                                                $sql_credit_branch = "SELECT * FROM bnm_credits WHERE user_or_branch_id=? AND noe_user= ? ORDER BY id DESC LIMIT 1";
-                                                                $res_credit_branch = Db::secure_fetchall($sql_credit_branch, array($res_subscriber[0]['branch_id'], 2));
-                                                                $branch_credit_array = array();
-                                                                $branch_credit_array['credit'] = $res_credit_branch[0]['credit'] - $res_noe_hamkari[0]['hazine_mansobe']; //-hazine_mansobe
-                                                                $branch_credit_array['bestankar'] = 0;
-                                                                $branch_credit_array['bedehkar'] = $res_noe_hamkari[0]['hazine_mansobe'];
-                                                                $branch_credit_array['user_or_branch_id'] = $res_subscriber[0]['branch_id'];
-                                                                $branch_credit_array['noe_user'] = '2';
-                                                                $branch_credit_array['modifier_username'] = $_SESSION['username'];
-                                                                $branch_credit_array['modifier_id'] = $_SESSION['user_id'];
-                                                                $branch_credit_array['tozihat'] = 'کسر هزینه منصوبه برای شماره فاکتور : ' . $res_factor[0]['id'] . ' مورخ : ' . Helper::Today_Shamsi_Date();
-                                                                $sql = Helper::Insert_Generator($branch_credit_array, 'bnm_credits');
-                                                                $result = Db::secure_insert_array($sql, $branch_credit_array);
-                                                                ////////////////////////////subscriber credit //////////////////////////////////////////
+                                        if ($res_credit_branch) {
+                                            // if ($res_credit_branch[0]['credit'] >= ($res_factor[0]['mablaghe_ghabele_pardakht'] + ($res_factor[0]['mablaghe_ghabele_pardakht'] * __BRANCHESACCEPTABLEBALANCEFORPAY__))) {
+                                            if (Helper::checkbranchCreditForpay($res_credit_branch[0]['credit'], $res_factor[0]['mablaghe_ghabele_pardakht'], __BRANCHESACCEPTABLEBALANCEFORPAY__)) {
+                                                //namayande credite kafi darad
+                                                if ($res_noe_hamkari) {
+                                                    //etelaate noe hamkarie namayande mojod ast
+                                                    if (isset($res_noe_hamkari[0]['cooperation_type']) && isset($res_noe_hamkari[0]['service_type']) && isset($res_noe_hamkari[0]['foroshe_service_jadid']) && isset($res_noe_hamkari[0]['foroshe_service_sharje_mojadad']) && isset($res_noe_hamkari[0]['foroshe_service_jashnvare']) && isset($res_noe_hamkari[0]['hazine_sazmane_tanzim']) && isset($res_noe_hamkari[0]['hazine_servco']) && isset($res_noe_hamkari[0]['hazine_mansobe'])) {
+                                                        if ($res_noe_hamkari[0]['cooperation_type'] === 1) {
+                                                            //pardakht az namayande->darsadi
+                                                            //all branch info exists so we can continue
+                                                            //pardakhte az hesabe namayande kole mablaghe ghabele pardakht
+                                                            $branch_credit_array = array();
+                                                            $branch_credit_array['credit'] = $res_credit_branch[0]['credit'] - ($res_factor[0]['mablaghe_ghabele_pardakht'] - ($res_factor[0]['maliate_arzeshe_afzode'] + $res_factor[0]['darsade_avareze_arzeshe_afzode']));
+                                                            $branch_credit_array['bestankar'] = 0;
+                                                            $branch_credit_array['bedehkar'] = ($res_factor[0]['mablaghe_ghabele_pardakht'] - ($res_factor[0]['maliate_arzeshe_afzode'] + $res_factor[0]['darsade_avareze_arzeshe_afzode']));
+                                                            $branch_credit_array['user_or_branch_id'] = $res_subscriber[0]['branch_id'];
+                                                            $branch_credit_array['noe_user'] = '2';
+                                                            $branch_credit_array['modifier_username'] = $_SESSION['username'];
+                                                            $branch_credit_array['modifier_id'] = $_SESSION['user_id'];
+                                                            $branch_credit_array['tozihat'] = 'پرداخت مبلغ فاکتور توسط نماینده/شرکت برای شماره : ' . $res_factor[0]['id'] . ' مورخ : ' . Helper::Today_Shamsi_Date();
+                                                            $sql = Helper::Insert_Generator($branch_credit_array, 'bnm_credits');
+                                                            $result = Db::secure_insert_array($sql, $branch_credit_array);
+                                                            //kasre maliat az hesabe namayande
+                                                            $sql_credit_branch = "SELECT * FROM bnm_credits WHERE user_or_branch_id=? AND noe_user= ? ORDER BY id DESC LIMIT 1";
+                                                            $res_credit_branch = Db::secure_fetchall($sql_credit_branch, array($res_subscriber[0]['branch_id'], 2));
+                                                            $branch_credit_array = array();
+                                                            $branch_credit_array['credit'] = $res_credit_branch[0]['credit'] - ($res_factor[0]['maliate_arzeshe_afzode'] + $res_factor[0]['darsade_avareze_arzeshe_afzode']);
+                                                            $branch_credit_array['bestankar'] = 0;
+                                                            $branch_credit_array['bedehkar'] = ($res_factor[0]['maliate_arzeshe_afzode'] + $res_factor[0]['darsade_avareze_arzeshe_afzode']);
+                                                            $branch_credit_array['user_or_branch_id'] = $res_subscriber[0]['branch_id'];
+                                                            $branch_credit_array['noe_user'] = '2';
+                                                            $branch_credit_array['modifier_username'] = $_SESSION['username'];
+                                                            $branch_credit_array['modifier_id'] = $_SESSION['user_id'];
+                                                            $branch_credit_array['tozihat'] = 'کسر مالیات توسط سیستم برای شماره فاکتور : ' . $res_factor[0]['id'] . ' مورخ : ' . Helper::Today_Shamsi_Date();
+                                                            $sql = Helper::Insert_Generator($branch_credit_array, 'bnm_credits');
+                                                            $result = Db::secure_insert_array($sql, $branch_credit_array);
+                                                            if ($res_credit_subscriber) {
+                                                                // user has an account already
+                                                                //add mablaghe kol to user credit
+                                                                $subscriber_credit_array = array();
+                                                                $subscriber_credit_array['credit'] = $res_credit_subscriber[0]['credit'] + $res_factor[0]['mablaghe_ghabele_pardakht'];
+                                                                $subscriber_credit_array['bedehkar'] = 0;
+                                                                $subscriber_credit_array['bestankar'] = $res_factor[0]['mablaghe_ghabele_pardakht'];
+                                                                $subscriber_credit_array['user_or_branch_id'] = $res_credit_subscriber[0]['user_or_branch_id'];
+                                                                $subscriber_credit_array['noe_user'] = '1';
+                                                                $subscriber_credit_array['tozihat'] = 'بدهکاری مشترک به نماینده در تاریخ : ' . Helper::Today_Shamsi_Date('-') . 'برای شماره فاکتور : ' . $res_factor[0]['id'];
+                                                                $subscriber_credit_array['modifier_username'] = $_SESSION['username'];
+                                                                $subscriber_credit_array['modifier_id'] = $_SESSION['user_id'];
+                                                                $sql = Helper::Insert_Generator($subscriber_credit_array, 'bnm_credits');
+                                                                $result = Db::secure_insert_array($sql, $subscriber_credit_array);
+                                                                //kasre asle mablaghe kol az moshtarak
                                                                 $sql_credit_subscriber = "SELECT * FROM bnm_credits WHERE user_or_branch_id=? AND noe_user= ? ORDER BY id DESC LIMIT 1";
                                                                 $res_credit_subscriber = Db::secure_fetchall($sql_credit_subscriber, array($res_subscriber[0]['id'], 1));
-                                                                if ($res_credit_subscriber) {
-                                                                    // user has an account already
-                                                                    //add mablaghe kol to user credit
-                                                                    $subscriber_credit_array = array();
-                                                                    $subscriber_credit_array['credit'] = $res_credit_subscriber[0]['credit'] + $res_factor[0]['mablaghe_ghabele_pardakht'];
-                                                                    $subscriber_credit_array['bedehkar'] = 0;
-                                                                    $subscriber_credit_array['bestankar'] = $res_factor[0]['mablaghe_ghabele_pardakht'];
-                                                                    $subscriber_credit_array['user_or_branch_id'] = $res_credit_subscriber[0]['user_or_branch_id'];
-                                                                    $subscriber_credit_array['noe_user'] = '1';
-                                                                    $subscriber_credit_array['tozihat'] = 'بدهکاری مشترک به نماینده در تاریخ : ' . Helper::Today_Shamsi_Date('-') . 'برای شماره فاکتور : ' . $res_factor[0]['id'];
-                                                                    $subscriber_credit_array['modifier_username'] = $_SESSION['username'];
-                                                                    $subscriber_credit_array['modifier_id'] = $_SESSION['user_id'];
-                                                                    $sql = Helper::Insert_Generator($subscriber_credit_array, 'bnm_credits');
-                                                                    $result = Db::secure_insert_array($sql, $subscriber_credit_array);
-                                                                    //kasre asle mablaghe kol az moshtarak
-                                                                    $sql_credit_subscriber = "SELECT * FROM bnm_credits WHERE user_or_branch_id=? AND noe_user= ? ORDER BY id DESC LIMIT 1";
-                                                                    $res_credit_subscriber = Db::secure_fetchall($sql_credit_subscriber, array($res_subscriber[0]['id'], 1));
-                                                                    $subscriber_credit_array = array();
-                                                                    $subscriber_credit_array['credit'] = $res_credit_subscriber[0]['credit'] - ($res_factor[0]['mablaghe_ghabele_pardakht'] - ($res_factor[0]['maliate_arzeshe_afzode'] + $res_factor[0]['darsade_avareze_arzeshe_afzode']));
-                                                                    $subscriber_credit_array['bedehkar'] = $res_factor[0]['mablaghe_ghabele_pardakht'] - ($res_factor[0]['maliate_arzeshe_afzode'] + $res_factor[0]['darsade_avareze_arzeshe_afzode']);
-                                                                    $subscriber_credit_array['bestankar'] = 0;
-                                                                    $subscriber_credit_array['user_or_branch_id'] = $res_credit_subscriber[0]['user_or_branch_id'];
-                                                                    $subscriber_credit_array['noe_user'] = '1';
-                                                                    $subscriber_credit_array['tozihat'] = 'کسر مالیات توسط سیستم در تاریخ : ' . Helper::Today_Shamsi_Date('-') . 'برای شماره فاکتور : ' . $res_factor[0]['id'];
-                                                                    $subscriber_credit_array['modifier_username'] = $_SESSION['username'];
-                                                                    $subscriber_credit_array['modifier_id'] = $_SESSION['user_id'];
-                                                                    $sql = Helper::Insert_Generator($subscriber_credit_array, 'bnm_credits');
-                                                                    $result = Db::secure_insert_array($sql, $subscriber_credit_array);
-                                                                    //kasre credit - maliat+arzeshe afzoode az moshtarak
-                                                                    $sql_credit_subscriber = "SELECT * FROM bnm_credits WHERE user_or_branch_id=? AND noe_user= ? ORDER BY id DESC LIMIT 1";
-                                                                    $res_credit_subscriber = Db::secure_fetchall($sql_credit_subscriber, array($res_subscriber[0]['id'], 1));
-                                                                    $subscriber_credit_array = array();
-                                                                    $subscriber_credit_array['credit'] = $res_credit_subscriber[0]['credit'] - ($res_factor[0]['maliate_arzeshe_afzode'] + $res_factor[0]['darsade_avareze_arzeshe_afzode']);
-                                                                    $subscriber_credit_array['bedehkar'] = ($res_factor[0]['maliate_arzeshe_afzode'] + $res_factor[0]['darsade_avareze_arzeshe_afzode']);
-                                                                    $subscriber_credit_array['bestankar'] = 0;
-                                                                    $subscriber_credit_array['user_or_branch_id'] = $res_credit_subscriber[0]['user_or_branch_id'];
-                                                                    $subscriber_credit_array['noe_user'] = '1';
-                                                                    $subscriber_credit_array['tozihat'] = 'کسر مبلغ فاکتور توسط نماینده/شرکت در تاریخ : ' . Helper::Today_Shamsi_Date('-') . 'برای شماره فاکتور : ' . $res_factor[0]['id'];
-                                                                    $subscriber_credit_array['modifier_username'] = $_SESSION['username'];
-                                                                    $subscriber_credit_array['modifier_id'] = $_SESSION['user_id'];
-                                                                    $sql = Helper::Insert_Generator($subscriber_credit_array, 'bnm_credits');
-                                                                    $result = Db::secure_insert_array($sql, $subscriber_credit_array);
-                                                                } else {
-                                                                    //create user account
-                                                                    //add mablaghe kol to user credit
-                                                                    $subscriber_credit_array = array();
-                                                                    $subscriber_credit_array['credit'] = $res_factor[0]['mablaghe_ghabele_pardakht'];
-                                                                    $subscriber_credit_array['bedehkar'] = 0;
-                                                                    $subscriber_credit_array['bestankar'] = $res_factor[0]['mablaghe_ghabele_pardakht'];
-                                                                    $subscriber_credit_array['user_or_branch_id'] = $res_factor[0]['subscriber_id'];
-                                                                    $subscriber_credit_array['noe_user'] = '1';
-                                                                    $subscriber_credit_array['tozihat'] = 'بدهکاری مشترک به نماینده در تاریخ : ' . Helper::Today_Shamsi_Date('-') . 'برای شماره فاکتور : ' . $res_factor[0]['id'];
-                                                                    $subscriber_credit_array['modifier_username'] = $_SESSION['username'];
-                                                                    $subscriber_credit_array['modifier_id'] = $_SESSION['user_id'];
-                                                                    $sql = Helper::Insert_Generator($subscriber_credit_array, 'bnm_credits');
-                                                                    $result = Db::secure_insert_array($sql, $subscriber_credit_array);
-                                                                    //kasre asle mablaghe kol az moshtarak
-                                                                    $sql_credit_subscriber = "SELECT * FROM bnm_credits WHERE user_or_branch_id=? AND noe_user= ? ORDER BY id DESC LIMIT 1";
-                                                                    $res_credit_subscriber = Db::secure_fetchall($sql_credit_subscriber, array($res_subscriber[0]['id'], 1));
-                                                                    $subscriber_credit_array = array();
-                                                                    $subscriber_credit_array['credit'] = $res_credit_subscriber[0]['credit'] - ($res_factor[0]['mablaghe_ghabele_pardakht'] - ($res_factor[0]['maliate_arzeshe_afzode'] + $res_factor[0]['darsade_avareze_arzeshe_afzode']));
-                                                                    $subscriber_credit_array['bedehkar'] = $res_factor[0]['mablaghe_ghabele_pardakht'] - ($res_factor[0]['maliate_arzeshe_afzode'] + $res_factor[0]['darsade_avareze_arzeshe_afzode']);
-                                                                    $subscriber_credit_array['bestankar'] = 0;
-                                                                    $subscriber_credit_array['user_or_branch_id'] = $res_factor[0]['subscriber_id'];
-                                                                    $subscriber_credit_array['noe_user'] = '1';
-                                                                    $subscriber_credit_array['tozihat'] = 'کسر مالیات توسط سیستم در تاریخ : ' . Helper::Today_Shamsi_Date('-') . 'برای شماره فاکتور : ' . $res_factor[0]['id'];
-                                                                    $subscriber_credit_array['modifier_username'] = $_SESSION['username'];
-                                                                    $subscriber_credit_array['modifier_id'] = $_SESSION['user_id'];
-                                                                    $sql = Helper::Insert_Generator($subscriber_credit_array, 'bnm_credits');
-                                                                    $result = Db::secure_insert_array($sql, $subscriber_credit_array);
-                                                                    //kasre credit - maliat+arzeshe afzoode az moshtarak
-                                                                    $sql_credit_subscriber = "SELECT * FROM bnm_credits WHERE user_or_branch_id=? AND noe_user= ? ORDER BY id DESC LIMIT 1";
-                                                                    $res_credit_subscriber = Db::secure_fetchall($sql_credit_subscriber, array($res_subscriber[0]['id'], 1));
-                                                                    $subscriber_credit_array = array();
-                                                                    $subscriber_credit_array['credit'] = $res_credit_subscriber[0]['credit'] - ($res_factor[0]['maliate_arzeshe_afzode'] + $res_factor[0]['darsade_avareze_arzeshe_afzode']);
-                                                                    $subscriber_credit_array['bedehkar'] = ($res_factor[0]['maliate_arzeshe_afzode'] + $res_factor[0]['darsade_avareze_arzeshe_afzode']);
-                                                                    $subscriber_credit_array['bestankar'] = 0;
-                                                                    $subscriber_credit_array['user_or_branch_id'] = $res_factor[0]['subscriber_id'];
-                                                                    $subscriber_credit_array['noe_user'] = '1';
-                                                                    $subscriber_credit_array['tozihat'] = 'کسر مبلغ فاکتور توسط نماینده/شرکت در تاریخ : ' . Helper::Today_Shamsi_Date('-') . 'برای شماره فاکتور : ' . $res_factor[0]['id'];
-                                                                    $subscriber_credit_array['modifier_username'] = $_SESSION['username'];
-                                                                    $subscriber_credit_array['modifier_id'] = $_SESSION['user_id'];
-                                                                    $sql = Helper::Insert_Generator($subscriber_credit_array, 'bnm_credits');
-                                                                    $result = Db::secure_insert_array($sql, $subscriber_credit_array);
-                                                                }
-                                                                // Helper::Set_Factor_Tasvie_Shode($res_factor[0]['id']);
-                                                                // die(Helper::Json_Message('pardakht_success'));
+                                                                $subscriber_credit_array = array();
+                                                                $subscriber_credit_array['credit'] = $res_credit_subscriber[0]['credit'] - ($res_factor[0]['mablaghe_ghabele_pardakht'] - ($res_factor[0]['maliate_arzeshe_afzode'] + $res_factor[0]['darsade_avareze_arzeshe_afzode']));
+                                                                $subscriber_credit_array['bedehkar'] = $res_factor[0]['mablaghe_ghabele_pardakht'] - ($res_factor[0]['maliate_arzeshe_afzode'] + $res_factor[0]['darsade_avareze_arzeshe_afzode']);
+                                                                $subscriber_credit_array['bestankar'] = 0;
+                                                                $subscriber_credit_array['user_or_branch_id'] = $res_credit_subscriber[0]['user_or_branch_id'];
+                                                                $subscriber_credit_array['noe_user'] = '1';
+                                                                $subscriber_credit_array['tozihat'] = 'کسر اصل مبلغ فاکتور توسط سیستم در تاریخ : ' . Helper::Today_Shamsi_Date('-') . 'برای شماره فاکتور : ' . $res_factor[0]['id'];
+                                                                $subscriber_credit_array['modifier_username'] = $_SESSION['username'];
+                                                                $subscriber_credit_array['modifier_id'] = $_SESSION['user_id'];
+                                                                $sql = Helper::Insert_Generator($subscriber_credit_array, 'bnm_credits');
+                                                                $result = Db::secure_insert_array($sql, $subscriber_credit_array);
+                                                                //kasre credit - maliat+arzeshe afzoode az moshtarak
+                                                                $sql_credit_subscriber = "SELECT * FROM bnm_credits WHERE user_or_branch_id=? AND noe_user= ? ORDER BY id DESC LIMIT 1";
+                                                                $res_credit_subscriber = Db::secure_fetchall($sql_credit_subscriber, array($res_subscriber[0]['id'], 1));
+                                                                $subscriber_credit_array = array();
+                                                                $subscriber_credit_array['credit'] = $res_credit_subscriber[0]['credit'] - ($res_factor[0]['maliate_arzeshe_afzode'] + $res_factor[0]['darsade_avareze_arzeshe_afzode']);
+                                                                $subscriber_credit_array['bedehkar'] = ($res_factor[0]['maliate_arzeshe_afzode'] + $res_factor[0]['darsade_avareze_arzeshe_afzode']);
+                                                                $subscriber_credit_array['bestankar'] = 0;
+                                                                $subscriber_credit_array['user_or_branch_id'] = $res_credit_subscriber[0]['user_or_branch_id'];
+                                                                $subscriber_credit_array['noe_user'] = '1';
+                                                                $subscriber_credit_array['tozihat'] = 'کسر مالیات و ارزش افزوده توسط نماینده/شرکت در تاریخ : ' . Helper::Today_Shamsi_Date('-') . 'برای شماره فاکتور : ' . $res_factor[0]['id'];
+                                                                $subscriber_credit_array['modifier_username'] = $_SESSION['username'];
+                                                                $subscriber_credit_array['modifier_id'] = $_SESSION['user_id'];
+                                                                $sql = Helper::Insert_Generator($subscriber_credit_array, 'bnm_credits');
+                                                                $result = Db::secure_insert_array($sql, $subscriber_credit_array);
+                                                            } else {
+                                                                //create user account
+                                                                //add mablaghe kol to user credit
+                                                                $subscriber_credit_array = array();
+                                                                $subscriber_credit_array['credit'] = $res_factor[0]['mablaghe_ghabele_pardakht'];
+                                                                $subscriber_credit_array['bedehkar'] = 0;
+                                                                $subscriber_credit_array['bestankar'] = $res_factor[0]['mablaghe_ghabele_pardakht'];
+                                                                $subscriber_credit_array['user_or_branch_id'] = $res_subscriber[0]['id'];
+                                                                $subscriber_credit_array['noe_user'] = '1';
+                                                                $subscriber_credit_array['tozihat'] = 'بدهکاری مشترک به نماینده در تاریخ : ' . Helper::Today_Shamsi_Date('-') . 'برای شماره فاکتور : ' . $res_factor[0]['id'];
+                                                                $subscriber_credit_array['modifier_username'] = $_SESSION['username'];
+                                                                $subscriber_credit_array['modifier_id'] = $_SESSION['user_id'];
+                                                                $sql = Helper::Insert_Generator($subscriber_credit_array, 'bnm_credits');
+                                                                $result = Db::secure_insert_array($sql, $subscriber_credit_array);
+                                                                //kasre asle mablaghe kol az moshtarak
+                                                                $sql_credit_subscriber = "SELECT * FROM bnm_credits WHERE user_or_branch_id=? AND noe_user= ? ORDER BY id DESC LIMIT 1";
+                                                                $res_credit_subscriber = Db::secure_fetchall($sql_credit_subscriber, array($res_subscriber[0]['id'], 1));
+                                                                $subscriber_credit_array = array();
+                                                                $subscriber_credit_array['credit'] = $res_credit_subscriber[0]['credit'] - ($res_factor[0]['mablaghe_ghabele_pardakht'] - ($res_factor[0]['maliate_arzeshe_afzode'] + $res_factor[0]['darsade_avareze_arzeshe_afzode']));
+                                                                $subscriber_credit_array['bedehkar'] = $res_factor[0]['mablaghe_ghabele_pardakht'] - ($res_factor[0]['maliate_arzeshe_afzode'] + $res_factor[0]['darsade_avareze_arzeshe_afzode']);
+                                                                $subscriber_credit_array['bestankar'] = 0;
+                                                                $subscriber_credit_array['user_or_branch_id'] = $res_subscriber[0]['id'];
+                                                                $subscriber_credit_array['noe_user'] = '1';
+                                                                $subscriber_credit_array['tozihat'] = 'کسر اصل مبلغ فاکتور توسط سیستم در تاریخ : ' . Helper::Today_Shamsi_Date('-') . 'برای شماره فاکتور : ' . $res_factor[0]['id'];
+                                                                $subscriber_credit_array['modifier_username'] = $_SESSION['username'];
+                                                                $subscriber_credit_array['modifier_id'] = $_SESSION['user_id'];
+                                                                $sql = Helper::Insert_Generator($subscriber_credit_array, 'bnm_credits');
+                                                                $result = Db::secure_insert_array($sql, $subscriber_credit_array);
+                                                                // $sql_credit_subscriber = "SELECT * FROM bnm_credits WHERE user_or_branch_id=? AND noe_user= ? ORDER BY id DESC LIMIT 1";
+                                                                // $res_credit_subscriber = Db::secure_fetchall($sql_credit_subscriber, array($res_subscriber[0]['id'], 1));
+                                                                //kasre credit - maliat+arzeshe afzoode az moshtarak
+                                                                $sql_credit_subscriber = "SELECT * FROM bnm_credits WHERE user_or_branch_id=? AND noe_user= ? ORDER BY id DESC LIMIT 1";
+                                                                $res_credit_subscriber = Db::secure_fetchall($sql_credit_subscriber, array($res_subscriber[0]['id'], 1));
+                                                                $subscriber_credit_array = array();
+                                                                $subscriber_credit_array['credit'] = $res_credit_subscriber[0]['credit'] - ($res_factor[0]['maliate_arzeshe_afzode'] + $res_factor[0]['darsade_avareze_arzeshe_afzode']);
+                                                                $subscriber_credit_array['bedehkar'] = ($res_factor[0]['maliate_arzeshe_afzode'] + $res_factor[0]['darsade_avareze_arzeshe_afzode']);
+                                                                $subscriber_credit_array['bestankar'] = 0;
+                                                                $subscriber_credit_array['user_or_branch_id'] = $res_subscriber[0]['id'];
+                                                                $subscriber_credit_array['noe_user'] = '1';
+                                                                $subscriber_credit_array['tozihat'] = 'کسر مالیات و ارزش افزوده توسط نماینده/شرکت در تاریخ : ' . Helper::Today_Shamsi_Date('-') . 'برای شماره فاکتور : ' . $res_factor[0]['id'];
+                                                                $subscriber_credit_array['modifier_username'] = $_SESSION['username'];
+                                                                $subscriber_credit_array['modifier_id'] = $_SESSION['user_id'];
+                                                                $sql = Helper::Insert_Generator($subscriber_credit_array, 'bnm_credits');
+                                                                $result = Db::secure_insert_array($sql, $subscriber_credit_array);
                                                             }
-                                                        } else {
-                                                            die(Helper::Json_Message('branch_cooperation_info_not_found'));
+                                                            $flag_noe_kharid = "service_jadid";
+                                                            if ($res_factor_noe_kharid[0]['tedad'] === 0) {
+                                                                $flag_noe_kharid = "service_jadid";
+                                                            } else {
+                                                                $flag_noe_kharid = "sharje_mojadad";
+                                                            }
+
+                                                            switch ($res_service[0]['noe_forosh']) {
+                                                                case 'adi':
+                                                                    $sql_credit_branch = "SELECT * FROM bnm_credits WHERE user_or_branch_id=? AND noe_user= ? ORDER BY id DESC LIMIT 1";
+                                                                    $res_credit_branch = Db::secure_fetchall($sql_credit_branch, array($res_subscriber[0]['branch_id'], 2));
+                                                                    if ($flag_noe_kharid == "sharje_mojadad") {
+                                                                        //pardakhte porsante namayande baraye sharje mojadad zamani ke namayande hesabe bank darad
+                                                                        $branch_credit_array = array();
+                                                                        $branch_credit_array['credit'] = $res_credit_branch[0]['credit'] + ($res_factor[0]['mablaghe_ghabele_pardakht'] + ($res_factor[0]['maliate_arzeshe_afzode'] + $res_factor[0]['darsade_avareze_arzeshe_afzode'])) * ($res_noe_hamkari[0]['foroshe_service_sharje_mojadad'] / 100);
+                                                                        $branch_credit_array['bestankar'] = ($res_factor[0]['mablaghe_ghabele_pardakht'] - ($res_factor[0]['maliate_arzeshe_afzode'] + $res_factor[0]['darsade_avareze_arzeshe_afzode'])) * ($res_noe_hamkari[0]['foroshe_service_sharje_mojadad'] / 100);
+                                                                        $branch_credit_array['bedehkar'] = 0;
+                                                                        $branch_credit_array['user_or_branch_id'] = $res_subscriber[0]['branch_id'];
+                                                                        $branch_credit_array['noe_user'] = '2';
+                                                                        $branch_credit_array['modifier_username'] = $_SESSION['username'];
+                                                                        $branch_credit_array['modifier_id'] = $_SESSION['user_id'];
+                                                                        $branch_credit_array['tozihat'] = 'پرداخت پورسانت برای شماره فاکتور : ' . $res_factor[0]['id'] . ' مورخ : ' . Helper::Today_Shamsi_Date();
+                                                                        $sql = Helper::Insert_Generator($branch_credit_array, 'bnm_credits');
+                                                                        $result = Db::secure_insert_array($sql, $branch_credit_array);
+                                                                    } elseif ($flag_noe_kharid == "service_jadid") {
+                                                                        //pardakhte porsante namayande baraye service jadid zamani ke namayande hesabe bank darad
+                                                                        $branch_credit_array = array();
+                                                                        $branch_credit_array['credit'] = $res_credit_branch[0]['credit'] + ($res_factor[0]['mablaghe_ghabele_pardakht'] + ($res_factor[0]['maliate_arzeshe_afzode'] + $res_factor[0]['darsade_avareze_arzeshe_afzode'])) * ($res_noe_hamkari[0]['foroshe_service_jadid'] / 100);
+                                                                        $branch_credit_array['bestankar'] = ($res_factor[0]['mablaghe_ghabele_pardakht'] - ($res_factor[0]['maliate_arzeshe_afzode'] + $res_factor[0]['darsade_avareze_arzeshe_afzode'])) * ($res_noe_hamkari[0]['foroshe_service_jadid'] / 100);
+                                                                        $branch_credit_array['bedehkar'] = 0;
+                                                                        $branch_credit_array['user_or_branch_id'] = $res_subscriber[0]['branch_id'];
+                                                                        $branch_credit_array['noe_user'] = '2';
+                                                                        $branch_credit_array['modifier_username'] = $_SESSION['username'];
+                                                                        $branch_credit_array['modifier_id'] = $_SESSION['user_id'];
+                                                                        $branch_credit_array['tozihat'] = 'پرداخت پورسانت برای شماره فاکتور : ' . $res_factor[0]['id'] . ' مورخ : ' . Helper::Today_Shamsi_Date();
+                                                                        $sql = Helper::Insert_Generator($branch_credit_array, 'bnm_credits');
+                                                                        $result = Db::secure_insert_array($sql, $branch_credit_array);
+                                                                    }
+                                                                    // Helper::Set_Factor_Tasvie_Shode($res_factor[0]['id']);
+                                                                    // die(Helper::Json_Message('pardakht_success'));
+                                                                    break;
+                                                                case 'bulk':
+                                                                    $sql_credit_branch = "SELECT * FROM bnm_credits WHERE user_or_branch_id=? AND noe_user= ? ORDER BY id DESC LIMIT 1";
+                                                                    $res_credit_branch = Db::secure_fetchall($sql_credit_branch, array($res_subscriber[0]['branch_id'], 2));
+                                                                    //pardakhte porsante namayande baraye bulk zamani ke namayande hesabe bank darad
+                                                                    $branch_credit_array = array();
+                                                                    $branch_credit_array['credit'] = $res_credit_branch[0]['credit'] + ($res_factor[0]['mablaghe_ghabele_pardakht'] - ($res_factor[0]['maliate_arzeshe_afzode'] + $res_factor[0]['darsade_avareze_arzeshe_afzode'])) * ($res_noe_hamkari[0]['foroshe_service_bulk'] / 100);
+                                                                    $branch_credit_array['bestankar'] = ($res_factor[0]['mablaghe_ghabele_pardakht'] - ($res_factor[0]['maliate_arzeshe_afzode'] + $res_factor[0]['darsade_avareze_arzeshe_afzode'])) * ($res_noe_hamkari[0]['foroshe_service_bulk'] / 100);
+                                                                    $branch_credit_array['bedehkar'] = 0;
+                                                                    $branch_credit_array['user_or_branch_id'] = $res_subscriber[0]['branch_id'];
+                                                                    $branch_credit_array['noe_user'] = '2';
+                                                                    $branch_credit_array['modifier_username'] = $_SESSION['username'];
+                                                                    $branch_credit_array['modifier_id'] = $_SESSION['user_id'];
+                                                                    $branch_credit_array['tozihat'] = 'پرداخت پورسانت برای شماره فاکتور : ' . $res_factor[0]['id'] . ' مورخ : ' . Helper::Today_Shamsi_Date();
+                                                                    $sql = Helper::Insert_Generator($branch_credit_array, 'bnm_credits');
+                                                                    $result = Db::secure_insert_array($sql, $branch_credit_array);
+                                                                    // Helper::Set_Factor_Tasvie_Shode($res_factor[0]['id']);
+                                                                    // die(Helper::Json_Message('pardakht_success'));
+                                                                    break;
+                                                                case 'jashnvare':
+                                                                    $sql_credit_branch = "SELECT * FROM bnm_credits WHERE user_or_branch_id=? AND noe_user= ? ORDER BY id DESC LIMIT 1";
+                                                                    $res_credit_branch = Db::secure_fetchall($sql_credit_branch, array($res_subscriber[0]['branch_id'], 2));
+                                                                    //pardakhte porsante namayande baraye jashnvare zamani ke namayande hesabe bank darad
+                                                                    $branch_credit_array = array();
+                                                                    $branch_credit_array['credit'] = $res_credit_branch[0]['credit'] + ($res_factor[0]['mablaghe_ghabele_pardakht'] - ($res_factor[0]['maliate_arzeshe_afzode'] + $res_factor[0]['darsade_avareze_arzeshe_afzode'])) * ($res_noe_hamkari[0]['foroshe_service_jashnvare'] / 100);
+                                                                    $branch_credit_array['bestankar'] = ($res_factor[0]['mablaghe_ghabele_pardakht'] - ($res_factor[0]['maliate_arzeshe_afzode'] + $res_factor[0]['darsade_avareze_arzeshe_afzode'])) * ($res_noe_hamkari[0]['foroshe_service_jashnvare'] / 100);
+                                                                    $branch_credit_array['bedehkar'] = 0;
+                                                                    $branch_credit_array['user_or_branch_id'] = $res_subscriber[0]['branch_id'];
+                                                                    $branch_credit_array['noe_user'] = '2';
+                                                                    $branch_credit_array['modifier_username'] = $_SESSION['username'];
+                                                                    $branch_credit_array['modifier_id'] = $_SESSION['user_id'];
+                                                                    $branch_credit_array['tozihat'] = 'پرداخت پورسانت برای شماره فاکتور : ' . $res_factor[0]['id'] . ' مورخ : ' . Helper::Today_Shamsi_Date();
+                                                                    $sql = Helper::Insert_Generator($branch_credit_array, 'bnm_credits');
+                                                                    $result = Db::secure_insert_array($sql, $branch_credit_array);
+                                                                    // Helper::Set_Factor_Tasvie_Shode($res_factor[0]['id']);
+                                                                    // die(Helper::Json_Message('pardakht_success'));
+                                                                    break;
+                                                                default:
+                                                                    die(Helper::Json_Message('service_info_not_right'));
+                                                                    break;
+                                                            }
+                                                        } elseif ($res_noe_hamkari[0]['cooperation_type'] === 2) {
+                                                            //pardakht az namayande->license
+                                                            $sql_credit_branch = "SELECT * FROM bnm_credits WHERE user_or_branch_id=? AND noe_user= ? ORDER BY id DESC LIMIT 1";
+                                                            $res_credit_branch = Db::secure_fetchall($sql_credit_branch, array($res_subscriber[0]['branch_id'], 2));
+                                                            //pardakhte porsante(lisence) namayande zamani ke namayande hesabe bank darad
+                                                            //insert credit ghabli
+                                                            $branch_credit_array = array();
+                                                            $branch_credit_array['credit'] = $res_credit_branch[0]['credit'] - ($res_factor[0]['mablaghe_ghabele_pardakht'] - ($res_factor[0]['maliate_arzeshe_afzode'] + $res_factor[0]['darsade_avareze_arzeshe_afzode']));;
+                                                            $branch_credit_array['bestankar'] = 0;
+                                                            $branch_credit_array['bedehkar'] = ($res_factor[0]['mablaghe_ghabele_pardakht'] - ($res_factor[0]['maliate_arzeshe_afzode'] + $res_factor[0]['darsade_avareze_arzeshe_afzode']));
+                                                            $branch_credit_array['user_or_branch_id'] = $res_subscriber[0]['branch_id'];
+                                                            $branch_credit_array['noe_user'] = '2';
+                                                            $branch_credit_array['modifier_username'] = $_SESSION['username'];
+                                                            $branch_credit_array['modifier_id'] = $_SESSION['user_id'];
+                                                            $branch_credit_array['tozihat'] = 'پرداخت مبلغ فاکتور برای شماره فاکتور : ' . $res_factor[0]['id'] . ' مورخ : ' . Helper::Today_Shamsi_Date();
+                                                            $sql = Helper::Insert_Generator($branch_credit_array, 'bnm_credits');
+                                                            $result = Db::secure_insert_array($sql, $branch_credit_array);
+                                                            //insert credit - maliat /update tozihat
+                                                            $sql_credit_branch = "SELECT * FROM bnm_credits WHERE user_or_branch_id=? AND noe_user= ? ORDER BY id DESC LIMIT 1";
+                                                            $res_credit_branch = Db::secure_fetchall($sql_credit_branch, array($res_subscriber[0]['branch_id'], 2));
+                                                            $branch_credit_array = array();
+                                                            $branch_credit_array['credit'] = $res_credit_branch[0]['credit'] - ($res_factor[0]['maliate_arzeshe_afzode'] + $res_factor[0]['darsade_avareze_arzeshe_afzode']); //-maliat
+                                                            $branch_credit_array['bestankar'] = 0;
+                                                            $branch_credit_array['bedehkar'] = ($res_factor[0]['maliate_arzeshe_afzode'] + $res_factor[0]['darsade_avareze_arzeshe_afzode']); //-maliat
+                                                            $branch_credit_array['user_or_branch_id'] = $res_subscriber[0]['branch_id'];
+                                                            $branch_credit_array['noe_user'] = '2';
+                                                            $branch_credit_array['modifier_username'] = $_SESSION['username'];
+                                                            $branch_credit_array['modifier_id'] = $_SESSION['user_id'];
+                                                            $branch_credit_array['tozihat'] = 'کسر مالیات برای شماره فاکتور : ' . $res_factor[0]['id'] . ' مورخ : ' . Helper::Today_Shamsi_Date();
+                                                            $sql = Helper::Insert_Generator($branch_credit_array, 'bnm_credits');
+                                                            $result = Db::secure_insert_array($sql, $branch_credit_array);
+                                                            //insert credit - darsade hazine_sazmane_tanzim /update tozihat
+                                                            $sql_credit_branch = "SELECT * FROM bnm_credits WHERE user_or_branch_id=? AND noe_user= ? ORDER BY id DESC LIMIT 1";
+                                                            $res_credit_branch = Db::secure_fetchall($sql_credit_branch, array($res_subscriber[0]['branch_id'], 2));
+                                                            $branch_credit_array = array();
+                                                            $branch_credit_array['credit'] = $res_credit_branch[0]['credit'] - (($res_factor[0]['mablaghe_ghabele_pardakht'] - ($res_factor[0]['maliate_arzeshe_afzode'] + $res_factor[0]['darsade_avareze_arzeshe_afzode'])) * floatval($res_noe_hamkari[0]['hazine_sazmane_tanzim']) / 100); //-hazine_sazmane_tanzim
+                                                            $branch_credit_array['bestankar'] = 0;
+                                                            $branch_credit_array['bedehkar'] = ($res_factor[0]['mablaghe_ghabele_pardakht'] - ($res_factor[0]['maliate_arzeshe_afzode'] + $res_factor[0]['darsade_avareze_arzeshe_afzode'])) * floatval($res_noe_hamkari[0]['hazine_sazmane_tanzim']) / 100;
+                                                            $branch_credit_array['user_or_branch_id'] = $res_subscriber[0]['branch_id'];
+                                                            $branch_credit_array['noe_user'] = '2';
+                                                            $branch_credit_array['modifier_username'] = $_SESSION['username'];
+                                                            $branch_credit_array['modifier_id'] = $_SESSION['user_id'];
+                                                            $branch_credit_array['tozihat'] = 'کسر هزینه سازمان تنظیم برای شماره فاکتور : ' . $res_factor[0]['id'] . ' مورخ : ' . Helper::Today_Shamsi_Date();
+                                                            $sql = Helper::Insert_Generator($branch_credit_array, 'bnm_credits');
+                                                            $result = Db::secure_insert_array($sql, $branch_credit_array);
+                                                            //insert credit - darsade hazine_servco /update tozihat
+                                                            $sql_credit_branch = "SELECT * FROM bnm_credits WHERE user_or_branch_id=? AND noe_user= ? ORDER BY id DESC LIMIT 1";
+                                                            $res_credit_branch = Db::secure_fetchall($sql_credit_branch, array($res_subscriber[0]['branch_id'], 2));
+                                                            $branch_credit_array = array();
+                                                            $branch_credit_array['credit'] = $res_credit_branch[0]['credit'] - (($res_factor[0]['mablaghe_ghabele_pardakht'] - ($res_factor[0]['maliate_arzeshe_afzode'] + $res_factor[0]['darsade_avareze_arzeshe_afzode'])) * floatval($res_noe_hamkari[0]['hazine_servco']) / 100); //-hazine_servco
+                                                            $branch_credit_array['bestankar'] = 0;
+                                                            $branch_credit_array['bedehkar'] = ($res_factor[0]['mablaghe_ghabele_pardakht'] - ($res_factor[0]['maliate_arzeshe_afzode'] + $res_factor[0]['darsade_avareze_arzeshe_afzode'])) * floatval($res_noe_hamkari[0]['hazine_servco']) / 100; //-hazine_servco
+                                                            $branch_credit_array['user_or_branch_id'] = $res_subscriber[0]['branch_id'];
+                                                            $branch_credit_array['noe_user'] = '2';
+                                                            $branch_credit_array['modifier_username'] = $_SESSION['username'];
+                                                            $branch_credit_array['modifier_id'] = $_SESSION['user_id'];
+                                                            $branch_credit_array['tozihat'] = 'کسر هزینه سروکو برای شماره فاکتور : ' . $res_factor[0]['id'] . ' مورخ : ' . Helper::Today_Shamsi_Date();
+                                                            $sql = Helper::Insert_Generator($branch_credit_array, 'bnm_credits');
+                                                            $result = Db::secure_insert_array($sql, $branch_credit_array);
+                                                            //insert credit - darsade hazine_mansobe /update tozihat
+                                                            $sql_credit_branch = "SELECT * FROM bnm_credits WHERE user_or_branch_id=? AND noe_user= ? ORDER BY id DESC LIMIT 1";
+                                                            $res_credit_branch = Db::secure_fetchall($sql_credit_branch, array($res_subscriber[0]['branch_id'], 2));
+                                                            $branch_credit_array = array();
+                                                            $branch_credit_array['credit'] = $res_credit_branch[0]['credit'] - $res_noe_hamkari[0]['hazine_mansobe']; //-hazine_mansobe
+                                                            $branch_credit_array['bestankar'] = 0;
+                                                            $branch_credit_array['bedehkar'] = $res_noe_hamkari[0]['hazine_mansobe'];
+                                                            $branch_credit_array['user_or_branch_id'] = $res_subscriber[0]['branch_id'];
+                                                            $branch_credit_array['noe_user'] = '2';
+                                                            $branch_credit_array['modifier_username'] = $_SESSION['username'];
+                                                            $branch_credit_array['modifier_id'] = $_SESSION['user_id'];
+                                                            $branch_credit_array['tozihat'] = 'کسر هزینه منصوبه برای شماره فاکتور : ' . $res_factor[0]['id'] . ' مورخ : ' . Helper::Today_Shamsi_Date();
+                                                            $sql = Helper::Insert_Generator($branch_credit_array, 'bnm_credits');
+                                                            $result = Db::secure_insert_array($sql, $branch_credit_array);
+                                                            ////////////////////////////subscriber credit //////////////////////////////////////////
+                                                            $sql_credit_subscriber = "SELECT * FROM bnm_credits WHERE user_or_branch_id=? AND noe_user= ? ORDER BY id DESC LIMIT 1";
+                                                            $res_credit_subscriber = Db::secure_fetchall($sql_credit_subscriber, array($res_subscriber[0]['id'], 1));
+                                                            if ($res_credit_subscriber) {
+                                                                // user has an account already
+                                                                //add mablaghe kol to user credit
+                                                                $subscriber_credit_array = array();
+                                                                $subscriber_credit_array['credit'] = $res_credit_subscriber[0]['credit'] + $res_factor[0]['mablaghe_ghabele_pardakht'];
+                                                                $subscriber_credit_array['bedehkar'] = 0;
+                                                                $subscriber_credit_array['bestankar'] = $res_factor[0]['mablaghe_ghabele_pardakht'];
+                                                                $subscriber_credit_array['user_or_branch_id'] = $res_credit_subscriber[0]['user_or_branch_id'];
+                                                                $subscriber_credit_array['noe_user'] = '1';
+                                                                $subscriber_credit_array['tozihat'] = 'بدهکاری مشترک به نماینده در تاریخ : ' . Helper::Today_Shamsi_Date('-') . 'برای شماره فاکتور : ' . $res_factor[0]['id'];
+                                                                $subscriber_credit_array['modifier_username'] = $_SESSION['username'];
+                                                                $subscriber_credit_array['modifier_id'] = $_SESSION['user_id'];
+                                                                $sql = Helper::Insert_Generator($subscriber_credit_array, 'bnm_credits');
+                                                                $result = Db::secure_insert_array($sql, $subscriber_credit_array);
+                                                                //kasre asle mablaghe kol az moshtarak
+                                                                $sql_credit_subscriber = "SELECT * FROM bnm_credits WHERE user_or_branch_id=? AND noe_user= ? ORDER BY id DESC LIMIT 1";
+                                                                $res_credit_subscriber = Db::secure_fetchall($sql_credit_subscriber, array($res_subscriber[0]['id'], 1));
+                                                                $subscriber_credit_array = array();
+                                                                $subscriber_credit_array['credit'] = $res_credit_subscriber[0]['credit'] - ($res_factor[0]['mablaghe_ghabele_pardakht'] - ($res_factor[0]['maliate_arzeshe_afzode'] + $res_factor[0]['darsade_avareze_arzeshe_afzode']));
+                                                                $subscriber_credit_array['bedehkar'] = $res_factor[0]['mablaghe_ghabele_pardakht'] - ($res_factor[0]['maliate_arzeshe_afzode'] + $res_factor[0]['darsade_avareze_arzeshe_afzode']);
+                                                                $subscriber_credit_array['bestankar'] = 0;
+                                                                $subscriber_credit_array['user_or_branch_id'] = $res_credit_subscriber[0]['user_or_branch_id'];
+                                                                $subscriber_credit_array['noe_user'] = '1';
+                                                                $subscriber_credit_array['tozihat'] = 'کسر مالیات توسط سیستم در تاریخ : ' . Helper::Today_Shamsi_Date('-') . 'برای شماره فاکتور : ' . $res_factor[0]['id'];
+                                                                $subscriber_credit_array['modifier_username'] = $_SESSION['username'];
+                                                                $subscriber_credit_array['modifier_id'] = $_SESSION['user_id'];
+                                                                $sql = Helper::Insert_Generator($subscriber_credit_array, 'bnm_credits');
+                                                                $result = Db::secure_insert_array($sql, $subscriber_credit_array);
+                                                                //kasre credit - maliat+arzeshe afzoode az moshtarak
+                                                                $sql_credit_subscriber = "SELECT * FROM bnm_credits WHERE user_or_branch_id=? AND noe_user= ? ORDER BY id DESC LIMIT 1";
+                                                                $res_credit_subscriber = Db::secure_fetchall($sql_credit_subscriber, array($res_subscriber[0]['id'], 1));
+                                                                $subscriber_credit_array = array();
+                                                                $subscriber_credit_array['credit'] = $res_credit_subscriber[0]['credit'] - ($res_factor[0]['maliate_arzeshe_afzode'] + $res_factor[0]['darsade_avareze_arzeshe_afzode']);
+                                                                $subscriber_credit_array['bedehkar'] = ($res_factor[0]['maliate_arzeshe_afzode'] + $res_factor[0]['darsade_avareze_arzeshe_afzode']);
+                                                                $subscriber_credit_array['bestankar'] = 0;
+                                                                $subscriber_credit_array['user_or_branch_id'] = $res_credit_subscriber[0]['user_or_branch_id'];
+                                                                $subscriber_credit_array['noe_user'] = '1';
+                                                                $subscriber_credit_array['tozihat'] = 'کسر مبلغ فاکتور توسط نماینده/شرکت در تاریخ : ' . Helper::Today_Shamsi_Date('-') . 'برای شماره فاکتور : ' . $res_factor[0]['id'];
+                                                                $subscriber_credit_array['modifier_username'] = $_SESSION['username'];
+                                                                $subscriber_credit_array['modifier_id'] = $_SESSION['user_id'];
+                                                                $sql = Helper::Insert_Generator($subscriber_credit_array, 'bnm_credits');
+                                                                $result = Db::secure_insert_array($sql, $subscriber_credit_array);
+                                                            } else {
+                                                                //create user account
+                                                                //add mablaghe kol to user credit
+                                                                $subscriber_credit_array = array();
+                                                                $subscriber_credit_array['credit'] = $res_factor[0]['mablaghe_ghabele_pardakht'];
+                                                                $subscriber_credit_array['bedehkar'] = 0;
+                                                                $subscriber_credit_array['bestankar'] = $res_factor[0]['mablaghe_ghabele_pardakht'];
+                                                                $subscriber_credit_array['user_or_branch_id'] = $res_factor[0]['subscriber_id'];
+                                                                $subscriber_credit_array['noe_user'] = '1';
+                                                                $subscriber_credit_array['tozihat'] = 'بدهکاری مشترک به نماینده در تاریخ : ' . Helper::Today_Shamsi_Date('-') . 'برای شماره فاکتور : ' . $res_factor[0]['id'];
+                                                                $subscriber_credit_array['modifier_username'] = $_SESSION['username'];
+                                                                $subscriber_credit_array['modifier_id'] = $_SESSION['user_id'];
+                                                                $sql = Helper::Insert_Generator($subscriber_credit_array, 'bnm_credits');
+                                                                $result = Db::secure_insert_array($sql, $subscriber_credit_array);
+                                                                //kasre asle mablaghe kol az moshtarak
+                                                                $sql_credit_subscriber = "SELECT * FROM bnm_credits WHERE user_or_branch_id=? AND noe_user= ? ORDER BY id DESC LIMIT 1";
+                                                                $res_credit_subscriber = Db::secure_fetchall($sql_credit_subscriber, array($res_subscriber[0]['id'], 1));
+                                                                $subscriber_credit_array = array();
+                                                                $subscriber_credit_array['credit'] = $res_credit_subscriber[0]['credit'] - ($res_factor[0]['mablaghe_ghabele_pardakht'] - ($res_factor[0]['maliate_arzeshe_afzode'] + $res_factor[0]['darsade_avareze_arzeshe_afzode']));
+                                                                $subscriber_credit_array['bedehkar'] = $res_factor[0]['mablaghe_ghabele_pardakht'] - ($res_factor[0]['maliate_arzeshe_afzode'] + $res_factor[0]['darsade_avareze_arzeshe_afzode']);
+                                                                $subscriber_credit_array['bestankar'] = 0;
+                                                                $subscriber_credit_array['user_or_branch_id'] = $res_factor[0]['subscriber_id'];
+                                                                $subscriber_credit_array['noe_user'] = '1';
+                                                                $subscriber_credit_array['tozihat'] = 'کسر مالیات توسط سیستم در تاریخ : ' . Helper::Today_Shamsi_Date('-') . 'برای شماره فاکتور : ' . $res_factor[0]['id'];
+                                                                $subscriber_credit_array['modifier_username'] = $_SESSION['username'];
+                                                                $subscriber_credit_array['modifier_id'] = $_SESSION['user_id'];
+                                                                $sql = Helper::Insert_Generator($subscriber_credit_array, 'bnm_credits');
+                                                                $result = Db::secure_insert_array($sql, $subscriber_credit_array);
+                                                                //kasre credit - maliat+arzeshe afzoode az moshtarak
+                                                                $sql_credit_subscriber = "SELECT * FROM bnm_credits WHERE user_or_branch_id=? AND noe_user= ? ORDER BY id DESC LIMIT 1";
+                                                                $res_credit_subscriber = Db::secure_fetchall($sql_credit_subscriber, array($res_subscriber[0]['id'], 1));
+                                                                $subscriber_credit_array = array();
+                                                                $subscriber_credit_array['credit'] = $res_credit_subscriber[0]['credit'] - ($res_factor[0]['maliate_arzeshe_afzode'] + $res_factor[0]['darsade_avareze_arzeshe_afzode']);
+                                                                $subscriber_credit_array['bedehkar'] = ($res_factor[0]['maliate_arzeshe_afzode'] + $res_factor[0]['darsade_avareze_arzeshe_afzode']);
+                                                                $subscriber_credit_array['bestankar'] = 0;
+                                                                $subscriber_credit_array['user_or_branch_id'] = $res_factor[0]['subscriber_id'];
+                                                                $subscriber_credit_array['noe_user'] = '1';
+                                                                $subscriber_credit_array['tozihat'] = 'کسر مبلغ فاکتور توسط نماینده/شرکت در تاریخ : ' . Helper::Today_Shamsi_Date('-') . 'برای شماره فاکتور : ' . $res_factor[0]['id'];
+                                                                $subscriber_credit_array['modifier_username'] = $_SESSION['username'];
+                                                                $subscriber_credit_array['modifier_id'] = $_SESSION['user_id'];
+                                                                $sql = Helper::Insert_Generator($subscriber_credit_array, 'bnm_credits');
+                                                                $result = Db::secure_insert_array($sql, $subscriber_credit_array);
+                                                            }
+                                                            // Helper::Set_Factor_Tasvie_Shode($res_factor[0]['id']);
+                                                            // die(Helper::Json_Message('pardakht_success'));
                                                         }
                                                     } else {
                                                         die(Helper::Json_Message('branch_cooperation_info_not_found'));
                                                     }
                                                 } else {
-                                                    die(Helper::Json_Message('branch_credit_not_enough'));
+                                                    die(Helper::Json_Message('branch_cooperation_info_not_found'));
                                                 }
                                             } else {
-                                                die(Helper::Json_Message('branch_credit_account_not_found'));
+                                                die(Helper::Json_Message('branch_credit_not_enough'));
                                             }
+                                        } else {
+                                            die(Helper::Json_Message('branch_credit_account_not_found'));
+                                        }
                                         break;
                                     default:
                                         die(Helper::Json_Message('auth_fail'));
@@ -7384,15 +7603,15 @@ class Bootstrap
                 //////ibs operations/////
                 if ($result) {
                     Helper::Set_Factor_Tasvie_Shode($res_factor[0]['id']);
-                    if($res_service[0]['type'] === 'bitstream'){
+                    if ($res_service[0]['type'] === 'bitstream') {
                         //if its bitstream then we update oss_reserves
-                        $bsarr=[];
-                        $bsarr['ranzhe']=1;
-                        $bsarr['id']=$res_factor[0]['emkanat_id'];
-                        $bsarr['laghv']=0;
-                        $bsarr['jamavari']=0;
-                        $sql=Helper::Update_Generator($bsarr, 'bnm_oss_reserves', "WHERE id = :id");
-                        $res_bs=Db::secure_update_array($sql, $bsarr);
+                        $bsarr = [];
+                        $bsarr['ranzhe'] = 1;
+                        $bsarr['id'] = $res_factor[0]['emkanat_id'];
+                        $bsarr['laghv'] = 0;
+                        $bsarr['jamavari'] = 0;
+                        $sql = Helper::Update_Generator($bsarr, 'bnm_oss_reserves', "WHERE id = :id");
+                        $res_bs = Db::secure_update_array($sql, $bsarr);
                     }
                     if ($res_service[0]['type'] !== "voip") {
                         if ($res_service[0]['noe_forosh'] === "adi" || $res_service[0]['noe_forosh'] === "jashnvare") {
@@ -7425,32 +7644,32 @@ class Bootstrap
                                             case 'bitstream':
                                             case 'adsl':
                                             case 'vdsl':
-                                                $cf_sername='ADSL';
-                                                $userid=$GLOBALS['ibs_internet']->getUserIdByNormalUsername((string) $res_ibsusername[0]['ibsusername']);
-                                                if($userid[0] && isset($cf_sername)){
-                                                    $id=$userid[1];
-                                                    $res=$GLOBALS['ibs_internet']->setUserCustomField((string) $id, 'service_name', $cf_sername);
+                                                $cf_sername = 'ADSL';
+                                                $userid = $GLOBALS['ibs_internet']->getUserIdByNormalUsername((string) $res_ibsusername[0]['ibsusername']);
+                                                if ($userid[0] && isset($cf_sername)) {
+                                                    $id = $userid[1];
+                                                    $res = $GLOBALS['ibs_internet']->setUserCustomField((string) $id, 'service_name', $cf_sername);
                                                 }
-                                            break;
+                                                break;
                                             case 'wireless':
-                                                $cf_sername='WIRELESS';
-                                                $userid=$GLOBALS['ibs_internet']->getUserIdByNormalUsername((string) $res_ibsusername[0]['ibsusername']);
-                                                if($userid[0] && isset($cf_sername)){
-                                                    $id=$userid[1];
-                                                    $res=$GLOBALS['ibs_internet']->setUserCustomField((string) $id, 'service_name', $cf_sername);
+                                                $cf_sername = 'WIRELESS';
+                                                $userid = $GLOBALS['ibs_internet']->getUserIdByNormalUsername((string) $res_ibsusername[0]['ibsusername']);
+                                                if ($userid[0] && isset($cf_sername)) {
+                                                    $id = $userid[1];
+                                                    $res = $GLOBALS['ibs_internet']->setUserCustomField((string) $id, 'service_name', $cf_sername);
                                                 }
-                                            break;
+                                                break;
                                             case 'tdlte':
-                                                $cf_sername='TD_LTE';
-                                                $userid=$GLOBALS['ibs_internet']->getUserIdByNormalUsername((string) $res_ibsusername[0]['ibsusername']);
-                                                if($userid[0] && isset($cf_sername)){
-                                                    $id=$userid[1];
-                                                    $res=$GLOBALS['ibs_internet']->setUserCustomField((string) $id, 'service_name', $cf_sername);
+                                                $cf_sername = 'TD_LTE';
+                                                $userid = $GLOBALS['ibs_internet']->getUserIdByNormalUsername((string) $res_ibsusername[0]['ibsusername']);
+                                                if ($userid[0] && isset($cf_sername)) {
+                                                    $id = $userid[1];
+                                                    $res = $GLOBALS['ibs_internet']->setUserCustomField((string) $id, 'service_name', $cf_sername);
                                                 }
-                                            break;
+                                                break;
                                             default:
-                                                
-                                            break;
+
+                                                break;
                                         }
                                     } else {
                                         $res_setuserattrs = $GLOBALS['ibs_internet']->setUserAttributes(
@@ -7477,18 +7696,18 @@ class Bootstrap
                                             case 'bitstream':
                                             case 'adsl':
                                             case 'vdsl':
-                                                $cf_sername='ADSL';
-                                                $userid=$GLOBALS['ibs_internet']->getUserIdByNormalUsername((string) $res_ibsusername[0]['ibsusername']);
-                                                if($userid[0] && isset($cf_sername)){
-                                                    $id=$userid[1];
-                                                    $res=$GLOBALS['ibs_internet']->setUserCustomField((string) $id, 'service_name', $cf_sername);
+                                                $cf_sername = 'ADSL';
+                                                $userid = $GLOBALS['ibs_internet']->getUserIdByNormalUsername((string) $res_ibsusername[0]['ibsusername']);
+                                                if ($userid[0] && isset($cf_sername)) {
+                                                    $id = $userid[1];
+                                                    $res = $GLOBALS['ibs_internet']->setUserCustomField((string) $id, 'service_name', $cf_sername);
                                                 }
-                                            break;
+                                                break;
                                             case 'wireless':
-                                                $cf_sername='WIRELESS';
-                                                $userid=$GLOBALS['ibs_internet']->getUserIdByNormalUsername((string) $res_ibsusername[0]['ibsusername']);
-                                                if($userid[0] && isset($cf_sername)){
-                                                    $sql="SELECT
+                                                $cf_sername = 'WIRELESS';
+                                                $userid = $GLOBALS['ibs_internet']->getUserIdByNormalUsername((string) $res_ibsusername[0]['ibsusername']);
+                                                if ($userid[0] && isset($cf_sername)) {
+                                                    $sql = "SELECT
                                                         ss.id ssid,
                                                         ss.station_id stationid,
                                                         ss.sub_id subid,
@@ -7501,40 +7720,40 @@ class Bootstrap
                                                     WHERE
                                                         ss.id = ?
                                                         GROUP BY ss.id";
-                                                    $res_station=Db::secure_fetchall($sql, [$res_factor[0]['emkanat_id']]);
-                                                    if($res_station){
-                                                        $tol=Helper::decimalToLL($res_station[0]['tol_joghrafiai']);
-                                                        $arz=Helper::decimalToLL($res_station[0]['arz_joghrafiai']);
-                                                        $id=$userid[1];
-                                                        $res=$GLOBALS['ibs_internet']->setUserCustomField((string) $id, 'service_name', $cf_sername);
-                                                        $res=$GLOBALS['ibs_internet']->setUserCustomField((string) $id, 'location1', $tol.','.$arz);
+                                                    $res_station = Db::secure_fetchall($sql, [$res_factor[0]['emkanat_id']]);
+                                                    if ($res_station) {
+                                                        $tol = Helper::decimalToLL($res_station[0]['tol_joghrafiai']);
+                                                        $arz = Helper::decimalToLL($res_station[0]['arz_joghrafiai']);
+                                                        $id = $userid[1];
+                                                        $res = $GLOBALS['ibs_internet']->setUserCustomField((string) $id, 'service_name', $cf_sername);
+                                                        $res = $GLOBALS['ibs_internet']->setUserCustomField((string) $id, 'location1', $tol . ',' . $arz);
                                                     }
                                                 }
-                                            break;
+                                                break;
                                             case 'tdlte':
-                                                $cf_sername='TD_LTE';
-                                                $userid=$GLOBALS['ibs_internet']->getUserIdByNormalUsername((string) $res_ibsusername[0]['ibsusername']);
-                                                if($userid[0] && isset($cf_sername)){
-                                                    $id=$userid[1];
-                                                    $res=$GLOBALS['ibs_internet']->setUserCustomField((string) $id, 'service_name', $cf_sername);
+                                                $cf_sername = 'TD_LTE';
+                                                $userid = $GLOBALS['ibs_internet']->getUserIdByNormalUsername((string) $res_ibsusername[0]['ibsusername']);
+                                                if ($userid[0] && isset($cf_sername)) {
+                                                    $id = $userid[1];
+                                                    $res = $GLOBALS['ibs_internet']->setUserCustomField((string) $id, 'service_name', $cf_sername);
                                                 }
-                                            break;
+                                                break;
                                             default:
-                                                
-                                            break;
+
+                                                break;
                                         }
                                     }
-                                    
+
                                     // ShahkarHelper::putServices($res_factor[0]['id'], $res_service[0]['type']);
-                                    if($res_service[0]['type']==='bitstream'){
+                                    if ($res_service[0]['type'] === 'bitstream') {
                                         //1-get reserve info
-                                        $sql="SELECT id, resid FROM bnm_oss_reserves WHERE id = ?";
-                                        $oss= Db::secure_fetchall($sql, [$res_factor[0]['emkanat_id']]);
-                                        if(! $oss)die(Helper::Json_Message('e'));
-                                        $res_bs=$GLOBALS['bs']->activateResource($oss[0]['resid']);
+                                        $sql = "SELECT id, resid FROM bnm_oss_reserves WHERE id = ?";
+                                        $oss = Db::secure_fetchall($sql, [$res_factor[0]['emkanat_id']]);
+                                        if (!$oss) die(Helper::Json_Message('e'));
+                                        $res_bs = $GLOBALS['bs']->activateResource($oss[0]['resid']);
                                         Helper::resetIbsChargeRulesByUsername((string) $res_ibsusername[0]['ibsusername'], 'internet');
-                                        die(Helper::Custom_Msg(Helper::Messages('s')."<br>".$GLOBALS['bs']->getMessage($res_bs), 1));
-                                    }else{
+                                        die(Helper::Custom_Msg(Helper::Messages('s') . "<br>" . $GLOBALS['bs']->getMessage($res_bs), 1));
+                                    } else {
                                         Helper::resetIbsChargeRulesByUsername((string) $res_ibsusername[0]['ibsusername'], 'internet');
                                         die(Helper::Custom_Msg(Helper::Messages('s'), 1));
                                     }
@@ -7544,10 +7763,10 @@ class Bootstrap
                             } else {
                                 //sharje mojadad
                                 $availblecredit = 0;
-                                if(isset($res_factor[0]['etebare_ghabele_enteghal'])){
-                                    $availblecredit=$res_factor[0]['etebare_ghabele_enteghal'];
-                                }else{
-                                    $availblecredit=0;
+                                if (isset($res_factor[0]['etebare_ghabele_enteghal'])) {
+                                    $availblecredit = $res_factor[0]['etebare_ghabele_enteghal'];
+                                } else {
+                                    $availblecredit = 0;
                                 }
                                 $user_id = $GLOBALS['ibs_internet']->getUserIdByNormalUsername($res_ibsusername[0]['ibsusername']);
                                 // die(json_encode($user_id));
@@ -7601,18 +7820,18 @@ class Bootstrap
                                         case 'bitstream':
                                         case 'adsl':
                                         case 'vdsl':
-                                            $cf_sername='ADSL';
-                                            $userid=$GLOBALS['ibs_internet']->getUserIdByNormalUsername((string) $res_ibsusername[0]['ibsusername']);
-                                            if($userid && isset($cf_sername)){
-                                                $id=$userid[1];
-                                                $res=$GLOBALS['ibs_internet']->setUserCustomField((string) $id, 'service_name', $cf_sername);
+                                            $cf_sername = 'ADSL';
+                                            $userid = $GLOBALS['ibs_internet']->getUserIdByNormalUsername((string) $res_ibsusername[0]['ibsusername']);
+                                            if ($userid && isset($cf_sername)) {
+                                                $id = $userid[1];
+                                                $res = $GLOBALS['ibs_internet']->setUserCustomField((string) $id, 'service_name', $cf_sername);
                                             }
-                                        break;
+                                            break;
                                         case 'wireless':
-                                            $cf_sername='WIRELESS';
-                                            $userid=$GLOBALS['ibs_internet']->getUserIdByNormalUsername((string) $res_ibsusername[0]['ibsusername']);
-                                            if($userid && isset($cf_sername)){
-                                                $sql="SELECT
+                                            $cf_sername = 'WIRELESS';
+                                            $userid = $GLOBALS['ibs_internet']->getUserIdByNormalUsername((string) $res_ibsusername[0]['ibsusername']);
+                                            if ($userid && isset($cf_sername)) {
+                                                $sql = "SELECT
                                                     ss.id ssid,
                                                     ss.station_id stationid,
                                                     ss.sub_id subid,
@@ -7625,41 +7844,41 @@ class Bootstrap
                                                 WHERE
                                                     ss.id = ?
                                                     GROUP BY ss.id";
-                                                $res_station=Db::secure_fetchall($sql, [$res_factor[0]['emkanat_id']]);
-                                                if($res_station){
-                                                    $tol=Helper::decimalToLL($res_station[0]['tol_joghrafiai']);
-                                                    $arz=Helper::decimalToLL($res_station[0]['arz_joghrafiai']);
-                                                    $id=$userid[1];
-                                                    $res=$GLOBALS['ibs_internet']->setUserCustomField((string) $id, 'service_name', $cf_sername);
-                                                    $res=$GLOBALS['ibs_internet']->setUserCustomField((string) $id, 'location1', $tol.','.$arz);
+                                                $res_station = Db::secure_fetchall($sql, [$res_factor[0]['emkanat_id']]);
+                                                if ($res_station) {
+                                                    $tol = Helper::decimalToLL($res_station[0]['tol_joghrafiai']);
+                                                    $arz = Helper::decimalToLL($res_station[0]['arz_joghrafiai']);
+                                                    $id = $userid[1];
+                                                    $res = $GLOBALS['ibs_internet']->setUserCustomField((string) $id, 'service_name', $cf_sername);
+                                                    $res = $GLOBALS['ibs_internet']->setUserCustomField((string) $id, 'location1', $tol . ',' . $arz);
                                                 }
                                             }
-                                        break;
+                                            break;
                                         case 'tdlte':
-                                            $cf_sername='TD_LTE';
-                                            $userid=$GLOBALS['ibs_internet']->getUserIdByNormalUsername((string) $res_ibsusername[0]['ibsusername']);
-                                            if($userid && isset($cf_sername)){
-                                                $id=$userid[1];
-                                                $res=$GLOBALS['ibs_internet']->setUserCustomField((string) $id, 'service_name', $cf_sername);
+                                            $cf_sername = 'TD_LTE';
+                                            $userid = $GLOBALS['ibs_internet']->getUserIdByNormalUsername((string) $res_ibsusername[0]['ibsusername']);
+                                            if ($userid && isset($cf_sername)) {
+                                                $id = $userid[1];
+                                                $res = $GLOBALS['ibs_internet']->setUserCustomField((string) $id, 'service_name', $cf_sername);
                                             }
-                                        break;
+                                            break;
                                         default:
-                                            
-                                        break;
+
+                                            break;
                                     }
                                     $changegroup = $GLOBALS['ibs_internet']->changeUserGroupByUserId((string) $user_id, (string) $res_service[0]['onvane_service']);
                                     $renew = $GLOBALS['ibs_internet']->renewUser((string) $user_id, (string) $availblecredit);
                                     $addtocredit = $GLOBALS['ibs_internet']->addToUserCredit((string) $user_id, (string) $availblecredit, (string) $availblecredit);
                                     // ShahkarHelper::putServices($res_factor[0]['id'], $res_service[0]['type']);
-                                    if($res_service[0]['type']==='bitstream'){
+                                    if ($res_service[0]['type'] === 'bitstream') {
                                         //1-get reserve info
-                                        $sql="SELECT id, resid FROM bnm_oss_reserves WHERE id = ?";
-                                        $oss= Db::secure_fetchall($sql, [$res_factor[0]['emkanat_id']]);
-                                        if(! $oss)die(Helper::Json_Message('e'));
-                                        $res_bs=$GLOBALS['bs']->activateResource($oss[0]['resid']);
+                                        $sql = "SELECT id, resid FROM bnm_oss_reserves WHERE id = ?";
+                                        $oss = Db::secure_fetchall($sql, [$res_factor[0]['emkanat_id']]);
+                                        if (!$oss) die(Helper::Json_Message('e'));
+                                        $res_bs = $GLOBALS['bs']->activateResource($oss[0]['resid']);
                                         Helper::resetIbsChargeRulesByUsername((string) $res_ibsusername[0]['ibsusername'], 'internet');
-                                        die(Helper::Custom_Msg(Helper::Messages('s')."<br>".$GLOBALS['bs']->getMessage($res_bs), 1));
-                                    }else{
+                                        die(Helper::Custom_Msg(Helper::Messages('s') . "<br>" . $GLOBALS['bs']->getMessage($res_bs), 1));
+                                    } else {
                                         Helper::resetIbsChargeRulesByUsername((string) $res_ibsusername[0]['ibsusername'], 'internet');
                                         die(Helper::Custom_Msg(Helper::Messages('s'), 1));
                                     }
@@ -7671,7 +7890,7 @@ class Bootstrap
                             ///for bulk no need to reset charge rules
                             $user_id = $GLOBALS['ibs_internet']->getUserIdByNormalUsername($res_ibsusername[0]['ibsusername']);
                             $addtocredit = $GLOBALS['ibs_internet']->addToUserCredit((string) $user_id, (string) $res_service[0]['terafik'], (string) $res_service[0]['terafik']);
-                            
+
                             // switch (strtolower($res_service[0]['type'])) {
                             //     case 'bitstream':
                             //     case 'adsl':
@@ -7719,11 +7938,11 @@ class Bootstrap
                             //         }
                             //     break;
                             //     default:
-                                    
+
                             //     break;
                             // }
                             // ShahkarHelper::putServices($res_factor[0]['id'], $res_service[0]['type']);
-                            
+
                             die(Helper::Custom_Msg(Helper::Messages('s'), 1));
                         } else {
                             die(Helper::Json_Message('f'));
@@ -7733,7 +7952,7 @@ class Bootstrap
                         if ($res_service[0]['noe_forosh'] === "adi" || $res_service[0]['noe_forosh'] === "jashnvare") {
                             if ($res_factor_noe_kharid[0]['tedad'] === 0) {
                                 //new user
-                                $res_addnewuser = $GLOBALS['ibs_voip']->addNewUser(1,(string) $res_service[0]['gheymat']/10, 'Main', $res_service[0]['onvane_service'], $res_subscriber[0]['code_meli']);
+                                $res_addnewuser = $GLOBALS['ibs_voip']->addNewUser(1, (string) $res_service[0]['gheymat'] / 10, 'Main', $res_service[0]['onvane_service'], $res_subscriber[0]['code_meli']);
                                 if (Helper::ibsCheckUserinfoExist($res_addnewuser)) {
                                     if ($res_factor[0]['noe_moshtarak'] === "real") {
                                         $res_setuserattrs = $GLOBALS['ibs_voip']->setUserAttributes(
@@ -7786,17 +8005,17 @@ class Bootstrap
                             } else {
                                 //sharje mojadad
                                 $availblecredit = 0;
-                                if(isset($res_factor[0]['etebare_ghabele_enteghal'])){
-                                    $availblecredit=$res_factor[0]['etebare_ghabele_enteghal'];
-                                }else{
-                                    $availblecredit=0;
+                                if (isset($res_factor[0]['etebare_ghabele_enteghal'])) {
+                                    $availblecredit = $res_factor[0]['etebare_ghabele_enteghal'];
+                                } else {
+                                    $availblecredit = 0;
                                 }
                                 $user_id = $GLOBALS['ibs_voip']->getUserIdByVoipUsername($res_ibsusername[0]['ibsusername']);
-                                
-                                if(! $user_id){
-                                    die(Helper::Custom_Msg(Helper::Messages('fts').' '."کاربر در اکانتینگ پیدا نشد"));
+
+                                if (!$user_id) {
+                                    die(Helper::Custom_Msg(Helper::Messages('fts') . ' ' . "کاربر در اکانتینگ پیدا نشد"));
                                 }
-                                
+
                                 if ($user_id) {
                                     if ($res_factor[0]['noe_moshtarak'] === "real") {
                                         $res_setuserattrs = $GLOBALS['ibs_voip']->setUserAttributes(
@@ -7843,12 +8062,12 @@ class Bootstrap
                                             )
                                         );
                                     }
-                                        $changegroup    = $GLOBALS['ibs_voip']->changeUserGroupByUserId((string) $user_id, (string) $res_service[0]['onvane_service']);
-                                        $renew          = $GLOBALS['ibs_voip']->renewUser((string) $user_id, (string) $availblecredit);
-                                        $addtocredit    = $GLOBALS['ibs_voip']->addToUserCredit((string) $user_id, (string) $availblecredit, (string) $availblecredit);
-                                        $aa             = $GLOBALS['ibs_voip']->setAbsExpDate($user_id, $res_factor[0]['tarikhe_payane_service'], 'gregorian');
-                                        // ShahkarHelper::putServices($res_factor[0]['id'], $res_service[0]['type']);
-                                        die(Helper::Custom_Msg(Helper::Messages('s'), 1));
+                                    $changegroup    = $GLOBALS['ibs_voip']->changeUserGroupByUserId((string) $user_id, (string) $res_service[0]['onvane_service']);
+                                    $renew          = $GLOBALS['ibs_voip']->renewUser((string) $user_id, (string) $availblecredit);
+                                    $addtocredit    = $GLOBALS['ibs_voip']->addToUserCredit((string) $user_id, (string) $availblecredit, (string) $availblecredit);
+                                    $aa             = $GLOBALS['ibs_voip']->setAbsExpDate($user_id, $res_factor[0]['tarikhe_payane_service'], 'gregorian');
+                                    // ShahkarHelper::putServices($res_factor[0]['id'], $res_service[0]['type']);
+                                    die(Helper::Custom_Msg(Helper::Messages('s'), 1));
                                 } else {
                                     die(Helper::Custom_Msg(Helper::Messages('aof'), 3));
                                 }
@@ -7871,27 +8090,40 @@ class Bootstrap
                 $controllerName = 'login';
                 $controller = new $controllerName();
                 $controller->index();
-            }elseif($_GET['path']==="pre_realsubscribers"){
-                $controllerName = 'pre_realsubscribers';
+            } elseif ($_GET['path'] === "Zarinpal") {
+                $controllerName = "Zarinpal";
                 $controller = new $controllerName();
-                $controller->index();
-            }elseif($_GET['path']==="Zarinpal"){
-                $controllerName="Zarinpal";
-                $controller = new $controllerName();
-                
+
                 $controller->index($_GET['Authority'], $_GET['Status']);
-            }elseif($_GET['path']==="CrmLastDayReport"){
-                $controllerName="CrmLastDayReport";
+            } elseif ($_GET['path'] === "CrmLastDayReport") {
+                $controllerName = "CrmLastDayReport";
                 $controller = new $controllerName();
                 // $controller->index($_GET['Authority'], $_GET['Status']);
-            }elseif($_GET['path']==="Expired"){
-                $controllerName ="Expired";
+            } elseif ($_GET['path'] === "Expired") {
+                $controllerName = "Expired";
+                $controller     = new $controllerName();
+                // $controller->index($_GET['Authority'], $_GET['Status']);
+            } elseif ($_GET['path'] === "pre_realsubscribers") {
+                $controllerName = "Pre_RealSubscribers";
+                $controller     = new $controllerName();
+                // $controller->index($_GET['Authority'], $_GET['Status']);
+            } elseif ($_GET['path'] === "pre_legalsubscribers") {
+                $controllerName = "Pre_LegalSubscribers";
+                $controller     = new $controllerName();
+                // $controller->index($_GET['Authority'], $_GET['Status']);
+            } elseif ($_GET['path'] === "pre_branch") {
+                $controllerName = "pre_branch";
+                $controller     = new $controllerName();
+                // $controller->index($_GET['Authority'], $_GET['Status']);
+            } elseif ($_GET['path'] === "pre_asiatech_bitstream_emkansanji") {
+                $controllerName = "pre_asiatech_bitstream_emkansanji";
                 $controller     = new $controllerName();
                 // $controller->index($_GET['Authority'], $_GET['Status']);
             }
             $tokens = explode('/', rtrim($_GET['path'], '/'));
             $controllerName = ucfirst(array_shift($tokens));
             $requested_page = strtolower($controllerName);
+
             if (file_exists('Controllers/' . $controllerName . '.php')) {
                 $controller = new $controllerName();
                 if (!empty($tokens)) {
@@ -7927,7 +8159,7 @@ class Bootstrap
 
                                         $controller = new $controllerName();
                                         $controller->index();
-                                    }elseif($requested_page==="zarinpal"){
+                                    } elseif ($requested_page === "zarinpal") {
                                         $controller = new $controllerName();
                                         $controller->index($_GET['Authority'], $_GET['status']);
                                     } else {
@@ -7965,10 +8197,10 @@ class Bootstrap
                                         if ($controllerName === 'dashboard' || $controllerName === 'Dashboard') {
                                             $controller = new $controllerName();
                                             $controller->index();
-                                        } elseif($requested_page==="zarinpal"){
+                                        } elseif ($requested_page === "zarinpal") {
                                             $controller = new $controllerName();
                                             $controller->index($_GET['Authority'], $_GET['status']);
-                                        }else {
+                                        } else {
                                             $controllerName = 'Error404';
                                             $controller = new $controllerName();
                                             $controller->index();
@@ -8007,14 +8239,13 @@ class Bootstrap
                     }
                 }
             } else {
-                //echo ('444');
-                ////if url exist but not found in controllers
-
-                $controllerName = 'Error404';
-                $controller = new $controllerName();
-                $controller->index();
-                //if controller not found render an error page
-                $flag = true;
+                if (strtolower($controllerName) !== 'logout') {
+                    $controllerName = 'Error404';
+                    $controller = new $controllerName();
+                    $controller->index();
+                    //if controller not found render an error page
+                    $flag = true;
+                }
             }
         } else {
             $controllerName = 'Home';
@@ -8023,4 +8254,3 @@ class Bootstrap
         }
     }
 }
-

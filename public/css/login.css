@@ -1,12 +1,21 @@
 /*//////////////////////////////////////////////////////////////////
 [ FONT ]*/
 
-@font-face {
-    font-family: 'BYekan' !important;
-    src: url('/public/css/fonts/BYekan.eot') format('eot'), url('/public/css/fonts/Byekan.ttf') format('truetype'), url('/public/css/fonts/BYekan.woff') format('woff');
-    font-weight: normal;
+/* @font-face {
+    font-family: BYekan;
+    src: url('/public/css/fonts/BYekan/BYekan.eot') format('eot'), url('/public/css/fonts/BYekan/Byekan.ttf') format('truetype'), url('/public/css/fonts/BYekan/BYekan.woff') format('woff');
+    font-weight: 400;
     font-style: normal;
-}
+} */
+@font-face {
+    font-family: vazir;
+    font-style: normal;
+    font-weight: 400;
+    src: url("/public/css/fonts/Vazir/Vazir-Medium.eot");
+    src: url("/public/css/fonts/Vazir/Vazir-Medium.woff") format("woff"),
+      url("/public/css/fonts/Vazir/Vazir-Medium.ttf") format("ttf"),
+      url("/public/css/fonts/Vazir/Vazir-Medium.woff2") format("woff2");
+  }
 
 
 /*//////////////////////////////////////////////////////////////////
@@ -24,6 +33,7 @@ html {
     height: 100%;
     /* font-family: Poppins-Regular, sans-serif; */
     background: #f8f8f8;
+    font-family: vazir;
 }
 
 

@@ -10,6 +10,44 @@ class Helper
             return false;
         }
     }
+    public static function asiatechEmkanSanji(string $tel,string $sertype, bool $chechotherpap){
+        $arr=[];
+        $telecenter = $GLOBALS['bs']->getLocationFromPhonePrefix($tel);
+        if ($GLOBALS['bs']->errorCheck($telecenter)) {
+            $telename = "مرکز : " . $telecenter['result']['data']['ciname'] . '-' . $telecenter['result']['data']['loname'];
+            $markaze_mokhaberati = $telecenter['result']['data']['loid'];
+        } else {
+            // return $telecenter['result']['errmsg'];
+            // die(Helper::Custom_Msg($GLOBALS['bs']->getMessage($telecenter)));
+            return ['hasError'=> true, 'msg'=>$telecenter['result']['errmsg']];
+        }
+        $arr['interfacetype']       = $sertype;
+        $arr['checkOtherPap']       = $chechotherpap;
+        $arr['loid']                = (int) $telecenter['result']['data']['loid'];
+        $arr['phone']               = $tel;
+        $arr['vspid']               = __ASIATECHALTVSPID__;
+        $arr['bmsPriorityCheck']    = "high";
+        $result = $GLOBALS['bs']->resourceFeasibilityCheck($arr);
+        if ($GLOBALS['bs']->errorCheck($result)) {
+            return ['hasError'=> false, 'msg'=>$result['result']['errmsg']];
+        } else {
+            // die(Helper::Custom_Msg($GLOBALS['bs']->getMessage($result) . '<br>' . $telename, 2));
+            return ['hasError'=> true, 'msg'=>$result['result']['errmsg']. '<br>' . $telename];
+        }
+    }
+    public static function getClientIp(){
+        $ip = isset($_SERVER['HTTP_CLIENT_IP']) 
+            ? $_SERVER['HTTP_CLIENT_IP'] 
+            : (isset($_SERVER['HTTP_X_FORWARDED_FOR']) 
+            ? $_SERVER['HTTP_X_FORWARDED_FOR'] 
+            : $_SERVER['REMOTE_ADDR']);
+        if($ip){
+            return $ip;
+        }else{
+            return false;
+        }
+        
+    }
     // public static function 
     public static function getCurrentUserInfo(){
         $arr=[];
@@ -5466,6 +5504,23 @@ class Helper
             return true;
         }
     }
+    public static function checkPreSubExist($codemeli, $telephone_hamrah, $telephone1)
+    {
+        $sql = "SELECT
+        COUNT(*) rowsnum
+    FROM
+        bnm_presubscribers
+    WHERE
+        code_meli = ?
+        OR telephone_hamrah = ?
+        OR telephone1 = ?";
+        $res = Db::secure_fetchall($sql, [$codemeli, $telephone_hamrah, $telephone1]);
+        if ($res[0]['rowsnum'] === 0) {
+            return false;
+        } else {
+            return true;
+        }
+    }
     public static function checkSubscriberCreditForPay($credit, $factorprice)
     {
         if ($credit && $factorprice) {
@@ -7156,10 +7211,14 @@ class Helper
     {
         switch ($message_code) {
 
+            case 'pcae':
+            case 'pleasechooseanelement':
+                return "لطفا یک مورد را انتخاب کنید";
+            break;
             case 'absnr':
             case 'asiatechbitstreamnoresponse':
                 return "پیامی دریافت نشد";
-                break;
+            break;
             case 'subauthproblem':
             case 'sap':
                 return 'احراز هویت مشترک موفق نبوده پس از بررسی و تکمیل اطلاعات هویتی مشترک مجددا تلاش کنید';
@@ -8743,6 +8802,56 @@ class Helper
                 }
 
                 break;
+                case 'pre_internal_branch':
+                    if (self::Login_Just_Check()) {
+                        switch ($_SESSION['user_type']) {
+                            case __ADMINUSERTYPE__:
+                            case __ADMINOPERATORUSERTYPE__:
+                                unset($data['datatable_request']);
+                                unset($data['request']);
+                                $table = 'bnm_prebranch';
+                                $primaryKey = 'id';
+
+                                $columns = array(
+                                    array('db' => 'id', 'dt' => 'id'),
+                                    array('db' => 'name_sherkat', 'dt' => 'name_sherkat'),
+                                    array('db' => 'shomare_sabt', 'dt' => 'shomare_sabt'),
+                                    array('db' => 'telephone1', 'dt' => 'telephone1'),
+                                    array('db' => 'telephone2', 'dt' => 'telephone2'),
+                                    array('db' => 'address', 'dt' => 'address'),
+                                    array('db' => 'noe_sherkat', 'dt' => 'noe_sherkat'),
+                                );
+                                $where = "confirmstatus = 2";
+                                return (json_encode(Db::simple($data, $table, $primaryKey, $columns, $where)));
+                                break;
+                            case __MODIRUSERTYPE__:
+                            case __OPERATORUSERTYPE__:
+                                unset($data['datatable_request']);
+                                unset($data['request']);
+                                $table = 'bnm_prebranch';
+                                $primaryKey = 'id';
+                                $columns = array(
+                                    array('db' => 'id', 'dt' => 'id'),
+                                    array('db' => 'name_sherkat', 'dt' => 'name_sherkat'),
+                                    array('db' => 'shomare_sabt', 'dt' => 'shomare_sabt'),
+                                    array('db' => 'telephone1', 'dt' => 'telephone1'),
+                                    array('db' => 'telephone2', 'dt' => 'telephone2'),
+                                    array('db' => 'address', 'dt' => 'address'),
+                                    array('db' => 'noe_sherkat', 'dt' => 'noe_sherkat'),
+                                );
+                                $where = "id = {$_SESSION['branch_id']} AND confirmstatus = 2";
+                                return (json_encode(Db::simple($data, $table, $primaryKey, $columns, $where)));
+                                break;
+                            default:
+                                die(self::Json_Message('af'));
+                                break;
+    
+                        }
+                    } else {
+                        die(self::Json_Message('af'));
+                    }
+    
+                break;
             case 'branch':
                 if (self::Login_Just_Check()) {
                     switch ($_SESSION['user_type']) {
@@ -8791,7 +8900,7 @@ class Helper
                     die(self::Json_Message('af'));
                 }
 
-                break;
+            break;
             case 'upload_file':
                 if (self::Login_Just_Check()) {
                     switch ($_SESSION['user_type']) {
@@ -9679,6 +9788,42 @@ class Helper
                 }
                 return (json_encode(Db::simple($data, $table, $primaryKey, $columns, $where)));
                 break;
+            case 'pre_internal_real_subscribers':
+                if (self::Login_Just_Check()) {
+                    $table = 'bnm_presubscribers';
+                    $primaryKey = 'id';
+                    $columns = array(
+                        array('db' => 'id', 'dt' => 'id'),
+                        array('db' => 'code_eshterak', 'dt' => 'code_eshterak'),
+                        array('db' => 'name', 'dt' => 'name'),
+                        array('db' => 'f_name', 'dt' => 'f_name'),
+                        array('db' => 'code_meli', 'dt' => 'code_meli'),
+                        array('db' => 'telephone_hamrah', 'dt' => 'telephone_hamrah'),
+                        array('db' => 'telephone1', 'dt' => 'telephone1'),
+                        array('db' => 'shomare_shenasname', 'dt' => 'shomare_shenasname'),
+                        array('db' => 'code_posti1', 'dt' => 'code_posti1'),
+                    );
+                    switch ($_SESSION['user_type']) {
+                        case __ADMINUSERTYPE__:
+                        case __ADMINOPERATORUSERTYPE__:
+                            $where = "noe_moshtarak='real' AND confirmstatus = 2";
+                            break;
+                        case __MODIRUSERTYPE__:
+                        case __MODIR2USERTYPE__:
+                        case __OPERATORUSERTYPE__:
+                        case __OPERATOR2USERTYPE__:
+                            $where = "branch_id = {$_SESSION['branch_id']} AND noe_moshtarak='real' AND confirmstatus = 2";
+                            break;
+                        case __MOSHTARAKUSERTYPE__:
+                            $where = "id={$_SESSION['user_id']} AND noe_moshtarak='real' AND confirmstatus = 2";
+                            break;
+                        default:
+                            return self::Json_Message('auth_fail');
+                            break;
+                    }
+                    return (json_encode(Db::simple($data, $table, $primaryKey, $columns, $where)));
+                }
+            break;
             case 'real_subscribers':
                 if (self::Login_Just_Check()) {
                     $table = 'bnm_subscribers';
@@ -9714,7 +9859,44 @@ class Helper
                     }
                     return (json_encode(Db::simple($data, $table, $primaryKey, $columns, $where)));
                 }
-                break;
+            break;
+            case 'pre_internal_legal_subscribers':
+                if (self::Login_Just_Check()) {
+                    $table = 'bnm_presubscribers';
+                    $primaryKey = 'id';
+                    $columns = array(
+                        array('db' => 'id', 'dt' => 'id'),
+                        array('db' => 'name', 'dt' => 'name'),
+                        array('db' => 'f_name', 'dt' => 'f_name'),
+                        array('db' => 'name_sherkat', 'dt' => 'name_sherkat'),
+                        array('db' => 'code_meli', 'dt' => 'code_meli'),
+                        array('db' => 'telephone1', 'dt' => 'telephone1'),
+                        array('db' => 'telephone_hamrah', 'dt' => 'telephone_hamrah'),
+                        array('db' => 'code_posti1', 'dt' => 'code_posti1'),
+                    );
+
+                    switch ($_SESSION['user_type']) {
+                        case __ADMINUSERTYPE__:
+                        case __ADMINOPERATORUSERTYPE__:
+                            $where = "noe_moshtarak='legal' AND confirmstatus = 2";
+                            break;
+                        case __MODIRUSERTYPE__:
+                        case __OPERATORUSERTYPE__:
+                        case __MODIR2USERTYPE__:
+                        case __OPERATOR2USERTYPE__:
+                            $where = "branch_id = {$_SESSION['branch_id']} AND noe_moshtarak='legal' AND confirmstatus = 2";
+                            break;
+                        case __MOSHTARAKUSERTYPE__:
+                            $where = "id={$_SESSION['user_id']} AND noe_moshtarak='legal' AND confirmstatus = 2";
+                            break;
+                        default:
+                            return self::Json_Message('auth_fail');
+                            break;
+                    }
+                    return (json_encode(Db::simple($data, $table, $primaryKey, $columns, $where)));
+
+                }
+            break;
             case 'legal_subscribers':
                 if (self::Login_Just_Check()) {
                     $table = 'bnm_subscribers';
@@ -9752,7 +9934,7 @@ class Helper
                     return (json_encode(Db::simple($data, $table, $primaryKey, $columns, $where)));
 
                 }
-                break;
+            break;
             case 'factors_init':
                 if (self::Login_Just_Check()) {
                     switch ($_SESSION['user_type']) {

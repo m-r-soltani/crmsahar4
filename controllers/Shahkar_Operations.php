@@ -12,7 +12,8 @@ class Shahkar_Operations extends Controller
         if (isset($_POST['send_shahkar_operations_servicestatus'])) {
             parse_str($_POST[key($_POST)], $_POST);
             $_POST = Helper::xss_check_array($_POST);
-            $_POST['service']=Helper::convert_numbers($_POST['service'], false);
+            $_POST['service']=Helper::regulateNumber($_POST['service']);
+            
             if (Helper::Login_Just_Check()) {
                 switch ($_SESSION['user_type']) {
                     case __ADMINUSERTYPE__:
@@ -47,7 +48,12 @@ class Shahkar_Operations extends Controller
 
         if (isset($_POST['send_shahkar_operations_closedelete'])) {
             parse_str($_POST[key($_POST)], $_POST);
+            foreach ($_POST as $k => $v) {
+                $_POST[$k]=Helper::str_trim($v);
+            }
+            
             $_POST = Helper::xss_check_array($_POST);
+            // die(json_encode($_POST));
             $res   = false;
             if (Helper::Login_Just_Check()) {
                 switch ($_SESSION['user_type']) {

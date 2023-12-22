@@ -8,7 +8,7 @@
                             <legend class="text-uppercase font-size-sm font-weight-bold">نماینده</legend>
                             
                             <div class="form-group row">
-                            <legend class="text-uppercase font-size-md font-weight-bold" style="color: #FB8C00">اطلاعات هویتی نمایندگی ( ستاره دار اجباری )</legend>
+                                <legend class="text-uppercase font-size-md font-weight-bold" style="color: #FB8C00">اطلاعات هویتی نمایندگی ( ستاره دار اجباری )</legend>
                                 <label class="col-form-label col-lg-2">نماینده بالادستی <span class="text-danger">*</span></label>
                                 <div class="col-lg-4">
                                     <select class="form-control form-control-lg custom-select" name="baladasti_id" id="baladasti_id" required>

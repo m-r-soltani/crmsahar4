@@ -169,8 +169,11 @@ class ShahkarHelper
                 if(! $info){
                     return false;
                 }
+                return $info;
+                
                 if($check[0]['noe_forosh']=="bulk"){
                     $prevfactor=Helper::getNormalPreviousFactor($check[0]['subid'], $check[0]['emkanat_id'], $check[0]['service_type']);
+                    
                     if(! $prevfactor){
                         return false;
                     }else{
@@ -181,7 +184,9 @@ class ShahkarHelper
                 if(! $data){
                     return false;
                 }
+                return $data;
                 $res=Shahkar_Requests::putService($data);
+                
                 if(! $res){
                     return false;
                 }
@@ -550,7 +555,6 @@ class ShahkarHelper
         fa.emkanat_id emkanatid,
         fa.tarikhe_shoroe_service start_service,
         fa.tarikhe_payane_service end_service,
-        
         ostan.code_ostan_shahkar ostane_tavalod_code,
         os.name ostane_sokonat_name,
         os.name_en ostane_sokonat_name_en,
@@ -558,8 +562,8 @@ class ShahkarHelper
         o1.name tel1_ostan_name,
         o1.code_ostan_shahkar tel1_ostan_code,
         o1.name_en tel1_ostan_name_en,
+        s1.name tel1_shahr_name,
         shahr.name shahre_tavalod_name,
-        
         country.code meliatcode,
         ncountry.code namayande_meliatcode,
         IF( country.code = 'IRN', 1, 0 ) isirani,
@@ -693,40 +697,41 @@ class ShahkarHelper
                 }
                 $date = $date[0] . $date[1] . $date[2];
                 $data = [
-                    "name" => $userinfo[0]["name"],
-                    "family" => $userinfo[0]["f_name"],
-                    "fatherName" => $userinfo[0]["name_pedar"],
-                    "certificateNo" => $userinfo[0]["shomare_shenasname"],
-                    "iranian" => $userinfo[0]["isirani"],
-                    "identificationType" => $userinfo[0]["noe_shenase_hoviati"],
-                    "birthDate" => $date,
-                    "identificationNo" => $userinfo[0]["code_meli"],
-                    "birthPlace" => $userinfo[0]["shahre_tavalod_name"],
-                    "mobile" => $userinfo[0]["telephone_hamrah"],
-                    "email" => $userinfo[0]["email"],
-                    "gender" => $userinfo[0]["jensiat"],
-                    "person" => $userinfo[0]['noe_moshtarak'],
+                    "name" => Helper::str_trim($userinfo[0]["name"]),
+                    "family" => Helper::str_trim($userinfo[0]["f_name"]),
+                    "fatherName" => Helper::str_trim($userinfo[0]["name_pedar"]),
+                    "certificateNo" => Helper::str_trim($userinfo[0]["shomare_shenasname"]),
+                    "iranian" => Helper::str_trim($userinfo[0]["isirani"]),
+                    "identificationType" => Helper::str_trim($userinfo[0]["noe_shenase_hoviati"]),
+                    "birthDate" => Helper::str_trim($date),
+                    "identificationNo" => Helper::str_trim($userinfo[0]["code_meli"]),
+                    "birthPlace" => Helper::str_trim($userinfo[0]["shahre_tavalod_name"]),
+                    "mobile" => Helper::str_trim($userinfo[0]["telephone_hamrah"]),
+                    "email" => Helper::str_trim($userinfo[0]["email"]),
+                    "gender" => Helper::str_trim($userinfo[0]["jensiat"]),
+                    "person" => Helper::str_trim($userinfo[0]['noe_moshtarak']),
                     "resellerCode" => "0",
                     "address" => [
-                        "street2" => $userinfo[0]["tel1_street2"],
-                        "address" => $userinfo[0]["address"],
-                        "houseNumber" => $userinfo[0]["tel1_vahed"],
-                        "tel" => $userinfo[0]["telephone"],
-                        "provinceName" => $userinfo[0]["tel1_ostan_name"],
-                        "postalCode" => $userinfo[0]["code_posti"],
+                        "street2" => Helper::str_trim($userinfo[0]["tel1_street2"]),
+                        "address" => Helper::str_trim($userinfo[0]["address"]),
+                        "houseNumber" => Helper::str_trim($userinfo[0]["tel1_vahed"]),
+                        "tel" => Helper::str_trim($userinfo[0]["telephone"]),
+                        "provinceName" => Helper::str_trim($userinfo[0]["tel1_ostan_name"]),
+                        "townshipName" => Helper::str_trim($userinfo[0]["tel1_shahr_name"]),
+                        "postalCode" => Helper::str_trim($userinfo[0]["code_posti"]),
                     ],
                     "service" => [
-                        "type" => $servicecode,
+                        "type" => Helper::str_trim($servicecode),
                         "ipStatic" => 0, //ToDo
                         "ip" => "", //ToDo
                         "subnet" => "", //ToDo
                         
-                        "ownershipType" => $userinfo[0]["noe_malekiat"],
-                        "startDate" => $start_service,
-                        "endDate" => $end_service,
-                        "bandwidth" => $userinfo[0]["hadeaxar_sorat_daryaft"],
-                        "province" =>(string) $userinfo[0]["tel1_ostan_code"],
-                        "phoneNumber" => $userinfo[0]["telephone"],
+                        "ownershipType" => Helper::str_trim($userinfo[0]["noe_malekiat"]),
+                        "startDate" => Helper::str_trim($start_service),
+                        "endDate" => Helper::str_trim($end_service),
+                        "bandwidth" => Helper::str_trim($userinfo[0]["hadeaxar_sorat_daryaft"]),
+                        "province" =>(string) Helper::str_trim($userinfo[0]["tel1_ostan_code"]),
+                        "phoneNumber" => Helper::str_trim($userinfo[0]["telephone"]),
 
                     ],
                 ];
@@ -788,46 +793,47 @@ class ShahkarHelper
                     }
                 }
                 $data = [
-                    "companyName" => $userinfo[0]["name_sherkat"],
-                    "iranian" => $userinfo[0]["isirani"],
+                    "companyName" => Helper::str_trim($userinfo[0]["name_sherkat"]),
+                    "iranian" => Helper::str_trim($userinfo[0]["isirani"]),
                     "identificationType" => 5,
-                    "registrationDate" => $tarikhe_sabt_sherkat,
-                    "identificationNo" => $userinfo[0]["shenase_meli"],
-                    "companyType" => $userinfo[0]['companytype'],
-                    "registrationNo" => $userinfo[0]['shomare_sabt'],
-                    "agentFirstName" => $userinfo[0]["name"],
-                    "agentLastName" => $userinfo[0]["f_name"],
-                    "agentFatherName" => $userinfo[0]["name_pedar"],
-                    "agentIdentificationType" => $userinfo[0]["noe_shenase_hoviati"],
-                    "agentIdentificationNo" => $userinfo[0]["code_meli"],
-                    "agentNationality" => $userinfo[0]["meliatcode"],
-                    "agentBirthCertificateNo" => $userinfo[0]["shomare_shenasname"],
-                    "agentBirthDate" => $date,
-                    "agentbirthPlace" => $userinfo[0]["shahre_tavalod"],
-                    "mobile" => $userinfo[0]["telephone_hamrah"],
-                    "email" => $userinfo[0]["email"],
-                    "gender" => $userinfo[0]["jensiat"],
-                    "person" => $userinfo[0]['noe_moshtarak'],
+                    "registrationDate" => Helper::str_trim($tarikhe_sabt_sherkat),
+                    "identificationNo" => Helper::str_trim($userinfo[0]["shenase_meli"]),
+                    "companyType" => Helper::str_trim($userinfo[0]['companytype']),
+                    "registrationNo" => Helper::str_trim($userinfo[0]['shomare_sabt']),
+                    "agentFirstName" => Helper::str_trim($userinfo[0]["name"]),
+                    "agentLastName" => Helper::str_trim($userinfo[0]["f_name"]),
+                    "agentFatherName" => Helper::str_trim($userinfo[0]["name_pedar"]),
+                    "agentIdentificationType" => Helper::str_trim($userinfo[0]["noe_shenase_hoviati"]),
+                    "agentIdentificationNo" => Helper::str_trim($userinfo[0]["code_meli"]),
+                    "agentNationality" => Helper::str_trim($userinfo[0]["meliatcode"]),
+                    "agentBirthCertificateNo" => Helper::str_trim($userinfo[0]["shomare_shenasname"]),
+                    "agentBirthDate" => Helper::str_trim($date),
+                    "agentbirthPlace" => Helper::str_trim($userinfo[0]["shahre_tavalod"]),
+                    "mobile" => Helper::str_trim($userinfo[0]["telephone_hamrah"]),
+                    "email" => Helper::str_trim($userinfo[0]["email"]),
+                    "gender" => Helper::str_trim($userinfo[0]["jensiat"]),
+                    "person" => Helper::str_trim($userinfo[0]['noe_moshtarak']),
                     "resellerCode" => "0",
                     "address" => [
-                        "street2" => $userinfo[0]["tel1_street2"],
-                        "address" => $userinfo[0]["address"],
-                        "houseNumber" => $userinfo[0]["tel1_vahed"],
-                        "tel" => $userinfo[0]["telephone"],
-                        "provinceName" => $userinfo[0]["tel1_ostan_name"],
-                        "postalCode" => $userinfo[0]["code_posti"],
+                        "street2" => Helper::str_trim($userinfo[0]["tel1_street2"]),
+                        "address" => Helper::str_trim($userinfo[0]["address"]),
+                        "houseNumber" => Helper::str_trim($userinfo[0]["tel1_vahed"]),
+                        "tel" => Helper::str_trim($userinfo[0]["telephone"]),
+                        "provinceName" => Helper::str_trim($userinfo[0]["tel1_ostan_name"]),
+                        "townshipName" => Helper::str_trim($userinfo[0]["tel1_shahr_name"]),
+                        "postalCode" => Helper::str_trim($userinfo[0]["code_posti"]),
                     ],
                     "service" => [
-                        "type" => $servicecode,
+                        "type" => Helper::str_trim($servicecode),
                         "ipStatic" => 0, //ToDo
                         "ip" => "", //ToDo
                         "subnet" => "", //ToDo
-                        "bandwidth" => $userinfo[0]["hadeaxar_sorat_daryaft"],
-                        "ownershipType" => $userinfo[0]["noe_malekiat"],
-                        "startDate" => $start_service,
-                        "endDate" => $end_service,
-                        "province" =>(string) $userinfo[0]["tel1_ostan_code"],
-                        "phoneNumber" => $userinfo[0]["telephone"],
+                        "bandwidth" => Helper::str_trim($userinfo[0]["hadeaxar_sorat_daryaft"]),
+                        "ownershipType" => Helper::str_trim($userinfo[0]["noe_malekiat"]),
+                        "startDate" => Helper::str_trim($start_service),
+                        "endDate" => Helper::str_trim($end_service),
+                        "province" =>(string) Helper::str_trim($userinfo[0]["tel1_ostan_code"]),
+                        "phoneNumber" => Helper::str_trim($userinfo[0]["telephone"]),
 
                     ],
                 ];
@@ -858,40 +864,41 @@ class ShahkarHelper
                     $date = $date[0] . $date[1] . $date[2];
                 }
                 $data = [
-                    "name" => $userinfo[0]["name"],
-                    "family" => $userinfo[0]["f_name"],
-                    "fatherName" => $userinfo[0]["name_pedar"],
-                    "certificateNo" => $userinfo[0]["shomare_shenasname"],
-                    "iranian" => $userinfo[0]["isirani"],
-                    "identificationType" => $userinfo[0]["noe_shenase_hoviati"],
-                    "birthDate" => $date,
-                    "identificationNo" => $userinfo[0]["code_meli"],
-                    "birthPlace" => $userinfo[0]["shahre_tavalod"],
-                    "mobile" => $userinfo[0]["telephone_hamrah"],
-                    "email" => $userinfo[0]["email"],
-                    "gender" => $userinfo[0]["jensiat"],
-                    "person" => $userinfo[0]['noe_moshtarak'],
+                    "name" => Helper::str_trim($userinfo[0]["name"]),
+                    "family" => Helper::str_trim($userinfo[0]["f_name"]),
+                    "fatherName" => Helper::str_trim($userinfo[0]["name_pedar"]),
+                    "certificateNo" => Helper::str_trim($userinfo[0]["shomare_shenasname"]),
+                    "iranian" => Helper::str_trim($userinfo[0]["isirani"]),
+                    "identificationType" => Helper::str_trim($userinfo[0]["noe_shenase_hoviati"]),
+                    "birthDate" => Helper::str_trim($date),
+                    "identificationNo" => Helper::str_trim($userinfo[0]["code_meli"]),
+                    "birthPlace" => Helper::str_trim($userinfo[0]["shahre_tavalod"]),
+                    "mobile" => Helper::str_trim($userinfo[0]["telephone_hamrah"]),
+                    "email" => Helper::str_trim($userinfo[0]["email"]),
+                    "gender" => Helper::str_trim($userinfo[0]["jensiat"]),
+                    "person" => Helper::str_trim($userinfo[0]['noe_moshtarak']),
                     "resellerCode" => "0",
                     "address" => [
                         // "address" => $userinfo[0]["address"],
-                        "street2" => $userinfo[0]["tel1_street2"],
-                        "address" => $userinfo[0]["address"],
-                        "houseNumber" => $userinfo[0]["tel1_vahed"],
-                        "tel" => $userinfo[0]["telephone"],
-                        "provinceName" => $userinfo[0]["tel1_ostan_name"],
-                        "postalCode" => $userinfo[0]["code_posti"],
+                        "street2" => Helper::str_trim($userinfo[0]["tel1_street2"]),
+                        "address" => Helper::str_trim($userinfo[0]["address"]),
+                        "houseNumber" => Helper::str_trim($userinfo[0]["tel1_vahed"]),
+                        "tel" => Helper::str_trim($userinfo[0]["telephone"]),
+                        "provinceName" => Helper::str_trim($userinfo[0]["tel1_ostan_name"]),
+                        "townshipName" => Helper::str_trim($userinfo[0]["tel1_shahr_name"]),
+                        "postalCode" => Helper::str_trim($userinfo[0]["code_posti"]),
                     ],
                     "service" => [
-                        "type" => $servicecode,
+                        "type" => Helper::str_trim($servicecode),
                         "ipStatic" => 0, //ToDo
                         "ip" => "", //ToDo
                         "subnet" => "", //ToDo
-                        "bandwidth" => $userinfo[0]["hadeaxar_sorat_daryaft"],
-                        "ownershipType" => $userinfo[0]["noe_malekiat"],
-                        "startDate" => $start_service,
-                        "endDate" => $end_service,
-                        "province" =>(string) $userinfo[0]["tel1_ostan_code"],
-                        "phoneNumber" => $userinfo[0]["telephone"],
+                        "bandwidth" => Helper::str_trim($userinfo[0]["hadeaxar_sorat_daryaft"]),
+                        "ownershipType" => Helper::str_trim($userinfo[0]["noe_malekiat"]),
+                        "startDate" => Helper::str_trim($start_service),
+                        "endDate" => Helper::str_trim($end_service),
+                        "province" =>(string) Helper::str_trim($userinfo[0]["tel1_ostan_code"]),
+                        "phoneNumber" => Helper::str_trim($userinfo[0]["telephone"]),
 
                     ],
                 ];
@@ -963,39 +970,40 @@ class ShahkarHelper
                     }
                 }
                 $data = [
-                    "name" => $userinfo[0]["name"],
-                    "family" => $userinfo[0]["f_name"],
-                    "fatherName" => $userinfo[0]["name_pedar"],
-                    "certificateNo" => $userinfo[0]["shomare_shenasname"],
-                    "iranian" => $userinfo[0]["isirani"],
-                    "identificationType" => $userinfo[0]["noe_shenase_hoviati"],
-                    "birthDate" => $date,
-                    "identificationNo" => $userinfo[0]["code_meli"],
-                    "birthPlace" => $userinfo[0]["shahre_tavalod"],
-                    "mobile" => $userinfo[0]["telephone_hamrah"],
-                    "email" => $userinfo[0]["email"],
-                    "gender" => $userinfo[0]["jensiat"],
-                    "person" => $userinfo[0]['noe_moshtarak'],
+                    "name" => Helper::str_trim($userinfo[0]["name"]),
+                    "family" => Helper::str_trim($userinfo[0]["f_name"]),
+                    "fatherName" => Helper::str_trim($userinfo[0]["name_pedar"]),
+                    "certificateNo" => Helper::str_trim($userinfo[0]["shomare_shenasname"]),
+                    "iranian" => Helper::str_trim($userinfo[0]["isirani"]),
+                    "identificationType" => Helper::str_trim($userinfo[0]["noe_shenase_hoviati"]),
+                    "birthDate" => Helper::str_trim($date),
+                    "identificationNo" => Helper::str_trim($userinfo[0]["code_meli"]),
+                    "birthPlace" => Helper::str_trim($userinfo[0]["shahre_tavalod"]),
+                    "mobile" => Helper::str_trim($userinfo[0]["telephone_hamrah"]),
+                    "email" => Helper::str_trim($userinfo[0]["email"]),
+                    "gender" => Helper::str_trim($userinfo[0]["jensiat"]),
+                    "person" => Helper::str_trim($userinfo[0]['noe_moshtarak']),
                     "resellerCode" => "0",
                     "address" => [
-                        "street2" => $userinfo[0]["tel1_street2"],
-                        "address" => $userinfo[0]["address"],
-                        "houseNumber" => $userinfo[0]["tel1_vahed"],
-                        "tel" => $userinfo[0]["telephone"],
-                        "provinceName" => $userinfo[0]["tel1_ostan_name"],
-                        "postalCode" => $userinfo[0]["code_posti"],
+                        "street2" => Helper::str_trim($userinfo[0]["tel1_street2"]),
+                        "address" => Helper::str_trim($userinfo[0]["address"]),
+                        "houseNumber" => Helper::str_trim($userinfo[0]["tel1_vahed"]),
+                        "tel" => Helper::str_trim($userinfo[0]["telephone"]),
+                        "provinceName" => Helper::str_trim($userinfo[0]["tel1_ostan_name"]),
+                        "townshipName" => Helper::str_trim($userinfo[0]["tel1_shahr_name"]),
+                        "postalCode" => Helper::str_trim($userinfo[0]["code_posti"]),
                     ],
                     "service" => [
-                        "type" => $servicecode,
+                        "type" => Helper::str_trim($servicecode),
                         "ipStatic" => 0, //ToDo
                         "ip" => "", //ToDo
                         "subnet" => "", //ToDo
-                        "bandwidth" => $userinfo[0]["hadeaxar_sorat_daryaft"],
-                        "ownershipType" => $userinfo[0]["noe_malekiat"],
-                        "startDate" => $start_service,
-                        "endDate" => $end_service,
-                        "province" =>(string) $userinfo[0]["tel1_ostan_code"],
-                        "phoneNumber" => $userinfo[0]["telephone"],
+                        "bandwidth" => Helper::str_trim($userinfo[0]["hadeaxar_sorat_daryaft"]),
+                        "ownershipType" => Helper::str_trim($userinfo[0]["noe_malekiat"]),
+                        "startDate" => Helper::str_trim($start_service),
+                        "endDate" => Helper::str_trim($end_service),
+                        "province" =>(string) Helper::str_trim($userinfo[0]["tel1_ostan_code"]),
+                        "phoneNumber" => Helper::str_trim($userinfo[0]["telephone"]),
 
                     ],
                 ];

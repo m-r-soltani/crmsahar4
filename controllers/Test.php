@@ -9,6 +9,11 @@ class Test extends Controller
     
     public function index()
     {
+        $st="id	noe_moshtarak	name	f_name	name_pedar	jensiat	meliat	tabeiat	noe_shenase_hoviati	shomare_shenasname	tarikhe_tavalod	ostane_tavalod	shahre_tavalod	telephone1	telephone_hamrah	email	fax	website	code_posti1	code_posti2	code_posti3	address1	address2	address3	shoghl	nahve_ashnai	gorohe_moshtarak	moaref	tozihat	r_t_karte_meli	r_t_ghabze_telephone	r_t_ejare_malekiat	r_t_gharardad	r_t_sayer	name_sherkat	shomare_sabt	tarikhe_sabt	shomare_dakheli	code_eghtesadi	shenase_meli	name_pedare	reshteye_faaliat	l_t_agahie_tasis	l_t_akharin_taghirat	l_t_saheb_kartemeli_emzaye_aval	l_t_saheb_kartemeli_emzaye_dovom	l_t_kartemeli_namayande	l_t_moarefiname_namayande	l_t_ghabze_telephone	l_t_gharardad	l_t_ejarename_malekiat	l_t_sayer	telephone2	telephone3	code_meli	code_eshterak	branch_id	noe_malekiat1	noe_malekiat2	noe_malekiat3	name_malek1	name_malek2	name_malek3	f_name_malek1	f_name_malek2	f_name_malek3	code_meli_malek1	code_meli_malek2	code_meli_malek3	noe_sherkat	code_faragire_haghighi_pezhvak	tarikhe_sabte_sherkat	shenase_hoviati_sherkat	code_namayande_forosh	telephone_hamrahe_sherkat	noe_shenase_hoviati_sherkat	shahre_sokonat	ostane_sokonat	tarikhe_tavalod_namayande	code_pezhvak	meliat_namayande	tel1_ostan	tel2_ostan	tel3_ostan	tel1_shahr	tel2_shahr	tel3_shahr	tel1_street	tel2_street	tel3_street	tel1_street2	tel2_street2	tel3_street2	tel1_housenumber	tel2_housenumber	tel3_housenumber	tel1_tabaghe	tel2_tabaghe	tel3_tabaghe	tel1_vahed	tel2_vahed	tel3_vahed	tarikhe_sabtenam	ipaddress	creatorid	lasteditor	confirmstatus";
+        // $st=str_replace('	', ', ', $st);
+        // echo $st;
+        // Helper::cLog($st);
+        die();
                 ///send sms to 3 days and 1 day expiring users
                 // $ibs=$GLOBALS['ibs_voip']->getUsersAboutToExpire(3,3);
                 // $arrids=[];

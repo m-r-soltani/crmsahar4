@@ -1,6 +1,5 @@
 <?php defined('__ROOT__') or exit('No direct script access allowed');
-
-class Pre_Realsubscribers extends Controller
+class Pre_RealSubscribers extends Controller
 {
     public function __construct()
     {
@@ -8,11 +7,8 @@ class Pre_Realsubscribers extends Controller
     }
 
     public function index()
-    {
-        /*========pre real_subscribers ========*/
-
+    {   
         $this->view->pagename = 'pre_realsubscribers';
-        $this->view->render('pre_realsubscribers', 'dashboard_template', '/public/js/pre_realsubscribers.js', false);
-
+        $this->view->render('pre_realsubscribers', 'blankdashboard', '/public/js/pre_realsubscribers.js', false);
     }
 }

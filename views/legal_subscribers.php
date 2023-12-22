@@ -13,7 +13,7 @@
                             <legend class="text-uppercase font-size-sm font-weight-bold">مشترکین حقوقی</legend>
                             
                             <div class="form-group row">
-                            <legend class="text-uppercase font-size-md font-weight-bold" style="color: #FB8C00">اطلاعات هویتی شرکت ( اجباری )</legend>
+                                <legend class="text-uppercase font-size-md font-weight-bold" style="color: #FB8C00">اطلاعات هویتی شرکت ( اجباری )</legend>
                                 <label class="col-form-label col-md-2" for="branch_id"><span class="text-danger">*</span>نماینده</label>
                                 <div class="col-lg-10">
                                     <select class="form-control form-control-lg custom-select" 

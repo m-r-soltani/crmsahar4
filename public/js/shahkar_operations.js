@@ -1,8 +1,10 @@
 $(document).ready(function() {
+    // $("form").submit(function(e) {
+    //     ajaxFormsWithConfirm(e, $(this));
+    // });
     $("form").submit(function(e) {
         ajaxFormsWithConfirm(e, $(this));
     });
-
     // ajaxRequest('getallservicestatuses', [], window.location.href.split('/').slice(-1)[0], function(result){
     //     console.log(result);
     //     if(check_isset_message(result)){

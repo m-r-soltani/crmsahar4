@@ -2,7 +2,7 @@
 <!DOCTYPE html>
 <html>
 	<head>
-		<title>Page not found</title>
+		<title>صفحه مورد نظر پیدا نشد!</title>
 	</head>
 	<body>
 		<center>
@@ -10,6 +10,7 @@
 		</center>
 	</body>
 	<script>
+		document.body.style.backgroundColor = "#fe5504";
 		// Get our canvas & context
 		var c 	= document.getElementById("error-canvas");
 		var ctx = c.getContext("2d");
@@ -19,7 +20,7 @@
 		// What text should display?
 		var displayText = '404';
 		// What color should the text be?
-		var textColor = '#262626';
+		var textColor = '#333';
 		// What font should the text use?
 		var textStyle = "normal normal bold 200px Arial";
 		// How small should the circles get when away from the center?

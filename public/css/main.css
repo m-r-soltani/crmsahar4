@@ -1,10 +1,56 @@
-@font-face {
-    font-family: 'BYekan' !important;
-    src: url('fonts/BYekan.eot') format('eot'), url('fonts/Byekan.ttf') format('truetype'), url('fonts/BYekan.woff') format('woff');
+/* @font-face {
+    font-family: 'Vazir' !important;
+    src: url('fonts/Vazir/Vazir.eot') format('eot'), url('fonts/Vazir/Vazir.ttf') format('truetype'), url('fonts/Vazir/Vazir.woff') format('woff');
     font-weight: normal;
     font-style: normal;
-}
-
+} */
+/* @font-face {
+    font-family: vazir;
+    font-style: normal;
+    font-weight: 100;
+    src: url("fonts/Vazir/Vazir-Thin.eot");
+    src: url("fonts/Vazir/Vazir-Thin.woff") format("woff"),
+      url("fonts/Vazir/Vazir-Thin.ttf") format("ttf"),
+      url("fonts/Vazir/Vazir-Thin.woff2") format("woff2");
+  } */
+  /* @font-face {
+    font-family: vazir;
+    font-style: normal;
+    font-weight: 300;
+    src: url("fonts/Vazir/Vazir-Light.eot");
+    src: url("fonts/Vazir/Vazir-Light.woff") format("woff"),
+      url("fonts/Vazir/Vazir-Light.ttf") format("ttf"),
+      url("fonts/Vazir/Vazir-Light.woff2") format("woff2");
+  } */
+  
+  @font-face {
+    font-family: vazir;
+    font-style: normal;
+    font-weight: 400;
+    src: url("fonts/Vazir/Vazir-Medium.eot");
+    src: url("fonts/Vazir/Vazir-Medium.woff") format("woff"),
+      url("fonts/Vazir/Vazir-Medium.ttf") format("ttf"),
+      url("fonts/Vazir/Vazir-Medium.woff2") format("woff2");
+  }
+  @font-face {
+    font-family: BYekan;
+    font-style: normal;
+    font-weight: 400;
+    src: url("fonts/BYekan/BYekan.woff") format("woff"),
+      url("fonts/BYekan/BYekan.ttf") format("ttf"),
+  }
+  /* @font-face {
+    font-family: vazir;
+    font-style: normal;
+    font-weight: 950;
+    src: url("fonts/Vazir/Vazir-Black.eot");
+    src: url("fonts/Vazir/Vazir-Black.woff") format("woff"),
+      url("fonts/Vazir/Vazir-Black.ttf") format("ttf"),
+      url("fonts/Vazir/Vazir-Black.woff2") format("woff2");
+  } */
+  * {
+    font-family: vazir;
+    }
 .select2-selection {
     height: 2.50002em;
 }
@@ -39,7 +85,11 @@ input[type="color"]:focus,
 
 
 /* * {
-    font-size: 14px !important;
+    font-family: 'Vazir' !important;
+    src: url('fonts/Vazir/Vazir.eot') format('eot'), url('fonts/Vazir/Vazir.ttf') format('truetype'), url('fonts/Vazir/Vazir.woff') format('woff');
+    font-weight: bold;
+    font-style: normal;
+    font-size: 16px;
 } */
 
 
@@ -180,10 +230,8 @@ input[type="color"]:focus,
 /*@font-face {*/
 
 
-/*    font-family: 'DIGITAL';*/
 
 
-/*    src: url('https://cssdeck.com/uploads/resources/fonts/digii/DS-DIGII.TTF');*/
 
 
 /*}*/

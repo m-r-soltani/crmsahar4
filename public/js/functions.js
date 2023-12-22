@@ -50,14 +50,20 @@ function ajaxForms(e, form, callback = false) {
     });
 }
 
+
+
 function ajaxFormsWithConfirm(e, form, callback = false) {
     e.preventDefault();
     if (confirm('از انجام این کار مطمعن هستید؟')) {
         let formbutton = form.find("button[type=submit]");
         let buttonname = formbutton.prop('name');
         let url = window.location.href.split('/').slice(-1)[0];
-        
-        let data = form.serializeArray();
+        // let aa=form.serialize();
+        let data=form.serialize();
+        // console.log(aa);
+        // let data = form.serializeArray();
+        console.log(data);
+        formbutton.prop("disabled", true);
         
         // var formData = new FormData(form);
         formbutton.prop("disabled", true);
@@ -102,6 +108,58 @@ function ajaxFormsWithConfirm(e, form, callback = false) {
         });
     }
 }
+// function ajaxFormsWithConfirm(e, form, callback = false) {
+//     e.preventDefault();
+//     if (confirm('از انجام این کار مطمعن هستید؟')) {
+//         let formbutton = form.find("button[type=submit]");
+//         let buttonname = formbutton.prop('name');
+//         let url = window.location.href.split('/').slice(-1)[0];
+        
+//         let data = form.serializeArray();
+        
+//         // var formData = new FormData(form);
+//         formbutton.prop("disabled", true);
+//         $.ajax({
+//             type: 'post',
+//             'url': url,
+//             'Content-Type': 'application/json; charset=utf-8',
+//             timeout: 12000,
+//             data: {
+//                 [buttonname]: data,
+//             },
+//             dataType: "json",
+//             success: function(response) {
+//                 formbutton.prop("disabled", false);
+//                 console.log(response);
+//                 if (callback === false) {
+//                     if (check_isset_message(response)) {
+//                         display_Predefiend_Messages(response);
+//                     }
+//                 } else {
+//                     callback(response);
+//                 }
+//             },
+//             error: function(x, e) {
+//                 if (x.status == 0) {
+//                     Custom_Modal_Show('d', `<div class="font-weight-bold">لطفا دسترسی خود را به اینترنت بررسی فرمایید.</div>`);
+//                 } else if (x.status == 404) {
+//                     Custom_Modal_Show('w', `<div class="font-weight-bold">خطایی در برنامه رخ داده مجددا تلاش کنید و یا با پشتیبانی تماس بگیرید</div>`);
+//                 } else if (x.status == 500) {
+//                     Custom_Modal_Show('d', `<div class="font-weight-bold">اررور داخلی سرور.</div>`);
+//                 } else if (e == 'parsererror') {
+//                     Custom_Modal_Show('w', `<div class="font-weight-bold">درخواست ارسال شد اما پاسخی از سرور دریافت نشده.</div>`);
+//                 } else if (e == 'timeout') {
+//                     Custom_Modal_Show('d', `<div class="font-weight-bold">درخواست شما بیش از حد مجاز طول کشید.</div>`);
+//                 } else {
+//                     alert('اررور نامشخص.\n' + x.responseText);
+//                 }
+//             },
+//             complete: function(s) {
+//                 formbutton.prop("disabled", false);
+//             }
+//         });
+//     }
+// }
 
 function ajaxRequest(request, data = [], url = window.location.href.split('/').slice(-1)[0], callback) {
     $.ajax({

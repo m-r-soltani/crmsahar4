@@ -249,6 +249,7 @@ $(document).ready(function () {
             national_code.val(data[0]['code_meli']);
             $('#tarikhe_tavalod').val(data[0]['tarikhe_tavalod']);
             $('#tarikhe_sabt').val(data[0]['tarikhe_sabt']);
+            $('#noe_sherkat').val(data[0]['noe_sherkat']);
             //tabdile miladi be shamsi+tabdile adade englisi be farsi
             $('#id').val(data[0]['id']);
             $('#name_en').val(data[0]['name_en']);
