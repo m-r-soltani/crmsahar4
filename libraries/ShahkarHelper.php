@@ -3,43 +3,24 @@
 // $shahkar = new Shahkar();
 class ShahkarHelper
 {
-//databases
- ///shahkar close & delete
-        // $data=[
-        //         "id"=>"UV4dY2O_ePjDPKLuk86qe8sioTvIp4-5EuwoJScZzsBHVl1nJOObEI2yDs6ZXDzqE7SQjFMAXAyAb2NtSzO5jg",//shahkarid
-        //         "resellerCode"=>"0",
-        //         "serviceNumber"=>"05143342179"
-        // ];
-        // $data=[
-        //     "id"=> "UV4dY2O_ePjDPKLuk86qe8sioTvIp4-5EuwoJScZzsBHVl1nJOObEI2yDs6ZXDzqE7SQjFMAXAyAb2NtSzO5jg",
-        //     "serviceNumber"=> "05143342179",
-        //     "resellerCode"=> "0",
-        //     "close"=> 1
-        // ];
-        // $res=Shahkar_Requests::deleteService($data);
-        // $res=Shahkar_Requests::closeService($data);
-        // $data=ShahkarHelper::EstServiceStatus(['servicetype'=>'adsl', 'telephone'=>'0586225773']);
-        // $res=Shahkar_Requests::estServiceStatus($data);
-        // print_r($res);
-        // Helper::cLog($res);
-        // die();
-        ///shahkar close & delete
-    public static function saveEstSub($res, $subid, $reqname="estAuthsub"){
-        $res=json_decode($res, true);
-        $arr=[];
-        if(isset($res['id'])){
-            $arr['responseid']= $res['id'];
+    //databases
+    public static function saveEstSub($res, $subid, $reqname = "estAuthsub")
+    {
+        $res = json_decode($res, true);
+        $arr = [];
+        if (isset($res['id'])) {
+            $arr['responseid'] = $res['id'];
         }
-        if(isset($res['result'])){
+        if (isset($res['result'])) {
             $arr['result']          = $res['result'];
         }
-        if(isset($res['requestId'])){
+        if (isset($res['requestId'])) {
             $arr['requestid']       = $res['requestId'];
         }
-        if(isset($res['response'])){
+        if (isset($res['response'])) {
             $arr['response']        = $res['response'];
         }
-        if(isset($res['comment'])){
+        if (isset($res['comment'])) {
             $arr['comment']         = $res['comment'];
         }
         $arr['jresponse']       = json_encode($res);
@@ -47,69 +28,81 @@ class ShahkarHelper
         $arr['noe_darkhast']    = 2;
         $arr['request_type']    = 'post';
         $arr['creator']         = $_SESSION['id'];
-        $arr['tarikh']          = Helper::Today_Miladi_Date().' '.Helper::nowTimeTehran(':', false);
-        $arr['datem']           = Helper::Today_Miladi_Date().' '.Helper::nowTimeTehran(':', true, true);
+        $arr['tarikh']          = Helper::Today_Miladi_Date() . ' ' . Helper::nowTimeTehran(':', false);
+        $arr['datem']           = Helper::Today_Miladi_Date() . ' ' . Helper::nowTimeTehran(':', true, true);
         $arr['requestname']     = $reqname;
         $sql                    = Helper::Insert_Generator($arr, 'shahkar_log');
         $result                 = Db::secure_insert_array($sql, $arr);
         return $result;
     }
 
-    public static function savePutService($res, $subid, $factorid, $reqname="putservice"){
-        $res=json_decode($res, true);
-        $arr=[];
-        if(isset($res['id'])){
-            $arr['responseid']= $res['id'];
+    public static function savePutAndUpdateService($res, $subid, $factorid, $emkanat_id, $sertype, $reqname = "putservice")
+    {
+        $res = json_decode($res, true);
+        $arr = [];
+
+        if (isset($res['id'])) {
+            $arr['responseid'] = $res['id'];
         }
-        if(isset($res['result'])){
+        if (isset($res['result'])) {
             $arr['result']    = $res['result'];
         }
-        if(isset($res['requestId'])){
+        if (isset($res['requestId'])) {
             $arr['requestid'] = $res['requestId'];
         }
-        if(isset($res['response'])){
+        if (isset($res['response'])) {
             $arr['response']  = $res['response'];
         }
-        if(isset($res['comment'])){
+        if (isset($res['comment'])) {
             $arr['comment']   = $res['comment'];
         }
-        if(isset($res['classifier'])){
-            $arr['classifier']= $res['classifier'];
+        if (isset($res['classifier'])) {
+            $arr['classifier'] = $res['classifier'];
         }
+        $arr['service_type']    = $sertype;
+        $arr['emkanat_id']      = $emkanat_id;
         $arr['jresponse']       = json_encode($res);
         $arr['subscriber_id']   = $subid;
         $arr['factor_id']       = $factorid;
         $arr['noe_darkhast']    = 1;
         $arr['request_type']    = 'post';
         $arr['creator']         = $_SESSION['id'];
-        $arr['tarikh']          = Helper::Today_Miladi_Date().' '.Helper::nowTimeTehran(':', false);
-        $arr['datem']           = Helper::Today_Miladi_Date().' '.Helper::nowTimeTehran(':', true, true);
+        $arr['tarikh']          = Helper::Today_Miladi_Date() . ' ' . Helper::nowTimeTehran(':', false);
+        $arr['datem']           = Helper::Today_Miladi_Date() . ' ' . Helper::nowTimeTehran(':', true, true);
         $arr['requestname']     = $reqname;
         $sql                    = Helper::Insert_Generator($arr, 'shahkar_log');
         $result                 = Db::secure_insert_array($sql, $arr);
         return $result;
+        // {
+        //     "result":"OK.",
+        //     "requestId":"026220220713171801798700",
+        //     "response":200,
+        //     "comment":"dfgdfgdfgdfg",
+        //     "id":null
+        // }
     }
 
-    public static function saveEstServiceStatus($res,$tel='',string $reqname){
-        $res=json_decode($res, true);
-        $arr=[];
-        if(isset($res['id'])){
-            $arr['responseid']= $res['id'];
+    public static function saveEstServiceStatus($res, $tel = '', string $reqname)
+    {
+        $res = json_decode($res, true);
+        $arr = [];
+        if (isset($res['id'])) {
+            $arr['responseid'] = $res['id'];
         }
-        if(isset($res['result'])){
+        if (isset($res['result'])) {
             $arr['result']    = $res['result'];
         }
-        if(isset($res['requestId'])){
+        if (isset($res['requestId'])) {
             $arr['requestid'] = $res['requestId'];
         }
-        if(isset($res['response'])){
+        if (isset($res['response'])) {
             $arr['response']  = $res['response'];
         }
-        if(isset($res['comment'])){
+        if (isset($res['comment'])) {
             $arr['comment']   = $res['comment'];
         }
-        if(isset($res['classifier'])){
-            $arr['classifier']= $res['classifier'];
+        if (isset($res['classifier'])) {
+            $arr['classifier'] = $res['classifier'];
         }
         $arr['telephone']       = $tel;
         $arr['jresponse']       = json_encode($res);
@@ -118,165 +111,386 @@ class ShahkarHelper
         $arr['noe_darkhast']    = 2;
         $arr['request_type']    = 'post';
         $arr['creator']         = $_SESSION['id'];
-        $arr['tarikh']          = Helper::Today_Miladi_Date().' '.Helper::nowTimeTehran(':', false);
-        $arr['datem']           = Helper::Today_Miladi_Date().' '.Helper::nowTimeTehran(':', true, true);
+        $arr['tarikh']          = Helper::Today_Miladi_Date() . ' ' . Helper::nowTimeTehran(':', false);
+        $arr['datem']           = Helper::Today_Miladi_Date() . ' ' . Helper::nowTimeTehran(':', true, true);
         $arr['requestname']     = $reqname;
         $sql                    = Helper::Insert_Generator($arr, 'shahkar_log');
         $result                 = Db::secure_insert_array($sql, $arr);
         return $result;
     }
-    public static function closeService($shahkarid, $servicenumber, $resellercode="0"){
-        $response=false;
-        $data=[
-            "id"=>$shahkarid,
-            "resellerCode"=>(string)$resellercode,
-            "serviceNumber"=>$servicenumber,
-            "close"=> 1
-        ];
-        $response=Shahkar_Requests::closeService($data);
-        if(! $response) return false;
-        $res=self::saveEstServiceStatus($response, $servicenumber,'closeservice');
-        return $response;
-    }
-    public static function deleteService($shahkarid, $servicenumber, $resellercode="0"){
 
-        $response=false;
-        $data=[
-            "id"=>$shahkarid,
-            "resellerCode"=>(string)$resellercode,
-            "serviceNumber"=>$servicenumber
+    public static function closeService($shahkarid, $servicenumber, $resellercode = "0")
+    {
+        $response = false;
+        $data = [
+            "id" => $shahkarid,
+            "resellerCode" => (string)$resellercode,
+            "serviceNumber" => $servicenumber,
+            "close" => 1
         ];
-        $response=Shahkar_Requests::deleteService($data);
-        if(! $response) return false;
-        $res=self::saveEstServiceStatus($response, $servicenumber,'deleteservice');
+        $response = Shahkar_Requests::closeService($data);
+        if (!$response) return false;
+        $res = self::saveEstServiceStatus($response, $servicenumber, 'closeservice');
         return $response;
     }
 
-    public static function putServices($factorid, $service_type=false){
-        $sql="SELECT fa.id fid, ser.type service_type, ser.noe_forosh, sub.id subid,fa.emkanat_id  FROM bnm_factor fa 
+    public static function deleteService($shahkarid, $servicenumber, $resellercode = "0")
+    {
+
+        $response = false;
+        $data = [
+            "id" => $shahkarid,
+            "resellerCode" => (string)$resellercode,
+            "serviceNumber" => $servicenumber
+        ];
+        $response = Shahkar_Requests::deleteService($data);
+        if (!$response) return false;
+        $res = self::saveEstServiceStatus($response, $servicenumber, 'deleteservice');
+        return $response;
+    }
+    public static function estServiceStatusByFactorID($fid)
+    {
+        $serinfo = Helper::getServiceInfoByFactorid($fid);
+        if (!$serinfo) return 1;
+        $data = ShahkarHelper::EstServiceStatus($serinfo[0]['general_sertype'], $serinfo[0]['ibsusername']);
+        if (!$data) return 2;
+        $res = Shahkar_Requests::estServiceStatus($data);
+        if (!$res) return 3;
+        $res    = json_decode($res, true);
+        $res    = json_encode($res, JSON_UNESCAPED_UNICODE);
+        $id     = ShahkarHelper::saveEstServiceStatus($res,  $serinfo[0]['ibsusername'], 'estservicestatus');
+        $res    = json_decode($res, true);
+        return $id;
+    }
+
+    public static function getClassifierByID($id)
+    {
+        if (!$id) return false;
+        $sql = "SELECT id,classifier FROM shahkar_log WHERE id = ?";
+        $res = Db::secure_fetchall($sql, [$id]);
+        if (!$res) return false;
+        if ($res[0]['classifier']) {
+            return $res[0]['classifier'];
+        } else {
+            return false;
+        }
+    }
+
+    public static function sabteShahkar($fid)
+    {
+        if (!$fid) return false;
+        $sql = "SELECT * FROM bnm_factor WHERE id = ?";
+        $res = Db::secure_fetchall($sql, [$fid]);
+        if (!$res) return false;
+        $check = Helper::checkNormalPreviousFactorExist($res[0]['subscriber_id'], $res[0]['emkanat_id'], $res[0]['type']);
+        if ($check[0]['tedad'] <= 1) {
+            return self::putServices($fid);
+        } else {
+            $shahkarcode = self::getServiceShahkarCodeByDB($res[0]['subscriber_id'], $res[0]['type'], $res[0]['emkanat_id']);
+            if ($shahkarcode) {
+                return self::updateServices($fid, $shahkarcode);
+            } else {
+                $id = self::estServiceStatusByFactorID($fid);
+                if ($id) {
+                    $shahkarcode = self::getClassifierByID($id);
+                }
+                if ($shahkarcode) {
+                    return 111;
+                    return self::updateServices($fid, $shahkarcode);
+                } else {
+                    return self::putServices($fid);
+                }
+            }
+        }
+    }
+
+
+    // {"result":"OK.","requestId":"026220231226204321200200","response":200,"comment":"\u062f\u0631\u062e\u0648\u0627\u0633\u062a \u0628\u0627 \u0645\u0648\u0641\u0642\u06cc\u062a \u062b\u0628\u062a \u0634\u062f","providerName":"\u062f\u0627\u062f\u0647 \u067e\u0631\u062f\u0627\u0632\u06cc \u0641\u0646 \u0622\u0648\u0627"}
+    public static function updateServices($factorid, $shahkarcode)
+    {
+        $sql = "SELECT fa.id fid, ser.type service_type, ser.noe_forosh, sub.id subid,fa.emkanat_id  FROM bnm_factor fa 
         INNER JOIN bnm_services ser ON ser.id = fa.service_id 
         INNER JOIN bnm_subscribers sub ON sub.id = fa.subscriber_id 
         WHERE fa.id = ?";
-        $check=Db::secure_fetchall($sql, [$factorid]);
-        if(! $check){
+        $check = Db::secure_fetchall($sql, [$factorid]);
+        if (!$check) {
             return false;
         }
         switch ($check[0]['service_type']) {
             case 'adsl':
             case 'vdsl':
+                $info = self::adslUserInfo($factorid);
+                if (!$info) {
+                    return false;
+                }
+                if ($check[0]['noe_forosh'] == "bulk") {
+                    $prevfactor = Helper::getNormalPreviousFactor($check[0]['subid'], $check[0]['emkanat_id'], $check[0]['service_type']);
+
+                    if (!$prevfactor) {
+                        return false;
+                    } else {
+                        $info[0]['bandwidth'] = $prevfactor[0]['bandwidth'];
+                    }
+                }
+                $info[0]['shahkarcode'] = $shahkarcode;
+                $data = self::updateDsl($info);
+                if (!$data) {
+                    return false;
+                }
+
+                $res = Shahkar_Requests::updateService($data);
+                if (!$res) {
+                    return false;
+                }
+                $id = self::savePutAndUpdateService($res, $info[0]['subscriber_id'], $factorid, $info[0]['emkanatid'], $info[0]['servicetype'], "updateservice");
+                break;
             case 'bitstream':
-                $info=self::adslUserInfo($factorid);
-                if(! $info){
+                $info = self::bitstreamUserInfo($factorid);
+                if (!$info) {
                     return false;
                 }
-                return $info;
-                
-                if($check[0]['noe_forosh']=="bulk"){
-                    $prevfactor=Helper::getNormalPreviousFactor($check[0]['subid'], $check[0]['emkanat_id'], $check[0]['service_type']);
-                    
-                    if(! $prevfactor){
+                if ($check[0]['noe_forosh'] == "bulk") {
+                    $prevfactor = Helper::getNormalPreviousFactor($check[0]['subid'], $check[0]['emkanat_id'], $check[0]['service_type']);
+
+                    if (!$prevfactor) {
                         return false;
-                    }else{
-                        $info[0]['bandwidth']=$prevfactor[0]['bandwidth'];
+                    } else {
+                        $info[0]['bandwidth'] = $prevfactor[0]['bandwidth'];
                     }
                 }
-                $data=self::putAdsl($info);
-                if(! $data){
+                $info[0]['shahkarcode'] = $shahkarcode;
+                $data = self::updateDsl($info);
+                if (!$data) {
                     return false;
                 }
-                return $data;
-                $res=Shahkar_Requests::putService($data);
-                
-                if(! $res){
+                $res = Shahkar_Requests::updateService($data);
+                if (!$res) {
                     return false;
                 }
-                $id=self::savePutService($res, $info[0]['subscriber_id'], $factorid);
-            break;
+                $id = self::savePutAndUpdateService($res, $info[0]['subscriber_id'], $factorid, $info[0]['emkanatid'], $info[0]['servicetype'], "updateservice");
+                break;
             case 'wireless':
-                $info=self::wirelessUserInfo($factorid);
-                if(! $info){
+                $info = self::wirelessUserInfo($factorid);
+                if (!$info) {
                     return false;
                 }
-                if($check[0]['noe_forosh']=="bulk"){
-                    $prevfactor=Helper::getNormalPreviousFactor($check[0]['subid'], $check[0]['emkanat_id'], $check[0]['service_type']);
-                    if(! $prevfactor){
+                if ($check[0]['noe_forosh'] == "bulk") {
+                    $prevfactor = Helper::getNormalPreviousFactor($check[0]['subid'], $check[0]['emkanat_id'], $check[0]['service_type']);
+                    if (!$prevfactor) {
                         return false;
-                    }else{
-                        $info[0]['bandwidth']=$prevfactor[0]['bandwidth'];
+                    } else {
+                        $info[0]['bandwidth'] = $prevfactor[0]['bandwidth'];
                     }
                 }
-                $data=self::putWireless($info);
-                if(! $data){
+                $info[0]['shahkarcode'] = $shahkarcode;
+                $data = self::updateWireless($info);
+                if (!$data) {
                     return false;
                 }
-                $res=Shahkar_Requests::putService($data);
-                if(! $res){
+                $res = Shahkar_Requests::updateService($data);
+                if (!$res) {
                     return false;
                 }
-                $id=self::savePutService($res, $info[0]['subscriber_id'], $factorid);
-            break;
+                $id = self::savePutAndUpdateService($res, $info[0]['subscriber_id'], $factorid, $info[0]['emkanatid'], $info[0]['servicetype'], "updateservice");
+                break;
             case 'voip':
-                $info=self::voipUserInfo($factorid);
-                if(! $info){
+                $info = self::voipUserInfo($factorid);
+                if (!$info) {
                     return false;
                 }
-                $data=self::putOrgination($info);
-                if(! $data){
+                $info[0]['shahkarcode'] = $shahkarcode;
+                $data = self::updateOrgination($info);
+                if (!$data) {
                     return false;
                 }
-                $res=Shahkar_Requests::putService($data);
-                if(! $res){
+                $res = Shahkar_Requests::updateService($data);
+                if (!$res) {
                     return false;
                 }
-                $id=self::savePutService($res, $info[0]['subscriber_id'], $factorid);
-            break;
+                $id = self::savePutAndUpdateService($res, $info[0]['subscriber_id'], $factorid, $info[0]['emkanatid'], $info[0]['servicetype'], "updateservice");
+                break;
             default:
                 return false;
                 break;
-        }     
-        if($id){
+        }
+        if ($id) {
             return $id;
-        }else{
+        } else {
             return false;
         }
     }
 
-    public static function estAuthSub($subid){
-        $subid=(int) $subid;
-        if($subid){
+    public static function putServices($factorid, $service_type = false)
+    {
+        $sql = "SELECT fa.id fid, ser.type service_type, ser.noe_forosh, sub.id subid,fa.emkanat_id  FROM bnm_factor fa 
+        INNER JOIN bnm_services ser ON ser.id = fa.service_id 
+        INNER JOIN bnm_subscribers sub ON sub.id = fa.subscriber_id 
+        WHERE fa.id = ?";
+        $check = Db::secure_fetchall($sql, [$factorid]);
+        if (!$check) {
+            return false;
+        }
+        switch ($check[0]['service_type']) {
+            case 'adsl':
+            case 'vdsl':
+                $info = self::adslUserInfo($factorid);
+                if (!$info) {
+                    return false;
+                }
+                if ($check[0]['noe_forosh'] == "bulk") {
+                    $prevfactor = Helper::getNormalPreviousFactor($check[0]['subid'], $check[0]['emkanat_id'], $check[0]['service_type']);
+
+                    if (!$prevfactor) {
+                        return false;
+                    } else {
+                        $info[0]['bandwidth'] = $prevfactor[0]['bandwidth'];
+                    }
+                }
+
+                $data = self::putAdsl($info);
+                if (!$data) {
+                    return false;
+                }
+                $res = Shahkar_Requests::putService($data);
+                if (!$res) {
+                    return false;
+                }
+                $id = self::savePutAndUpdateService($res, $info[0]['subscriber_id'], $factorid, $info[0]['emkanatid'], $info[0]['servicetype'], "putservice");
+                break;
+            case 'bitstream':
+                $info = self::bitstreamUserInfo($factorid);
+                if (!$info) {
+                    return false;
+                }
+                if ($check[0]['noe_forosh'] == "bulk") {
+                    $prevfactor = Helper::getNormalPreviousFactor($check[0]['subid'], $check[0]['emkanat_id'], $check[0]['service_type']);
+                    if (!$prevfactor) {
+                        return false;
+                    } else {
+                        $info[0]['bandwidth'] = $prevfactor[0]['bandwidth'];
+                    }
+                }
+                $data = self::putAdsl($info);
+                if (!$data) {
+                    return false;
+                }
+                $res = Shahkar_Requests::putService($data);
+                if (!$res) {
+                    return false;
+                }
+                $id = self::savePutAndUpdateService($res, $info[0]['subscriber_id'], $factorid, $info[0]['emkanatid'], $info[0]['servicetype'], "putservice");
+                break;
+            case 'wireless':
+                $info = self::wirelessUserInfo($factorid);
+                if (!$info) {
+                    return false;
+                }
+                if ($check[0]['noe_forosh'] == "bulk") {
+                    $prevfactor = Helper::getNormalPreviousFactor($check[0]['subid'], $check[0]['emkanat_id'], $check[0]['service_type']);
+                    if (!$prevfactor) {
+                        return false;
+                    } else {
+                        $info[0]['bandwidth'] = $prevfactor[0]['bandwidth'];
+                    }
+                }
+
+                $data = self::putWireless($info);
+                if (!$data) {
+                    return false;
+                }
+                $res = Shahkar_Requests::putService($data);
+                if (!$res) {
+                    return false;
+                }
+                $id = self::savePutAndUpdateService($res, $info[0]['subscriber_id'], $factorid, $info[0]['emkanatid'], $info[0]['servicetype'], "putservice");
+                break;
+            case 'voip':
+                $info = self::voipUserInfo($factorid);
+                if (!$info) {
+                    return false;
+                }
+                $data = self::putOrgination($info);
+                if (!$data) {
+                    return false;
+                }
+                $res = Shahkar_Requests::putService($data);
+                if (!$res) {
+                    return false;
+                }
+                $id = self::savePutAndUpdateService($res, $info[0]['subscriber_id'], $factorid, $info[0]['emkanatid'], $info[0]['servicetype'], "putservice");
+                break;
+            default:
+                return false;
+                break;
+        }
+        if ($id) {
+            return $id;
+        } else {
+            return false;
+        }
+    }
+
+    public static function estAuthSub($subid)
+    {
+        $subid = (int) $subid;
+        if ($subid) {
             $userinfo   = self::getSubInfo($subid);
-            if($userinfo){
-                $nationality= Helper::subIsIrani($subid);
-                if($nationality){
-                    if($userinfo[0]['noe_moshtarak']==='real'){
+            if ($userinfo) {
+                $nationality = Helper::subIsIrani($subid);
+                if ($nationality) {
+                    if ($userinfo[0]['noe_moshtarak'] === 'real') {
                         $data       = self::DataEstAuthenticationIranianReal($userinfo);
-                    }else{
+                    } else {
                         $data       = self::DataEstAuthenticationIranianLegal($userinfo);
                     }
-                }else{
-                    if($userinfo[0]['noe_moshtarak']==='real'){
+                } else {
+                    if ($userinfo[0]['noe_moshtarak'] === 'real') {
                         $data       = self::DataEstAuthenticationForeignReal($userinfo);
-                    }else{
+                    } else {
                         $data       = self::DataEstAuthenticationForeignLegal($userinfo);
                     }
                 }
-                if($data){
-                    $res_shahkar= Shahkar_Requests::estAuthSub($data);
+                if ($data) {
+                    $res_shahkar = Shahkar_Requests::estAuthSub($data);
                     $res_save   = self::saveEstSub($res_shahkar, $subid);
                     return $res_save;
-                }else{
+                } else {
                     return 'aaa';
-                }    
-            }else{
+                }
+            } else {
                 return 'bbb';
             }
-        }else{
+        } else {
             return 'cccc';
         }
     }
 
-    public static function resellerInfo($id){
-        $sql= "SELECT
+    public static function getServiceShahkarCodeByDB($subid, $sertype, $emkanat)
+    {
+        $sql = "SELECT
+                    fa.id fid,
+                    fa.type,
+                    fa.tasvie_shode,
+                    sl.responseid
+                FROM bnm_factor fa
+                INNER JOIN shahkar_log sl ON sl.factor_id = fa.id
+                WHERE 
+                    sl.responseid IS NOT NULL
+                    AND sl.responseid <> ''
+                    AND fa.subscriber_id = ?
+                    AND fa.type = ?
+                    AND fa.emkanat_id = ?
+                    AND sl.response = ?
+                    AND sl.requestname = ?
+                    ORDER BY sl.tarikh DESC";
+        $shahkarcode = Db::secure_fetchall($sql, [$subid, $sertype, $emkanat, 200, 'putservice']);
+        if (!$shahkarcode) return false;
+        return $shahkarcode[0]['responseid'];
+    }
+
+    public static function resellerInfo($id)
+    {
+        $sql = "SELECT
             b.name_sherkat,
             b.id bid,
             b.noe_sherkat,
@@ -325,27 +539,28 @@ class ShahkarHelper
             WHERE
                 b.id = ? AND operator.ismodir = ?
         ";
-        $res= Db::secure_fetchall($sql, [$id, 1]);
-        if($res){
+        $res = Db::secure_fetchall($sql, [$id, 1]);
+        if ($res) {
             return $res;
-        }else{
+        } else {
             return false;
         }
     }
 
-    public static function putReseller($userinfo){
-        if($userinfo[0]['noe_namayandegi']){
+    public static function putReseller($userinfo)
+    {
+        if ($userinfo[0]['noe_namayandegi']) {
             $date = Helper::dateConvertInitialize($userinfo[0]['tarikhe_tavalod'], '-');
             $date = Helper::gregorian_to_jalali($date[0], $date[1], $date[2]);
             $date[0] = (string) $date[0];
-            if(strlen($date[1])<2){
+            if (strlen($date[1]) < 2) {
                 $date[1] = "0" . (string) $date[1];
             }
-            if(strlen($date[2])<2){
+            if (strlen($date[2]) < 2) {
                 $date[2] = "0" . (string) $date[2];
             }
             $date = $date[0] . $date[1] . $date[2];
-            $servicecode=self::service_type('reseller');
+            $servicecode = self::service_type('reseller');
             $data = [
                 "resellerCode" => "0",
                 "name" => $userinfo[0]["name"],
@@ -359,7 +574,7 @@ class ShahkarHelper
                 "birthPlace" => $userinfo[0]["shahr_name"],
                 "mobile" => $userinfo[0]["telephone_hamrah"],
                 "person" => (int) $userinfo[0]['noe_namayandegi'],
-                
+
                 "address" => [
                     // "street2" => $userinfo[0]["address"],
                     "street2" => $userinfo[0]["street2"],
@@ -371,57 +586,57 @@ class ShahkarHelper
                 ],
                 "service" => [
                     "type" => $servicecode,
-                    "resellerCode" =>"0",
+                    "resellerCode" => "0",
                     "province" => (string) $userinfo[0]['ostan_code'],
                     "ipStatic" => 0, //ToDo
                     "ip" => 0, //ToDo
                     "subnet" => 0, //ToDo
                 ],
             ];
-        }else{
+        } else {
             //hoghoghi
             $date = Helper::dateConvertInitialize($userinfo[0]['tarikhe_tavalod'], '-');
             $date = Helper::gregorian_to_jalali($date[0], $date[1], $date[2]);
             $date[0] = (string) $date[0];
-            if(strlen($date[1])<2){
+            if (strlen($date[1]) < 2) {
                 $date[1] = "0" . (string) $date[1];
             }
-            if(strlen($date[2])<2){
+            if (strlen($date[2]) < 2) {
                 $date[2] = "0" . (string) $date[2];
             }
             $date = $date[0] . $date[1] . $date[2];
-            $servicecode=self::service_type('reseller');
+            $servicecode = self::service_type('reseller');
             //////////
             $tarikhe_sabt = Helper::dateConvertInitialize($userinfo[0]['tarikhe_sabt'], '-');
             $tarikhe_sabt = Helper::gregorian_to_jalali($tarikhe_sabt[0], $tarikhe_sabt[1], $tarikhe_sabt[2]);
             $tarikhe_sabt[0] = (string) $tarikhe_sabt[0];
-            if(strlen($tarikhe_sabt[1])<2){
+            if (strlen($tarikhe_sabt[1]) < 2) {
                 $tarikhe_sabt[1] = "0" . (string) $tarikhe_sabt[1];
             }
-            if(strlen($tarikhe_sabt[2])<2){
+            if (strlen($tarikhe_sabt[2]) < 2) {
                 $tarikhe_sabt[2] = "0" . (string) $tarikhe_sabt[2];
             }
             $tarikhe_sabt = $tarikhe_sabt[0] . $tarikhe_sabt[1] . $tarikhe_sabt[2];
-            $servicecode=self::service_type('reseller');
+            $servicecode = self::service_type('reseller');
 
             //put reseller legal
             $data = [
                 "person" => (string)0,
                 "companyName" => $userinfo[0]["name_sherkat"],
                 "iranian" => (string)1,
-                "identificationType" =>(string)5,
-                "registrationDate" =>(string) $userinfo[0]["tarikhe_sabt"],
-                "registrationNo" =>(string) $userinfo[0]["shomare_sabt"],
-                "identificationNo" =>(string) $userinfo[0]["shenase_meli"],
-                "companyType" =>(string) $userinfo[0]["code_noe_sherkat"],
+                "identificationType" => (string)5,
+                "registrationDate" => (string) $userinfo[0]["tarikhe_sabt"],
+                "registrationNo" => (string) $userinfo[0]["shomare_sabt"],
+                "identificationNo" => (string) $userinfo[0]["shenase_meli"],
+                "companyType" => (string) $userinfo[0]["code_noe_sherkat"],
                 "resellerCode" => "0",
                 "agentFirstName" => $userinfo[0]["name"],
                 "agentLastName" => $userinfo[0]["name_khanevadegi"],
                 "agentFatherName" => $userinfo[0]["name_pedar"],
-                "agentCertificateNo" =>(string) $userinfo[0]["shomare_shenasname"],
+                "agentCertificateNo" => (string) $userinfo[0]["shomare_shenasname"],
                 "agentIdentificationType" => (string)0,
                 "agentIdentificationNo" => $userinfo[0]["code_meli"],
-                "agentBirthDate" =>(string) $date,
+                "agentBirthDate" => (string) $date,
                 "agentBirthPlace" => $userinfo[0]["shahr_name"],
                 "agentMobile" => $userinfo[0]["telephone_hamrah"],
                 "agentNationality" => "IRN",
@@ -430,16 +645,16 @@ class ShahkarHelper
                     "street2" => $userinfo[0]["street2"],
                     "address" => $userinfo[0]["address"],
                     "provinceName" => $userinfo[0]["ostan_sokonat_name"],
-                    "houseNumber" =>(string) $userinfo[0]["housenumber"],
+                    "houseNumber" => (string) $userinfo[0]["housenumber"],
                     "postalCode" => (string)$userinfo[0]["code_posti"],
-                    "tel" =>(string) $userinfo[0]["otelephone"],
+                    "tel" => (string) $userinfo[0]["otelephone"],
                 ],
                 "service" => [
-                    "type" =>(string) $servicecode,
+                    "type" => (string) $servicecode,
                     "province" => (string)$userinfo[0]['ostan_code'],
                     "resellerCode" => "0",
                     "ipStatic" => (string) 0, //ToDo
-                    "ip" =>(string) 0, //ToDo
+                    "ip" => (string) 0, //ToDo
                     "subnet" => (string)0, //ToDo
                 ],
             ];
@@ -483,9 +698,9 @@ class ShahkarHelper
 
 
         }
-        if($data){
+        if ($data) {
             return $data;
-        }else{
+        } else {
             return false;
         }
     }
@@ -638,11 +853,146 @@ class ShahkarHelper
         fa.id = ?
         ";
         $res = Db::secure_fetchall($sql, [$factorid]);
-        if($res){
+        if ($res) {
             return $res;
-        }else{
+        } else {
             return false;
         }
+    }
+    public static function bitstreamUserInfo(int $factorid)
+    {
+        $arr = [];
+        $sql = "SELECT
+        sub.id subscriber_id,
+        sub.name,
+        sub.f_name,
+        sub.name_pedar,
+        sub.code_meli,
+        sub.branch_id,
+        sub.email,
+        sub.telephone_hamrah,
+        sub.telephone_hamrahe_sherkat,
+        sub.jensiat,
+        sub.tarikhe_tavalod,
+        sub.shomare_shenasname,
+        sub.shenase_meli,
+        sub.name_sherkat,
+        sub.shomare_sabt,
+        sub.tarikhe_sabt,
+        sub.tel1_street,
+        sub.tel2_street,
+        sub.tel3_street,
+        sub.tel1_street2,
+        sub.tel2_street2,
+        sub.tel3_street2,
+        sub.tel1_housenumber,
+        sub.tel2_housenumber,
+        sub.tel3_housenumber,
+        sub.tel1_tabaghe,
+        sub.tel2_tabaghe,
+        sub.tel3_tabaghe,
+        sub.tel1_vahed,
+        sub.tel2_vahed,
+        sub.tel3_vahed,
+        sub.code_posti1,
+        if(sub.noe_moshtarak='real',1,0) noe_moshtarak,
+        sub.noe_shenase_hoviati,
+        ser.hadeaxar_sorat_daryaft bandwidth,
+        ser.type servicetype,
+        ser.id serviceid,
+        ser.hadeaxar_sorat_daryaft,
+        fa.id fid,
+        fa.emkanat_id emkanatid,
+        fa.tarikhe_shoroe_service start_service,
+        fa.tarikhe_payane_service end_service,
+        ostan.code_ostan_shahkar ostane_tavalod_code,
+        os.name ostane_sokonat_name,
+        os.name_en ostane_sokonat_name_en,
+        os.code_ostan_shahkar ostane_sokonat_code,
+        o1.name tel1_ostan_name,
+        o1.code_ostan_shahkar tel1_ostan_code,
+        o1.name_en tel1_ostan_name_en,
+        s1.name tel1_shahr_name,
+        shahr.name shahre_tavalod_name,
+        country.code meliatcode,
+        ncountry.code namayande_meliatcode,
+        IF( country.code = 'IRN', 1, 0 ) isirani,
+        IF( ncountry.code = 'IRN', 1, 0 ) namayande_isirani,
+        company.code_noe_sherkat companytype,
+        company.noe_sherkat companytypefarsi,
+        CASE
+                WHEN oss.telephone = 1 THEN
+                sub.telephone1
+                WHEN oss.telephone = 2 THEN
+                sub.telephone2
+                WHEN oss.telephone = 3 THEN
+                sub.telephone3
+            END AS telephone,
+        CASE
+                WHEN oss.telephone = 1 THEN
+                sub.noe_malekiat1
+                WHEN oss.telephone = 2 THEN
+                sub.noe_malekiat1
+                WHEN oss.telephone = 3 THEN
+                sub.noe_malekiat1
+            END AS noe_malekiat,
+        CASE
+                WHEN oss.telephone = 1 THEN
+                CONCAT(sub.tel1_street, ' ', sub.tel1_street2, ' پلاک ', sub.tel1_housenumber, ' طبقه ', sub.tel1_tabaghe, ' واحد ',sub.tel1_vahed )
+                WHEN oss.telephone = 2 THEN
+                CONCAT(sub.tel2_street, ' ', sub.tel2_street2, ' پلاک ', sub.tel2_housenumber, ' طبقه ', sub.tel2_tabaghe, ' واحد ',sub.tel2_vahed )
+                WHEN oss.telephone = 3 THEN
+                CONCAT(sub.tel3_street, ' ', sub.tel3_street2, ' پلاک ', sub.tel3_housenumber, ' طبقه ', sub.tel3_tabaghe, ' واحد ',sub.tel3_vahed )
+            END AS address,
+        CASE
+                WHEN oss.telephone = 1 THEN
+                sub.code_posti1
+                WHEN oss.telephone = 2 THEN
+                sub.code_posti2
+                WHEN oss.telephone = 3 THEN
+                sub.code_posti3
+            END AS code_posti,
+        CASE
+                WHEN oss.telephone = 1 THEN
+                sub.name_malek1
+                WHEN oss.telephone = 2 THEN
+                sub.name_malek2
+                WHEN oss.telephone = 3 THEN
+                sub.name_malek3
+            END AS name_malek,
+        CASE
+                WHEN oss.telephone = 1 THEN
+                sub.f_name_malek1
+                WHEN oss.telephone = 2 THEN
+                sub.f_name_malek2
+                WHEN oss.telephone = 3 THEN
+                sub.f_name_malek3
+            END AS f_name_malek
+        FROM
+            bnm_factor fa
+            INNER JOIN bnm_subscribers sub ON sub.id = fa.subscriber_id
+            INNER JOIN bnm_services ser ON ser.id = fa.service_id
+            INNER JOIN bnm_ostan ostan ON ostan.id = sub.ostane_tavalod
+            INNER JOIN bnm_ostan os ON os.id = sub.ostane_sokonat
+            INNER JOIN bnm_ostan o1 ON o1.id = sub.tel1_ostan
+            INNER JOIN bnm_shahr s1 ON s1.id = sub.tel1_shahr
+            INNER JOIN bnm_shahr ss ON ss.id = sub.shahre_sokonat
+            INNER JOIN bnm_shahr shahr ON shahr.id = sub.shahre_tavalod
+            INNER JOIN bnm_countries country ON country.id = sub.meliat
+            INNER JOIN bnm_oss_reserves res ON res.id = fa.emkanat_id
+            INNER JOIN bnm_oss_subscribers oss ON res.oss_id = oss.id
+            LEFT JOIN bnm_countries ncountry ON ncountry.id = sub.meliat_namayande
+            LEFT JOIN bnm_company_types company ON company.id = sub.noe_sherkat
+        WHERE
+        fa.id = ?
+		AND ser.type='bitstream'";
+        $res = Db::secure_fetchall($sql, [$factorid]);
+        if ($res) {
+            return $res;
+        } else {
+            return false;
+        }
+        return $res;
     }
 
     //adsl put data
@@ -650,11 +1000,11 @@ class ShahkarHelper
     {
         //todo ... check ip static and fill parameters
         //service type code
-        if(! $userinfo){
+        if (!$userinfo) {
             return false;
         }
-        $servicecode=self::serviceCode($userinfo[0]['servicetype']);
-        if(! $servicecode){
+        $servicecode = self::serviceCode($userinfo[0]['servicetype']);
+        if (!$servicecode) {
             return false;
         }
         //start service
@@ -689,10 +1039,10 @@ class ShahkarHelper
                 $date = Helper::dateConvertInitialize($userinfo[0]['tarikhe_tavalod'], '-');
                 $date = Helper::gregorian_to_jalali($date[0], $date[1], $date[2]);
                 $date[0] = (string) $date[0];
-                if(strlen($date[1])<2){
+                if (strlen($date[1]) < 2) {
                     $date[1] = "0" . (string) $date[1];
                 }
-                if(strlen($date[2])<2){
+                if (strlen($date[2]) < 2) {
                     $date[2] = "0" . (string) $date[2];
                 }
                 $date = $date[0] . $date[1] . $date[2];
@@ -725,12 +1075,12 @@ class ShahkarHelper
                         "ipStatic" => 0, //ToDo
                         "ip" => "", //ToDo
                         "subnet" => "", //ToDo
-                        
+
                         "ownershipType" => Helper::str_trim($userinfo[0]["noe_malekiat"]),
                         "startDate" => Helper::str_trim($start_service),
                         "endDate" => Helper::str_trim($end_service),
                         "bandwidth" => Helper::str_trim($userinfo[0]["hadeaxar_sorat_daryaft"]),
-                        "province" =>(string) Helper::str_trim($userinfo[0]["tel1_ostan_code"]),
+                        "province" => (string) Helper::str_trim($userinfo[0]["tel1_ostan_code"]),
                         "phoneNumber" => Helper::str_trim($userinfo[0]["telephone"]),
 
                     ],
@@ -750,43 +1100,43 @@ class ShahkarHelper
                 }
                 $tarikhe_sabt_sherkat = $tarikhe_sabt_sherkat[0] . $tarikhe_sabt_sherkat[1] . $tarikhe_sabt_sherkat[2];
                 //check namayande meliat va noeshenasehoviati
-                if($userinfo[0]['namayande_isirani']===1){
+                if ($userinfo[0]['namayande_isirani'] === 1) {
                     //bayad code meli bashad
-                    if($userinfo[0]['noe_shenase_hoviati']===0){
+                    if ($userinfo[0]['noe_shenase_hoviati'] === 0) {
                         //passport miladi sayer shamsi
                         $date = Helper::dateConvertInitialize($userinfo[0]['tarikhe_tavalod'], '-');
                         $date = Helper::gregorian_to_jalali($date[0], $date[1], $date[2]);
                         $date[0] = (string) $date[0];
-                        if(strlen($date[1])<2){
+                        if (strlen($date[1]) < 2) {
                             $date[1] = "0" . (string) $date[1];
                         }
-                        if(strlen($date[2])<2){
+                        if (strlen($date[2]) < 2) {
                             $date[2] = "0" . (string) $date[2];
                         }
                         $date = $date[0] . $date[1] . $date[2];
-                    }else{
+                    } else {
                         return false;
                     }
-                }else{
+                } else {
                     //namayande khareji
-                    if($userinfo[0]['noe_shenase_hoviati']===1){
+                    if ($userinfo[0]['noe_shenase_hoviati'] === 1) {
                         //passport miladi sayer shamsi
-                        $date=explode('-',$userinfo[0]['tarikhe_tavalod']);
-                        if(strlen($date[1])<2){
+                        $date = explode('-', $userinfo[0]['tarikhe_tavalod']);
+                        if (strlen($date[1]) < 2) {
                             $date[1] = "0" . (string) $date[1];
                         }
-                        if(strlen($date[2])<2){
+                        if (strlen($date[2]) < 2) {
                             $date[2] = "0" . (string) $date[2];
                         }
                         $date = $date[0] . $date[1] . $date[2];
-                    }else{
+                    } else {
                         $date = Helper::dateConvertInitialize($userinfo[0]['tarikhe_tavalod'], '-');
                         $date = Helper::gregorian_to_jalali($date[0], $date[1], $date[2]);
                         $date[0] = (string) $date[0];
-                        if(strlen($date[1])<2){
+                        if (strlen($date[1]) < 2) {
                             $date[1] = "0" . (string) $date[1];
                         }
-                        if(strlen($date[2])<2){
+                        if (strlen($date[2]) < 2) {
                             $date[2] = "0" . (string) $date[2];
                         }
                         $date = $date[0] . $date[1] . $date[2];
@@ -832,7 +1182,7 @@ class ShahkarHelper
                         "ownershipType" => Helper::str_trim($userinfo[0]["noe_malekiat"]),
                         "startDate" => Helper::str_trim($start_service),
                         "endDate" => Helper::str_trim($end_service),
-                        "province" =>(string) Helper::str_trim($userinfo[0]["tel1_ostan_code"]),
+                        "province" => (string) Helper::str_trim($userinfo[0]["tel1_ostan_code"]),
                         "phoneNumber" => Helper::str_trim($userinfo[0]["telephone"]),
 
                     ],
@@ -841,24 +1191,24 @@ class ShahkarHelper
         } else {
             if ($userinfo[0]['noe_moshtarak'] === 1) {
                 //haghighi khareji
-                if($userinfo[0]['noe_shenase_hoviati']===1){
+                if ($userinfo[0]['noe_shenase_hoviati'] === 1) {
                     //passport miladi sayer shamsi
-                    $date=explode('-',$userinfo[0]['tarikhe_tavalod']);
-                    if(strlen($date[1])<2){
+                    $date = explode('-', $userinfo[0]['tarikhe_tavalod']);
+                    if (strlen($date[1]) < 2) {
                         $date[1] = "0" . (string) $date[1];
                     }
-                    if(strlen($date[2])<2){
+                    if (strlen($date[2]) < 2) {
                         $date[2] = "0" . (string) $date[2];
                     }
                     $date = $date[0] . $date[1] . $date[2];
-                }else{
+                } else {
                     $date = Helper::dateConvertInitialize($userinfo[0]['tarikhe_tavalod'], '-');
                     $date = Helper::gregorian_to_jalali($date[0], $date[1], $date[2]);
                     $date[0] = (string) $date[0];
-                    if(strlen($date[1])<2){
+                    if (strlen($date[1]) < 2) {
                         $date[1] = "0" . (string) $date[1];
                     }
-                    if(strlen($date[2])<2){
+                    if (strlen($date[2]) < 2) {
                         $date[2] = "0" . (string) $date[2];
                     }
                     $date = $date[0] . $date[1] . $date[2];
@@ -897,73 +1247,73 @@ class ShahkarHelper
                         "ownershipType" => Helper::str_trim($userinfo[0]["noe_malekiat"]),
                         "startDate" => Helper::str_trim($start_service),
                         "endDate" => Helper::str_trim($end_service),
-                        "province" =>(string) Helper::str_trim($userinfo[0]["tel1_ostan_code"]),
+                        "province" => (string) Helper::str_trim($userinfo[0]["tel1_ostan_code"]),
                         "phoneNumber" => Helper::str_trim($userinfo[0]["telephone"]),
 
                     ],
                 ];
-            }else{
+            } else {
                 //hoghoghi khareji
-                if($userinfo[0]['noe_shenase_hoviati']===1){
+                if ($userinfo[0]['noe_shenase_hoviati'] === 1) {
                     //passport miladi sayer shamsi
-                    $date=explode('-',$userinfo[0]['tarikhe_tavalod']);
-                    if(strlen($date[1])<2){
+                    $date = explode('-', $userinfo[0]['tarikhe_tavalod']);
+                    if (strlen($date[1]) < 2) {
                         $date[1] = "0" . (string) $date[1];
                     }
-                    if(strlen($date[2])<2){
+                    if (strlen($date[2]) < 2) {
                         $date[2] = "0" . (string) $date[2];
                     }
                     $date = $date[0] . $date[1] . $date[2];
-                }else{
+                } else {
                     $date = Helper::dateConvertInitialize($userinfo[0]['tarikhe_tavalod'], '-');
                     $date = Helper::gregorian_to_jalali($date[0], $date[1], $date[2]);
                     $date[0] = (string) $date[0];
-                    if(strlen($date[1])<2){
+                    if (strlen($date[1]) < 2) {
                         $date[1] = "0" . (string) $date[1];
                     }
-                    if(strlen($date[2])<2){
+                    if (strlen($date[2]) < 2) {
                         $date[2] = "0" . (string) $date[2];
                     }
                     $date = $date[0] . $date[1] . $date[2];
                 }
 
 
-                if($userinfo[0]['namayande_isirani']===1){
+                if ($userinfo[0]['namayande_isirani'] === 1) {
                     //bayad code meli bashad
-                    if($userinfo[0]['noe_shenase_hoviati']===0){
+                    if ($userinfo[0]['noe_shenase_hoviati'] === 0) {
                         $date = Helper::dateConvertInitialize($userinfo[0]['tarikhe_tavalod'], '-');
                         $date = Helper::gregorian_to_jalali($date[0], $date[1], $date[2]);
                         $date[0] = (string) $date[0];
-                        if(strlen($date[1])<2){
+                        if (strlen($date[1]) < 2) {
                             $date[1] = "0" . (string) $date[1];
                         }
-                        if(strlen($date[2])<2){
+                        if (strlen($date[2]) < 2) {
                             $date[2] = "0" . (string) $date[2];
                         }
                         $date = $date[0] . $date[1] . $date[2];
-                    }else{
+                    } else {
                         return false;
                     }
-                }else{
+                } else {
                     //namayande khareji
-                    if($userinfo[0]['noe_shenase_hoviati']===1){
+                    if ($userinfo[0]['noe_shenase_hoviati'] === 1) {
                         //passport miladi sayer shamsi
-                        $date=explode('-',$userinfo[0]['tarikhe_tavalod']);
-                        if(strlen($date[1])<2){
+                        $date = explode('-', $userinfo[0]['tarikhe_tavalod']);
+                        if (strlen($date[1]) < 2) {
                             $date[1] = "0" . (string) $date[1];
                         }
-                        if(strlen($date[2])<2){
+                        if (strlen($date[2]) < 2) {
                             $date[2] = "0" . (string) $date[2];
                         }
                         $date = $date[0] . $date[1] . $date[2];
-                    }else{
+                    } else {
                         $date = Helper::dateConvertInitialize($userinfo[0]['tarikhe_tavalod'], '-');
                         $date = Helper::gregorian_to_jalali($date[0], $date[1], $date[2]);
                         $date[0] = (string) $date[0];
-                        if(strlen($date[1])<2){
+                        if (strlen($date[1]) < 2) {
                             $date[1] = "0" . (string) $date[1];
                         }
-                        if(strlen($date[2])<2){
+                        if (strlen($date[2]) < 2) {
                             $date[2] = "0" . (string) $date[2];
                         }
                         $date = $date[0] . $date[1] . $date[2];
@@ -1002,7 +1352,7 @@ class ShahkarHelper
                         "ownershipType" => Helper::str_trim($userinfo[0]["noe_malekiat"]),
                         "startDate" => Helper::str_trim($start_service),
                         "endDate" => Helper::str_trim($end_service),
-                        "province" =>(string) Helper::str_trim($userinfo[0]["tel1_ostan_code"]),
+                        "province" => (string) Helper::str_trim($userinfo[0]["tel1_ostan_code"]),
                         "phoneNumber" => Helper::str_trim($userinfo[0]["telephone"]),
 
                     ],
@@ -1011,6 +1361,506 @@ class ShahkarHelper
         }
         return $data;
     }
+
+    //adsl put data
+    public static function updateDsl2($userinfo)
+    {
+        //todo ... check ip static and fill parameters
+        //service type code
+        if (!$userinfo) {
+            return false;
+        }
+        $servicecode = self::serviceCode($userinfo[0]['servicetype']);
+        if (!$servicecode) {
+            return false;
+        }
+        //start service
+        $start_service = Helper::dateConvertInitialize($userinfo[0]["start_service"], '-');
+        $start_service = Helper::gregorian_to_jalali($start_service[0], $start_service[1], $start_service[2]);
+        $start_service[0] = (string) $start_service[0];
+        if ($start_service[1] < 10) {
+            $start_service[1] = "0" . (string) $start_service[1];
+        }
+        if ($start_service[2] < 10) {
+            $start_service[2] = "0" . (string) $start_service[2];
+        }
+        $start_service = $start_service[0] . $start_service[1] . $start_service[2];
+        //end service
+        $end_service = Helper::dateConvertInitialize($userinfo[0]["end_service"], '-');
+        $end_service = Helper::gregorian_to_jalali($end_service[0], $end_service[1], $end_service[2]);
+        $end_service[0] = (string) $end_service[0];
+        if ($end_service[1] < 10) {
+            $end_service[1] = "0" . (string) $end_service[1];
+        }
+        if ($end_service[2] < 10) {
+            $end_service[2] = "0" . (string) $end_service[2];
+        }
+        $end_service = $end_service[0] . $end_service[1] . $end_service[2];
+        /////////////////////////////////////////////////////////////////////////////////////
+        if ($userinfo[0]['isirani'] === 1) {
+            if ($userinfo[0]['noe_moshtarak'] === 1) {
+                //haghighi irani
+                if ($userinfo[0]['noe_shenase_hoviati'] !== 0) {
+                    return false;
+                }
+                $date = Helper::dateConvertInitialize($userinfo[0]['tarikhe_tavalod'], '-');
+                $date = Helper::gregorian_to_jalali($date[0], $date[1], $date[2]);
+                $date[0] = (string) $date[0];
+                if (strlen($date[1]) < 2) {
+                    $date[1] = "0" . (string) $date[1];
+                }
+                if (strlen($date[2]) < 2) {
+                    $date[2] = "0" . (string) $date[2];
+                }
+                $date = $date[0] . $date[1] . $date[2];
+                $data = [
+                    "name" => Helper::str_trim($userinfo[0]["name"]),
+                    "family" => Helper::str_trim($userinfo[0]["f_name"]),
+                    "fatherName" => Helper::str_trim($userinfo[0]["name_pedar"]),
+                    "certificateNo" => Helper::str_trim($userinfo[0]["shomare_shenasname"]),
+                    "iranian" => Helper::str_trim($userinfo[0]["isirani"]),
+                    "identificationType" => Helper::str_trim($userinfo[0]["noe_shenase_hoviati"]),
+                    "birthDate" => Helper::str_trim($date),
+                    "identificationNo" => Helper::str_trim($userinfo[0]["code_meli"]),
+                    "birthPlace" => Helper::str_trim($userinfo[0]["shahre_tavalod_name"]),
+                    "mobile" => Helper::str_trim($userinfo[0]["telephone_hamrah"]),
+                    "email" => Helper::str_trim($userinfo[0]["email"]),
+                    "gender" => Helper::str_trim($userinfo[0]["jensiat"]),
+                    "person" => Helper::str_trim($userinfo[0]['noe_moshtarak']),
+                    "resellerCode" => "0",
+                    "address" => [
+                        "street2" => Helper::str_trim($userinfo[0]["tel1_street2"]),
+                        "address" => Helper::str_trim($userinfo[0]["address"]),
+                        "houseNumber" => Helper::str_trim($userinfo[0]["tel1_vahed"]),
+                        "tel" => Helper::str_trim($userinfo[0]["telephone"]),
+                        "provinceName" => Helper::str_trim($userinfo[0]["tel1_ostan_name"]),
+                        "townshipName" => Helper::str_trim($userinfo[0]["tel1_shahr_name"]),
+                        "postalCode" => Helper::str_trim($userinfo[0]["code_posti"]),
+                    ],
+                    "service" => [
+                        "type" => Helper::str_trim($servicecode),
+                        "ipStatic" => 0, //ToDo
+                        "ip" => "", //ToDo
+                        "subnet" => "", //ToDo
+
+                        "ownershipType" => Helper::str_trim($userinfo[0]["noe_malekiat"]),
+                        "startDate" => Helper::str_trim($start_service),
+                        "endDate" => Helper::str_trim($end_service),
+                        "bandwidth" => Helper::str_trim($userinfo[0]["hadeaxar_sorat_daryaft"]),
+                        "province" => (string) Helper::str_trim($userinfo[0]["tel1_ostan_code"]),
+                        "phoneNumber" => Helper::str_trim($userinfo[0]["telephone"]),
+
+                    ],
+                ];
+            } else {
+                //hoghoghi irani
+
+                ///tarikhe sabt
+                $tarikhe_sabt_sherkat = Helper::dateConvertInitialize($userinfo[0]['tarikhe_sabt'], '-');
+                $tarikhe_sabt_sherkat = Helper::gregorian_to_jalali($tarikhe_sabt_sherkat[0], $tarikhe_sabt_sherkat[1], $tarikhe_sabt_sherkat[2]);
+                $tarikhe_sabt_sherkat[0] = (string) $tarikhe_sabt_sherkat[0];
+                if ($tarikhe_sabt_sherkat[1] < 10) {
+                    $tarikhe_sabt_sherkat[1] = "0" . (string) $tarikhe_sabt_sherkat[1];
+                }
+                if ($tarikhe_sabt_sherkat[2] < 10) {
+                    $tarikhe_sabt_sherkat[2] = "0" . (string) $tarikhe_sabt_sherkat[2];
+                }
+                $tarikhe_sabt_sherkat = $tarikhe_sabt_sherkat[0] . $tarikhe_sabt_sherkat[1] . $tarikhe_sabt_sherkat[2];
+                //check namayande meliat va noeshenasehoviati
+                if ($userinfo[0]['namayande_isirani'] === 1) {
+                    //bayad code meli bashad
+                    if ($userinfo[0]['noe_shenase_hoviati'] === 0) {
+                        //passport miladi sayer shamsi
+                        $date = Helper::dateConvertInitialize($userinfo[0]['tarikhe_tavalod'], '-');
+                        $date = Helper::gregorian_to_jalali($date[0], $date[1], $date[2]);
+                        $date[0] = (string) $date[0];
+                        if (strlen($date[1]) < 2) {
+                            $date[1] = "0" . (string) $date[1];
+                        }
+                        if (strlen($date[2]) < 2) {
+                            $date[2] = "0" . (string) $date[2];
+                        }
+                        $date = $date[0] . $date[1] . $date[2];
+                    } else {
+                        return false;
+                    }
+                } else {
+                    //namayande khareji
+                    if ($userinfo[0]['noe_shenase_hoviati'] === 1) {
+                        //passport miladi sayer shamsi
+                        $date = explode('-', $userinfo[0]['tarikhe_tavalod']);
+                        if (strlen($date[1]) < 2) {
+                            $date[1] = "0" . (string) $date[1];
+                        }
+                        if (strlen($date[2]) < 2) {
+                            $date[2] = "0" . (string) $date[2];
+                        }
+                        $date = $date[0] . $date[1] . $date[2];
+                    } else {
+                        $date = Helper::dateConvertInitialize($userinfo[0]['tarikhe_tavalod'], '-');
+                        $date = Helper::gregorian_to_jalali($date[0], $date[1], $date[2]);
+                        $date[0] = (string) $date[0];
+                        if (strlen($date[1]) < 2) {
+                            $date[1] = "0" . (string) $date[1];
+                        }
+                        if (strlen($date[2]) < 2) {
+                            $date[2] = "0" . (string) $date[2];
+                        }
+                        $date = $date[0] . $date[1] . $date[2];
+                    }
+                }
+                $data = [
+                    "companyName" => Helper::str_trim($userinfo[0]["name_sherkat"]),
+                    "iranian" => Helper::str_trim($userinfo[0]["isirani"]),
+                    "identificationType" => 5,
+                    "registrationDate" => Helper::str_trim($tarikhe_sabt_sherkat),
+                    "identificationNo" => Helper::str_trim($userinfo[0]["shenase_meli"]),
+                    "companyType" => Helper::str_trim($userinfo[0]['companytype']),
+                    "registrationNo" => Helper::str_trim($userinfo[0]['shomare_sabt']),
+                    "agentFirstName" => Helper::str_trim($userinfo[0]["name"]),
+                    "agentLastName" => Helper::str_trim($userinfo[0]["f_name"]),
+                    "agentFatherName" => Helper::str_trim($userinfo[0]["name_pedar"]),
+                    "agentIdentificationType" => Helper::str_trim($userinfo[0]["noe_shenase_hoviati"]),
+                    "agentIdentificationNo" => Helper::str_trim($userinfo[0]["code_meli"]),
+                    "agentNationality" => Helper::str_trim($userinfo[0]["meliatcode"]),
+                    "agentBirthCertificateNo" => Helper::str_trim($userinfo[0]["shomare_shenasname"]),
+                    "agentBirthDate" => Helper::str_trim($date),
+                    "agentbirthPlace" => Helper::str_trim($userinfo[0]["shahre_tavalod"]),
+                    "mobile" => Helper::str_trim($userinfo[0]["telephone_hamrah"]),
+                    "email" => Helper::str_trim($userinfo[0]["email"]),
+                    "gender" => Helper::str_trim($userinfo[0]["jensiat"]),
+                    "person" => Helper::str_trim($userinfo[0]['noe_moshtarak']),
+                    "resellerCode" => "0",
+                    "address" => [
+                        "street2" => Helper::str_trim($userinfo[0]["tel1_street2"]),
+                        "address" => Helper::str_trim($userinfo[0]["address"]),
+                        "houseNumber" => Helper::str_trim($userinfo[0]["tel1_vahed"]),
+                        "tel" => Helper::str_trim($userinfo[0]["telephone"]),
+                        "provinceName" => Helper::str_trim($userinfo[0]["tel1_ostan_name"]),
+                        "townshipName" => Helper::str_trim($userinfo[0]["tel1_shahr_name"]),
+                        "postalCode" => Helper::str_trim($userinfo[0]["code_posti"]),
+                    ],
+                    "service" => [
+                        "type" => Helper::str_trim($servicecode),
+                        "ipStatic" => 0, //ToDo
+                        "ip" => "", //ToDo
+                        "subnet" => "", //ToDo
+                        "bandwidth" => Helper::str_trim($userinfo[0]["hadeaxar_sorat_daryaft"]),
+                        "ownershipType" => Helper::str_trim($userinfo[0]["noe_malekiat"]),
+                        "startDate" => Helper::str_trim($start_service),
+                        "endDate" => Helper::str_trim($end_service),
+                        "province" => (string) Helper::str_trim($userinfo[0]["tel1_ostan_code"]),
+                        "phoneNumber" => Helper::str_trim($userinfo[0]["telephone"]),
+
+                    ],
+                ];
+            }
+        } else {
+            if ($userinfo[0]['noe_moshtarak'] === 1) {
+                //haghighi khareji
+                if ($userinfo[0]['noe_shenase_hoviati'] === 1) {
+                    //passport miladi sayer shamsi
+                    $date = explode('-', $userinfo[0]['tarikhe_tavalod']);
+                    if (strlen($date[1]) < 2) {
+                        $date[1] = "0" . (string) $date[1];
+                    }
+                    if (strlen($date[2]) < 2) {
+                        $date[2] = "0" . (string) $date[2];
+                    }
+                    $date = $date[0] . $date[1] . $date[2];
+                } else {
+                    $date = Helper::dateConvertInitialize($userinfo[0]['tarikhe_tavalod'], '-');
+                    $date = Helper::gregorian_to_jalali($date[0], $date[1], $date[2]);
+                    $date[0] = (string) $date[0];
+                    if (strlen($date[1]) < 2) {
+                        $date[1] = "0" . (string) $date[1];
+                    }
+                    if (strlen($date[2]) < 2) {
+                        $date[2] = "0" . (string) $date[2];
+                    }
+                    $date = $date[0] . $date[1] . $date[2];
+                }
+                $data = [
+                    "name" => Helper::str_trim($userinfo[0]["name"]),
+                    "family" => Helper::str_trim($userinfo[0]["f_name"]),
+                    "fatherName" => Helper::str_trim($userinfo[0]["name_pedar"]),
+                    "certificateNo" => Helper::str_trim($userinfo[0]["shomare_shenasname"]),
+                    "iranian" => Helper::str_trim($userinfo[0]["isirani"]),
+                    "identificationType" => Helper::str_trim($userinfo[0]["noe_shenase_hoviati"]),
+                    "birthDate" => Helper::str_trim($date),
+                    "identificationNo" => Helper::str_trim($userinfo[0]["code_meli"]),
+                    "birthPlace" => Helper::str_trim($userinfo[0]["shahre_tavalod"]),
+                    "mobile" => Helper::str_trim($userinfo[0]["telephone_hamrah"]),
+                    "email" => Helper::str_trim($userinfo[0]["email"]),
+                    "gender" => Helper::str_trim($userinfo[0]["jensiat"]),
+                    "person" => Helper::str_trim($userinfo[0]['noe_moshtarak']),
+                    "resellerCode" => "0",
+                    "address" => [
+                        // "address" => $userinfo[0]["address"],
+                        "street2" => Helper::str_trim($userinfo[0]["tel1_street2"]),
+                        "address" => Helper::str_trim($userinfo[0]["address"]),
+                        "houseNumber" => Helper::str_trim($userinfo[0]["tel1_vahed"]),
+                        "tel" => Helper::str_trim($userinfo[0]["telephone"]),
+                        "provinceName" => Helper::str_trim($userinfo[0]["tel1_ostan_name"]),
+                        "townshipName" => Helper::str_trim($userinfo[0]["tel1_shahr_name"]),
+                        "postalCode" => Helper::str_trim($userinfo[0]["code_posti"]),
+                    ],
+                    "service" => [
+                        "type" => Helper::str_trim($servicecode),
+                        "ipStatic" => 0, //ToDo
+                        "ip" => "", //ToDo
+                        "subnet" => "", //ToDo
+                        "bandwidth" => Helper::str_trim($userinfo[0]["hadeaxar_sorat_daryaft"]),
+                        "ownershipType" => Helper::str_trim($userinfo[0]["noe_malekiat"]),
+                        "startDate" => Helper::str_trim($start_service),
+                        "endDate" => Helper::str_trim($end_service),
+                        "province" => (string) Helper::str_trim($userinfo[0]["tel1_ostan_code"]),
+                        "phoneNumber" => Helper::str_trim($userinfo[0]["telephone"]),
+
+                    ],
+                ];
+            } else {
+                //hoghoghi khareji
+                if ($userinfo[0]['noe_shenase_hoviati'] === 1) {
+                    //passport miladi sayer shamsi
+                    $date = explode('-', $userinfo[0]['tarikhe_tavalod']);
+                    if (strlen($date[1]) < 2) {
+                        $date[1] = "0" . (string) $date[1];
+                    }
+                    if (strlen($date[2]) < 2) {
+                        $date[2] = "0" . (string) $date[2];
+                    }
+                    $date = $date[0] . $date[1] . $date[2];
+                } else {
+                    $date = Helper::dateConvertInitialize($userinfo[0]['tarikhe_tavalod'], '-');
+                    $date = Helper::gregorian_to_jalali($date[0], $date[1], $date[2]);
+                    $date[0] = (string) $date[0];
+                    if (strlen($date[1]) < 2) {
+                        $date[1] = "0" . (string) $date[1];
+                    }
+                    if (strlen($date[2]) < 2) {
+                        $date[2] = "0" . (string) $date[2];
+                    }
+                    $date = $date[0] . $date[1] . $date[2];
+                }
+
+
+                if ($userinfo[0]['namayande_isirani'] === 1) {
+                    //bayad code meli bashad
+                    if ($userinfo[0]['noe_shenase_hoviati'] === 0) {
+                        $date = Helper::dateConvertInitialize($userinfo[0]['tarikhe_tavalod'], '-');
+                        $date = Helper::gregorian_to_jalali($date[0], $date[1], $date[2]);
+                        $date[0] = (string) $date[0];
+                        if (strlen($date[1]) < 2) {
+                            $date[1] = "0" . (string) $date[1];
+                        }
+                        if (strlen($date[2]) < 2) {
+                            $date[2] = "0" . (string) $date[2];
+                        }
+                        $date = $date[0] . $date[1] . $date[2];
+                    } else {
+                        return false;
+                    }
+                } else {
+                    //namayande khareji
+                    if ($userinfo[0]['noe_shenase_hoviati'] === 1) {
+                        //passport miladi sayer shamsi
+                        $date = explode('-', $userinfo[0]['tarikhe_tavalod']);
+                        if (strlen($date[1]) < 2) {
+                            $date[1] = "0" . (string) $date[1];
+                        }
+                        if (strlen($date[2]) < 2) {
+                            $date[2] = "0" . (string) $date[2];
+                        }
+                        $date = $date[0] . $date[1] . $date[2];
+                    } else {
+                        $date = Helper::dateConvertInitialize($userinfo[0]['tarikhe_tavalod'], '-');
+                        $date = Helper::gregorian_to_jalali($date[0], $date[1], $date[2]);
+                        $date[0] = (string) $date[0];
+                        if (strlen($date[1]) < 2) {
+                            $date[1] = "0" . (string) $date[1];
+                        }
+                        if (strlen($date[2]) < 2) {
+                            $date[2] = "0" . (string) $date[2];
+                        }
+                        $date = $date[0] . $date[1] . $date[2];
+                    }
+                }
+                $data = [
+                    "name" => Helper::str_trim($userinfo[0]["name"]),
+                    "family" => Helper::str_trim($userinfo[0]["f_name"]),
+                    "fatherName" => Helper::str_trim($userinfo[0]["name_pedar"]),
+                    "certificateNo" => Helper::str_trim($userinfo[0]["shomare_shenasname"]),
+                    "iranian" => Helper::str_trim($userinfo[0]["isirani"]),
+                    "identificationType" => Helper::str_trim($userinfo[0]["noe_shenase_hoviati"]),
+                    "birthDate" => Helper::str_trim($date),
+                    "identificationNo" => Helper::str_trim($userinfo[0]["code_meli"]),
+                    "birthPlace" => Helper::str_trim($userinfo[0]["shahre_tavalod"]),
+                    "mobile" => Helper::str_trim($userinfo[0]["telephone_hamrah"]),
+                    "email" => Helper::str_trim($userinfo[0]["email"]),
+                    "gender" => Helper::str_trim($userinfo[0]["jensiat"]),
+                    "person" => Helper::str_trim($userinfo[0]['noe_moshtarak']),
+                    "resellerCode" => "0",
+                    "address" => [
+                        "street2" => Helper::str_trim($userinfo[0]["tel1_street2"]),
+                        "address" => Helper::str_trim($userinfo[0]["address"]),
+                        "houseNumber" => Helper::str_trim($userinfo[0]["tel1_vahed"]),
+                        "tel" => Helper::str_trim($userinfo[0]["telephone"]),
+                        "provinceName" => Helper::str_trim($userinfo[0]["tel1_ostan_name"]),
+                        "townshipName" => Helper::str_trim($userinfo[0]["tel1_shahr_name"]),
+                        "postalCode" => Helper::str_trim($userinfo[0]["code_posti"]),
+                    ],
+                    "service" => [
+                        "type" => Helper::str_trim($servicecode),
+                        "ipStatic" => 0, //ToDo
+                        "ip" => "", //ToDo
+                        "subnet" => "", //ToDo
+                        "bandwidth" => Helper::str_trim($userinfo[0]["hadeaxar_sorat_daryaft"]),
+                        "ownershipType" => Helper::str_trim($userinfo[0]["noe_malekiat"]),
+                        "startDate" => Helper::str_trim($start_service),
+                        "endDate" => Helper::str_trim($end_service),
+                        "province" => (string) Helper::str_trim($userinfo[0]["tel1_ostan_code"]),
+                        "phoneNumber" => Helper::str_trim($userinfo[0]["telephone"]),
+
+                    ],
+                ];
+            }
+        }
+        return $data;
+    }
+    //adsl put data
+    public static function updateDsl($userinfo)
+    {
+        //todo ... check ip static and fill parameters
+        //service type code
+        if (!$userinfo) {
+            return false;
+        }
+        $servicecode = self::serviceCode($userinfo[0]['servicetype']);
+        if (!$servicecode) {
+            return false;
+        }
+        //start service
+        $start_service = Helper::dateConvertInitialize($userinfo[0]["start_service"], '-');
+        $start_service = Helper::gregorian_to_jalali($start_service[0], $start_service[1], $start_service[2]);
+        $start_service[0] = (string) $start_service[0];
+        if ($start_service[1] < 10) {
+            $start_service[1] = "0" . (string) $start_service[1];
+        }
+        if ($start_service[2] < 10) {
+            $start_service[2] = "0" . (string) $start_service[2];
+        }
+        $start_service = $start_service[0] . $start_service[1] . $start_service[2];
+        //end service
+        $end_service = Helper::dateConvertInitialize($userinfo[0]["end_service"], '-');
+        $end_service = Helper::gregorian_to_jalali($end_service[0], $end_service[1], $end_service[2]);
+        $end_service[0] = (string) $end_service[0];
+        if ($end_service[1] < 10) {
+            $end_service[1] = "0" . (string) $end_service[1];
+        }
+        if ($end_service[2] < 10) {
+            $end_service[2] = "0" . (string) $end_service[2];
+        }
+        $end_service = $end_service[0] . $end_service[1] . $end_service[2];
+        /////////////////////////////////////////////////////////////////////////////////////
+        $data = [];
+        // $data = [
+        //     "name" => Helper::str_trim($userinfo[0]["name"]),
+        //     "family" => Helper::str_trim($userinfo[0]["f_name"]),
+        //     "fatherName" => Helper::str_trim($userinfo[0]["name_pedar"]),
+        //     "certificateNo" => Helper::str_trim($userinfo[0]["shomare_shenasname"]),
+        //     "iranian" => Helper::str_trim($userinfo[0]["isirani"]),
+        //     "identificationType" => Helper::str_trim($userinfo[0]["noe_shenase_hoviati"]),
+        //     "birthDate" => Helper::str_trim($date),
+        //     "identificationNo" => Helper::str_trim($userinfo[0]["code_meli"]),
+        //     "birthPlace" => Helper::str_trim($userinfo[0]["shahre_tavalod_name"]),
+        //     "mobile" => Helper::str_trim($userinfo[0]["telephone_hamrah"]),
+        //     "email" => Helper::str_trim($userinfo[0]["email"]),
+        //     "gender" => Helper::str_trim($userinfo[0]["jensiat"]),
+        //     "person" => Helper::str_trim($userinfo[0]['noe_moshtarak']),
+        //     "resellerCode" => "0",
+        //     "address" => [
+        //         "street2" => Helper::str_trim($userinfo[0]["tel1_street2"]),
+        //         "address" => Helper::str_trim($userinfo[0]["address"]),
+        //         "houseNumber" => Helper::str_trim($userinfo[0]["tel1_vahed"]),
+        //         "tel" => Helper::str_trim($userinfo[0]["telephone"]),
+        //         "provinceName" => Helper::str_trim($userinfo[0]["tel1_ostan_name"]),
+        //         "townshipName" => Helper::str_trim($userinfo[0]["tel1_shahr_name"]),
+        //         "postalCode" => Helper::str_trim($userinfo[0]["code_posti"]),
+        //     ],
+        //     "service" => [
+        //         "type" => Helper::str_trim($servicecode),
+        //         "ipStatic" => 0, //ToDo
+        //         "ip" => "", //ToDo
+        //         "subnet" => "", //ToDo
+
+        //         "ownershipType" => Helper::str_trim($userinfo[0]["noe_malekiat"]),
+        //         "startDate" => Helper::str_trim($start_service),
+        //         "endDate" => Helper::str_trim($end_service),
+        //         "bandwidth" => Helper::str_trim($userinfo[0]["hadeaxar_sorat_daryaft"]),
+        //         "province" => (string) Helper::str_trim($userinfo[0]["tel1_ostan_code"]),
+        //         "phoneNumber" => Helper::str_trim($userinfo[0]["telephone"]),
+
+        //     ],
+        // ];
+
+        if ($userinfo[0]['noe_moshtarak'] === 1) {
+            if ($userinfo[0]['isirani'] === 1) {
+                //haghighi irani
+                $data["customerUpdate"] = [
+                    "name" => Helper::str_trim($userinfo[0]["name"]),
+                    "family" => Helper::str_trim($userinfo[0]["f_name"]),
+                    "email" => Helper::str_trim($userinfo[0]["email"]),
+                ];
+            } else {
+                //haghighi khareji 
+                $data["customerUpdate"] = [
+                    "name" => Helper::str_trim($userinfo[0]["name"]),
+                    "family" => Helper::str_trim($userinfo[0]["f_name"]),
+                    "email" => Helper::str_trim($userinfo[0]["email"]),
+                ];
+            }
+        } else {
+            if ($userinfo[0]['isirani'] === 1) {
+                //hoghoghi irani
+                $data["customerUpdate"] = [
+                    "mobile" => Helper::str_trim($userinfo[0]["telephone_hamrah"]),
+                    "companyName" => Helper::str_trim($userinfo[0]["name_sherkat"]),
+                    "email" => Helper::str_trim($userinfo[0]["email"]),
+                    "agentFatherName" => Helper::str_trim($userinfo[0]["name_pedar"])
+                ];
+            } else {
+                //hoghoghi khareji
+                $data["customerUpdate"] = [
+                    "mobile" => Helper::str_trim($userinfo[0]["telephone_hamrah"]),
+                    "companyName" => Helper::str_trim($userinfo[0]["name_sherkat"]),
+                    "email" => Helper::str_trim($userinfo[0]["email"]),
+                    "agentFatherName" => Helper::str_trim($userinfo[0]["name_pedar"])
+                ];
+            }
+        }
+        $data["resellerCode"] = "0";
+        $data["id"] = Helper::str_trim($userinfo[0]['shahkarcode']);
+        $data["serviceNumber"] = Helper::str_trim($userinfo[0]["telephone"]);
+        $data["addressUpdate"] = [
+            "postalCode" => Helper::str_trim($userinfo[0]["code_posti"]),
+            "townshipName" => Helper::str_trim($userinfo[0]["tel1_shahr_name"]),
+            "tel" => Helper::str_trim($userinfo[0]["telephone"]),
+        ];
+        $data["serviceUpdate"] = [
+            "bandwidth" => Helper::str_trim($userinfo[0]["hadeaxar_sorat_daryaft"]),
+            "ownershipType" => $userinfo[0]["noe_malekiat"],
+            "startDate" => $start_service,
+            "endDate" => $end_service,
+            "province" => (string) $userinfo[0]["tel1_ostan_code"],
+            "ipStatic" => "0",
+            "ip" => "",
+            "subnet" => "",
+        ];
+
+        return $data;
+    }
+
 
     public static function voipUserInfo(int $factorid)
     {
@@ -1066,7 +1916,7 @@ class ShahkarHelper
             t1ostan.code_ostan_shahkar tel1_ostan_code,
             t1ostan.name_en tel1_ostan_name_en,
             shahr.name shahre_tavalod_name,
-            
+            s1.name tel1_shahr_name,
             country.code meliatcode,
             ncountry.code namayande_meliatcode,
             IF( country.code = 'IRN', 1, 0 ) isirani,
@@ -1131,28 +1981,403 @@ class ShahkarHelper
                 INNER JOIN bnm_ostan t1ostan ON t1ostan.id = sub.tel1_ostan
                 INNER JOIN bnm_shahr ss ON ss.id = sub.shahre_sokonat
                 INNER JOIN bnm_shahr t1shahr ON t1shahr.id = sub.tel1_shahr
+                INNER JOIN bnm_shahr s1 ON s1.id = sub.tel1_shahr
                 INNER JOIN bnm_countries country ON country.id = sub.meliat
                 LEFT JOIN bnm_countries ncountry ON ncountry.id = sub.meliat_namayande
                 LEFT JOIN bnm_company_types company ON company.id = sub.noe_sherkat
             WHERE
             fa.id = ?";
         $res = Db::secure_fetchall($sql, [$factorid]);
-        if($res){
+        if ($res) {
             return $res;
-        }else{
+        } else {
             return false;
         }
     }
 
-    public static function putVoip($userinfo)
+    // public static function putVoip($userinfo)
+    // {
+    //     //todo ... check ip static and fill parameters
+    //     //service type code
+    //     if (!$userinfo) {
+    //         return false;
+    //     }
+    //     $servicecode = self::serviceCode($userinfo[0]['servicetype']);
+    //     if (!$servicecode) {
+    //         return false;
+    //     }
+    //     //start service
+    //     $start_service = Helper::dateConvertInitialize($userinfo[0]["start_service"], '-');
+    //     $start_service = Helper::gregorian_to_jalali($start_service[0], $start_service[1], $start_service[2]);
+    //     $start_service[0] = (string) $start_service[0];
+    //     if ($start_service[1] < 10) {
+    //         $start_service[1] = "0" . (string) $start_service[1];
+    //     }
+    //     if ($start_service[2] < 10) {
+    //         $start_service[2] = "0" . (string) $start_service[2];
+    //     }
+    //     $start_service = $start_service[0] . $start_service[1] . $start_service[2];
+    //     //end service
+    //     $end_service = Helper::dateConvertInitialize($userinfo[0]["end_service"], '-');
+    //     $end_service = Helper::gregorian_to_jalali($end_service[0], $end_service[1], $end_service[2]);
+    //     $end_service[0] = (string) $end_service[0];
+    //     if ($end_service[1] < 10) {
+    //         $end_service[1] = "0" . (string) $end_service[1];
+    //     }
+    //     if ($end_service[2] < 10) {
+    //         $end_service[2] = "0" . (string) $end_service[2];
+    //     }
+    //     $end_service = $end_service[0] . $end_service[1] . $end_service[2];
+    //     /////////////////////////////////////////////////////////////////////////////////////
+    //     if ($userinfo[0]['isirani'] === 1) {
+    //         if ($userinfo[0]['noe_moshtarak'] === 1) {
+    //             //haghighi irani
+    //             if ($userinfo[0]['noe_shenase_hoviati'] !== 0) {
+    //                 return false;
+    //             }
+    //             $date = Helper::dateConvertInitialize($userinfo[0]['tarikhe_tavalod'], '-');
+    //             $date = Helper::gregorian_to_jalali($date[0], $date[1], $date[2]);
+    //             $date[0] = (string) $date[0];
+    //             if (strlen($date[1]) < 2) {
+    //                 $date[1] = "0" . (string) $date[1];
+    //             }
+    //             if (strlen($date[2]) < 2) {
+    //                 $date[2] = "0" . (string) $date[2];
+    //             }
+    //             $date = $date[0] . $date[1] . $date[2];
+    //             $data = [
+    //                 "name" => $userinfo[0]["name"],
+    //                 "family" => $userinfo[0]["f_name"],
+    //                 "fatherName" => $userinfo[0]["name_pedar"],
+    //                 "certificateNo" => $userinfo[0]["shomare_shenasname"],
+    //                 "iranian" => $userinfo[0]["isirani"],
+    //                 "identificationType" => $userinfo[0]["noe_shenase_hoviati"],
+    //                 "birthDate" => $date,
+    //                 "identificationNo" => $userinfo[0]["code_meli"],
+    //                 "birthPlace" => $userinfo[0]["shahre_tavalod_name"],
+    //                 "mobile" => $userinfo[0]["telephone_hamrah"],
+    //                 "email" => $userinfo[0]["email"],
+    //                 "gender" => $userinfo[0]["jensiat"],
+    //                 "person" => $userinfo[0]['noe_moshtarak'],
+    //                 "resellerCode" => "0",
+    //                 "address" => [
+    //                     "street2" => $userinfo[0]["tel1_street2"],
+    //                     "address" => $userinfo[0]["address"],
+    //                     "houseNumber" => $userinfo[0]["tel1_vahed"],
+    //                     "tel" => $userinfo[0]["telephone"],
+    //                     "provinceName" => $userinfo[0]["tel1_ostan_name"],
+    //                     "postalCode" => $userinfo[0]["code_posti"],
+    //                 ],
+    //                 "service" => [
+    //                     "type" => $servicecode,
+    //                     "phoneNumber" => $userinfo[0]["telephone"],
+    //                     "province" => (string) $userinfo[0]["tel1_ostan_code"],
+    //                     "county" => $userinfo[0]["tel1_ostan_name_en"],
+    //                     "ownershipType" => $userinfo[0]["noe_malekiat"],
+    //                     "status" => 1,
+    //                     "credit" => 1,
+    //                     "general" => 0,
+    //                     "provincialCountry" => 0,
+    //                     "ipStatic" => 0, //ToDo
+    //                     "ip" => "", //ToDo
+    //                     "subnet" => "", //ToDo                        
+    //                     "startDate" => $start_service,
+    //                     "endDate" => $end_service,
+    //                 ],
+    //             ];
+    //         } else {
+    //             //hoghoghi irani
+
+    //             ///tarikhe sabt
+    //             $tarikhe_sabt_sherkat = Helper::dateConvertInitialize($userinfo[0]['tarikhe_sabt'], '-');
+    //             $tarikhe_sabt_sherkat = Helper::gregorian_to_jalali($tarikhe_sabt_sherkat[0], $tarikhe_sabt_sherkat[1], $tarikhe_sabt_sherkat[2]);
+    //             $tarikhe_sabt_sherkat[0] = (string) $tarikhe_sabt_sherkat[0];
+    //             if ($tarikhe_sabt_sherkat[1] < 10) {
+    //                 $tarikhe_sabt_sherkat[1] = "0" . (string) $tarikhe_sabt_sherkat[1];
+    //             }
+    //             if ($tarikhe_sabt_sherkat[2] < 10) {
+    //                 $tarikhe_sabt_sherkat[2] = "0" . (string) $tarikhe_sabt_sherkat[2];
+    //             }
+    //             $tarikhe_sabt_sherkat = $tarikhe_sabt_sherkat[0] . $tarikhe_sabt_sherkat[1] . $tarikhe_sabt_sherkat[2];
+    //             //check namayande meliat va noeshenasehoviati
+    //             if ($userinfo[0]['namayande_isirani'] === 1) {
+    //                 //bayad code meli bashad
+    //                 if ($userinfo[0]['noe_shenase_hoviati'] === 0) {
+    //                     //passport miladi sayer shamsi
+    //                     $date = Helper::dateConvertInitialize($userinfo[0]['tarikhe_tavalod'], '-');
+    //                     $date = Helper::gregorian_to_jalali($date[0], $date[1], $date[2]);
+    //                     $date[0] = (string) $date[0];
+    //                     if (strlen($date[1]) < 2) {
+    //                         $date[1] = "0" . (string) $date[1];
+    //                     }
+    //                     if (strlen($date[2]) < 2) {
+    //                         $date[2] = "0" . (string) $date[2];
+    //                     }
+    //                     $date = $date[0] . $date[1] . $date[2];
+    //                 } else {
+    //                     return false;
+    //                 }
+    //             } else {
+    //                 //namayande khareji
+    //                 if ($userinfo[0]['noe_shenase_hoviati'] === 1) {
+    //                     //passport miladi sayer shamsi
+    //                     $date = explode('-', $userinfo[0]['tarikhe_tavalod']);
+    //                     if (strlen($date[1]) < 2) {
+    //                         $date[1] = "0" . (string) $date[1];
+    //                     }
+    //                     if (strlen($date[2]) < 2) {
+    //                         $date[2] = "0" . (string) $date[2];
+    //                     }
+    //                     $date = $date[0] . $date[1] . $date[2];
+    //                 } else {
+    //                     $date = Helper::dateConvertInitialize($userinfo[0]['tarikhe_tavalod'], '-');
+    //                     $date = Helper::gregorian_to_jalali($date[0], $date[1], $date[2]);
+    //                     $date[0] = (string) $date[0];
+    //                     if (strlen($date[1]) < 2) {
+    //                         $date[1] = "0" . (string) $date[1];
+    //                     }
+    //                     if (strlen($date[2]) < 2) {
+    //                         $date[2] = "0" . (string) $date[2];
+    //                     }
+    //                     $date = $date[0] . $date[1] . $date[2];
+    //                 }
+    //             }
+    //             $data = [
+    //                 "companyName" => $userinfo[0]["name_sherkat"],
+    //                 "iranian" => $userinfo[0]["isirani"],
+    //                 "identificationType" => 5,
+    //                 "registrationDate" => $tarikhe_sabt_sherkat,
+    //                 "identificationNo" => $userinfo[0]["shenase_meli"],
+    //                 "companyType" => $userinfo[0]['companytype'],
+    //                 "registrationNo" => $userinfo[0]['shomare_sabt'],
+    //                 "agentFirstName" => $userinfo[0]["name"],
+    //                 "agentLastName" => $userinfo[0]["f_name"],
+    //                 "agentFatherName" => $userinfo[0]["name_pedar"],
+    //                 "agentIdentificationType" => $userinfo[0]["noe_shenase_hoviati"],
+    //                 "agentIdentificationNo" => $userinfo[0]["code_meli"],
+    //                 "agentNationality" => $userinfo[0]["meliatcode"],
+    //                 "agentBirthCertificateNo" => $userinfo[0]["shomare_shenasname"],
+    //                 "agentBirthDate" => $date,
+    //                 "agentbirthPlace" => $userinfo[0]["shahre_tavalod"],
+    //                 "mobile" => $userinfo[0]["telephone_hamrah"],
+    //                 "email" => $userinfo[0]["email"],
+    //                 "gender" => $userinfo[0]["jensiat"],
+    //                 "person" => $userinfo[0]['noe_moshtarak'],
+    //                 "resellerCode" => "0",
+    //                 "address" => [
+    //                     "street2" => $userinfo[0]["tel1_street2"],
+    //                     "address" => $userinfo[0]["address"],
+    //                     "houseNumber" => $userinfo[0]["tel1_vahed"],
+    //                     "tel" => $userinfo[0]["telephone"],
+    //                     "provinceName" => $userinfo[0]["tel1_ostan_name"],
+    //                     "postalCode" => $userinfo[0]["code_posti"],
+    //                 ],
+    //                 "service" => [
+    //                     "type" => $servicecode,
+    //                     "phoneNumber" => $userinfo[0]["telephone"],
+    //                     "province" => (string) $userinfo[0]["tel1_ostan_code"],
+    //                     "county" => $userinfo[0]["tel1_ostan_name_en"],
+    //                     "ownershipType" => $userinfo[0]["noe_malekiat"],
+    //                     "status" => 1,
+    //                     "credit" => 1,
+    //                     "general" => 0,
+    //                     "provincialCountry" => 0,
+    //                     "ipStatic" => 0, //ToDo
+    //                     "ip" => "", //ToDo
+    //                     "subnet" => "", //ToDo                        
+    //                     "startDate" => $start_service,
+    //                     "endDate" => $end_service,
+
+    //                 ],
+    //             ];
+    //         }
+    //     } else {
+    //         if ($userinfo[0]['noe_moshtarak'] === 1) {
+    //             //haghighi khareji
+    //             if ($userinfo[0]['noe_shenase_hoviati'] === 1) {
+    //                 //passport miladi sayer shamsi
+    //                 $date = explode('-', $userinfo[0]['tarikhe_tavalod']);
+    //                 if (strlen($date[1]) < 2) {
+    //                     $date[1] = "0" . (string) $date[1];
+    //                 }
+    //                 if (strlen($date[2]) < 2) {
+    //                     $date[2] = "0" . (string) $date[2];
+    //                 }
+    //                 $date = $date[0] . $date[1] . $date[2];
+    //             } else {
+    //                 $date = Helper::dateConvertInitialize($userinfo[0]['tarikhe_tavalod'], '-');
+    //                 $date = Helper::gregorian_to_jalali($date[0], $date[1], $date[2]);
+    //                 $date[0] = (string) $date[0];
+    //                 if (strlen($date[1]) < 2) {
+    //                     $date[1] = "0" . (string) $date[1];
+    //                 }
+    //                 if (strlen($date[2]) < 2) {
+    //                     $date[2] = "0" . (string) $date[2];
+    //                 }
+    //                 $date = $date[0] . $date[1] . $date[2];
+    //             }
+    //             $data = [
+    //                 "name" => $userinfo[0]["name"],
+    //                 "family" => $userinfo[0]["f_name"],
+    //                 "fatherName" => $userinfo[0]["name_pedar"],
+    //                 "certificateNo" => $userinfo[0]["shomare_shenasname"],
+    //                 "iranian" => $userinfo[0]["isirani"],
+    //                 "identificationType" => $userinfo[0]["noe_shenase_hoviati"],
+    //                 "birthDate" => $date,
+    //                 "identificationNo" => $userinfo[0]["code_meli"],
+    //                 "birthPlace" => $userinfo[0]["shahre_tavalod"],
+    //                 "mobile" => $userinfo[0]["telephone_hamrah"],
+    //                 "email" => $userinfo[0]["email"],
+    //                 "gender" => $userinfo[0]["jensiat"],
+    //                 "person" => $userinfo[0]['noe_moshtarak'],
+    //                 "resellerCode" => "0",
+    //                 "address" => [
+    //                     "street2" => $userinfo[0]["tel1_street2"],
+    //                     "address" => $userinfo[0]["address"],
+    //                     "houseNumber" => $userinfo[0]["tel1_vahed"],
+    //                     "tel" => $userinfo[0]["telephone"],
+    //                     "provinceName" => $userinfo[0]["tel1_ostan_name"],
+    //                     "postalCode" => $userinfo[0]["code_posti"],
+    //                 ],
+    //                 "service" => [
+    //                     "type" => $servicecode,
+    //                     "phoneNumber" => $userinfo[0]["telephone"],
+    //                     "province" => (string) $userinfo[0]["tel1_ostan_code"],
+    //                     "county" => $userinfo[0]["tel1_ostan_name_en"],
+    //                     "ownershipType" => $userinfo[0]["noe_malekiat"],
+    //                     "status" => 1,
+    //                     "credit" => 1,
+    //                     "general" => 0,
+    //                     "provincialCountry" => 0,
+    //                     "ipStatic" => 0, //ToDo
+    //                     "ip" => "", //ToDo
+    //                     "subnet" => "", //ToDo                        
+    //                     "startDate" => $start_service,
+    //                     "endDate" => $end_service,
+
+    //                 ],
+    //             ];
+    //         } else {
+    //             //hoghoghi khareji
+    //             if ($userinfo[0]['noe_shenase_hoviati'] === 1) {
+    //                 //passport miladi sayer shamsi
+    //                 $date = explode('-', $userinfo[0]['tarikhe_tavalod']);
+    //                 if (strlen($date[1]) < 2) {
+    //                     $date[1] = "0" . (string) $date[1];
+    //                 }
+    //                 if (strlen($date[2]) < 2) {
+    //                     $date[2] = "0" . (string) $date[2];
+    //                 }
+    //                 $date = $date[0] . $date[1] . $date[2];
+    //             } else {
+    //                 $date = Helper::dateConvertInitialize($userinfo[0]['tarikhe_tavalod'], '-');
+    //                 $date = Helper::gregorian_to_jalali($date[0], $date[1], $date[2]);
+    //                 $date[0] = (string) $date[0];
+    //                 if (strlen($date[1]) < 2) {
+    //                     $date[1] = "0" . (string) $date[1];
+    //                 }
+    //                 if (strlen($date[2]) < 2) {
+    //                     $date[2] = "0" . (string) $date[2];
+    //                 }
+    //                 $date = $date[0] . $date[1] . $date[2];
+    //             }
+
+
+    //             if ($userinfo[0]['namayande_isirani'] === 1) {
+    //                 //bayad code meli bashad
+    //                 if ($userinfo[0]['noe_shenase_hoviati'] === 0) {
+    //                     $date = Helper::dateConvertInitialize($userinfo[0]['tarikhe_tavalod'], '-');
+    //                     $date = Helper::gregorian_to_jalali($date[0], $date[1], $date[2]);
+    //                     $date[0] = (string) $date[0];
+    //                     if (strlen($date[1]) < 2) {
+    //                         $date[1] = "0" . (string) $date[1];
+    //                     }
+    //                     if (strlen($date[2]) < 2) {
+    //                         $date[2] = "0" . (string) $date[2];
+    //                     }
+    //                     $date = $date[0] . $date[1] . $date[2];
+    //                 } else {
+    //                     return false;
+    //                 }
+    //             } else {
+    //                 //namayande khareji
+    //                 if ($userinfo[0]['noe_shenase_hoviati'] === 1) {
+    //                     //passport miladi sayer shamsi
+    //                     $date = explode('-', $userinfo[0]['tarikhe_tavalod']);
+    //                     if (strlen($date[1]) < 2) {
+    //                         $date[1] = "0" . (string) $date[1];
+    //                     }
+    //                     if (strlen($date[2]) < 2) {
+    //                         $date[2] = "0" . (string) $date[2];
+    //                     }
+    //                     $date = $date[0] . $date[1] . $date[2];
+    //                 } else {
+    //                     $date = Helper::dateConvertInitialize($userinfo[0]['tarikhe_tavalod'], '-');
+    //                     $date = Helper::gregorian_to_jalali($date[0], $date[1], $date[2]);
+    //                     $date[0] = (string) $date[0];
+    //                     if (strlen($date[1]) < 2) {
+    //                         $date[1] = "0" . (string) $date[1];
+    //                     }
+    //                     if (strlen($date[2]) < 2) {
+    //                         $date[2] = "0" . (string) $date[2];
+    //                     }
+    //                     $date = $date[0] . $date[1] . $date[2];
+    //                 }
+    //             }
+    //             $data = [
+    //                 "name" => $userinfo[0]["name"],
+    //                 "family" => $userinfo[0]["f_name"],
+    //                 "fatherName" => $userinfo[0]["name_pedar"],
+    //                 "certificateNo" => $userinfo[0]["shomare_shenasname"],
+    //                 "iranian" => $userinfo[0]["isirani"],
+    //                 "identificationType" => $userinfo[0]["noe_shenase_hoviati"],
+    //                 "birthDate" => $date,
+    //                 "identificationNo" => $userinfo[0]["code_meli"],
+    //                 "birthPlace" => $userinfo[0]["shahre_tavalod"],
+    //                 "mobile" => $userinfo[0]["telephone_hamrah"],
+    //                 "email" => $userinfo[0]["email"],
+    //                 "gender" => $userinfo[0]["jensiat"],
+    //                 "person" => $userinfo[0]['noe_moshtarak'],
+    //                 "resellerCode" => "0",
+    //                 "address" => [
+    //                     "street2" => $userinfo[0]["tel1_street2"],
+    //                     "address" => $userinfo[0]["address"],
+    //                     "houseNumber" => $userinfo[0]["tel1_vahed"],
+    //                     "tel" => $userinfo[0]["telephone"],
+    //                     "provinceName" => $userinfo[0]["tel1_ostan_name"],
+    //                     "postalCode" => $userinfo[0]["code_posti"],
+    //                 ],
+    //                 "service" => [
+    //                     "type" => $servicecode,
+    //                     "phoneNumber" => $userinfo[0]["telephone"],
+    //                     "province" => (string) $userinfo[0]["tel1_ostan_code"],
+    //                     "county" => $userinfo[0]["tel1_ostan_name_en"],
+    //                     "ownershipType" => $userinfo[0]["noe_malekiat"],
+    //                     "status" => 1,
+    //                     "credit" => 1,
+    //                     "general" => 0,
+    //                     "provincialCountry" => 0,
+    //                     "ipStatic" => 0, //ToDo
+    //                     "ip" => "", //ToDo
+    //                     "subnet" => "", //ToDo                        
+    //                     "startDate" => $start_service,
+    //                     "endDate" => $end_service,
+    //                 ],
+    //             ];
+    //         }
+    //     }
+    //     return $data;
+    // }
+
+    public static function putOrgination($userinfo)
     {
         //todo ... check ip static and fill parameters
         //service type code
-        if(! $userinfo){
+        if (!$userinfo) {
             return false;
         }
-        $servicecode=self::serviceCode($userinfo[0]['servicetype']);
-        if(! $servicecode){
+        $servicecode = self::serviceCode($userinfo[0]['servicetype']);
+        if (!$servicecode) {
             return false;
         }
         //start service
@@ -1187,10 +2412,10 @@ class ShahkarHelper
                 $date = Helper::dateConvertInitialize($userinfo[0]['tarikhe_tavalod'], '-');
                 $date = Helper::gregorian_to_jalali($date[0], $date[1], $date[2]);
                 $date[0] = (string) $date[0];
-                if(strlen($date[1])<2){
+                if (strlen($date[1]) < 2) {
                     $date[1] = "0" . (string) $date[1];
                 }
-                if(strlen($date[2])<2){
+                if (strlen($date[2]) < 2) {
                     $date[2] = "0" . (string) $date[2];
                 }
                 $date = $date[0] . $date[1] . $date[2];
@@ -1216,21 +2441,23 @@ class ShahkarHelper
                         "tel" => $userinfo[0]["telephone"],
                         "provinceName" => $userinfo[0]["tel1_ostan_name"],
                         "postalCode" => $userinfo[0]["code_posti"],
+                        "townshipName" => Helper::str_trim($userinfo[0]["tel1_shahr_name"]),
                     ],
                     "service" => [
                         "type" => $servicecode,
-                        "phoneNumber" => $userinfo[0]["telephone"],
-                        "province" =>(string) $userinfo[0]["tel1_ostan_code"],
-                        "county" => $userinfo[0]["tel1_ostan_name_en"],
-                        "ownershipType" => $userinfo[0]["noe_malekiat"],
-                        "status" => 1,
-                        "credit" => 1,
-                        "general" => 0,
-                        "provincialCountry" => 0,
-                        "ipStatic" => 0, //ToDo
-                        "ip" => "", //ToDo
-                        "subnet" => "", //ToDo                        
-                        "startDate" => $start_service,
+                        "cardSerial" => $userinfo[0]['fid'],
+                        // "phoneNumber" => $userinfo[0]["telephone"],
+                        // "province" =>(string) $userinfo[0]["tel1_ostan_code"],
+                        // "county" => $userinfo[0]["tel1_ostan_name_en"],
+                        // "ownershipType" => $userinfo[0]["noe_malekiat"],
+                        // "status" => 1,
+                        // "credit" => 1,
+                        // "general" => 0,
+                        // "provincialCountry" => 0,
+                        // "ipStatic" => 0, //ToDo
+                        // "ip" => "", //ToDo
+                        // "subnet" => "", //ToDo                        
+                        // "startDate" => $start_service,
                         "endDate" => $end_service,
                     ],
                 ];
@@ -1249,43 +2476,43 @@ class ShahkarHelper
                 }
                 $tarikhe_sabt_sherkat = $tarikhe_sabt_sherkat[0] . $tarikhe_sabt_sherkat[1] . $tarikhe_sabt_sherkat[2];
                 //check namayande meliat va noeshenasehoviati
-                if($userinfo[0]['namayande_isirani']===1){
+                if ($userinfo[0]['namayande_isirani'] === 1) {
                     //bayad code meli bashad
-                    if($userinfo[0]['noe_shenase_hoviati']===0){
+                    if ($userinfo[0]['noe_shenase_hoviati'] === 0) {
                         //passport miladi sayer shamsi
                         $date = Helper::dateConvertInitialize($userinfo[0]['tarikhe_tavalod'], '-');
                         $date = Helper::gregorian_to_jalali($date[0], $date[1], $date[2]);
                         $date[0] = (string) $date[0];
-                        if(strlen($date[1])<2){
+                        if (strlen($date[1]) < 2) {
                             $date[1] = "0" . (string) $date[1];
                         }
-                        if(strlen($date[2])<2){
+                        if (strlen($date[2]) < 2) {
                             $date[2] = "0" . (string) $date[2];
                         }
                         $date = $date[0] . $date[1] . $date[2];
-                    }else{
+                    } else {
                         return false;
                     }
-                }else{
+                } else {
                     //namayande khareji
-                    if($userinfo[0]['noe_shenase_hoviati']===1){
+                    if ($userinfo[0]['noe_shenase_hoviati'] === 1) {
                         //passport miladi sayer shamsi
-                        $date=explode('-',$userinfo[0]['tarikhe_tavalod']);
-                        if(strlen($date[1])<2){
+                        $date = explode('-', $userinfo[0]['tarikhe_tavalod']);
+                        if (strlen($date[1]) < 2) {
                             $date[1] = "0" . (string) $date[1];
                         }
-                        if(strlen($date[2])<2){
+                        if (strlen($date[2]) < 2) {
                             $date[2] = "0" . (string) $date[2];
                         }
                         $date = $date[0] . $date[1] . $date[2];
-                    }else{
+                    } else {
                         $date = Helper::dateConvertInitialize($userinfo[0]['tarikhe_tavalod'], '-');
                         $date = Helper::gregorian_to_jalali($date[0], $date[1], $date[2]);
                         $date[0] = (string) $date[0];
-                        if(strlen($date[1])<2){
+                        if (strlen($date[1]) < 2) {
                             $date[1] = "0" . (string) $date[1];
                         }
-                        if(strlen($date[2])<2){
+                        if (strlen($date[2]) < 2) {
                             $date[2] = "0" . (string) $date[2];
                         }
                         $date = $date[0] . $date[1] . $date[2];
@@ -1313,28 +2540,30 @@ class ShahkarHelper
                     "gender" => $userinfo[0]["jensiat"],
                     "person" => $userinfo[0]['noe_moshtarak'],
                     "resellerCode" => "0",
-                    "address" => [                        
+                    "address" => [
                         "street2" => $userinfo[0]["tel1_street2"],
                         "address" => $userinfo[0]["address"],
                         "houseNumber" => $userinfo[0]["tel1_vahed"],
                         "tel" => $userinfo[0]["telephone"],
                         "provinceName" => $userinfo[0]["tel1_ostan_name"],
                         "postalCode" => $userinfo[0]["code_posti"],
+                        "townshipName" => Helper::str_trim($userinfo[0]["tel1_shahr_name"]),
                     ],
                     "service" => [
                         "type" => $servicecode,
-                        "phoneNumber" => $userinfo[0]["telephone"],
-                        "province" =>(string) $userinfo[0]["tel1_ostan_code"],
-                        "county" => $userinfo[0]["tel1_ostan_name_en"],
-                        "ownershipType" => $userinfo[0]["noe_malekiat"],
-                        "status" => 1,
-                        "credit" => 1,
-                        "general" => 0,
-                        "provincialCountry" => 0,
-                        "ipStatic" => 0, //ToDo
-                        "ip" => "", //ToDo
-                        "subnet" => "", //ToDo                        
-                        "startDate" => $start_service,
+                        "cardSerial" => $userinfo[0]['fid'],
+                        // "phoneNumber" => $userinfo[0]["telephone"],
+                        // "province" =>(string) $userinfo[0]["tel1_ostan_code"],
+                        // "county" => $userinfo[0]["tel1_ostan_name_en"],
+                        // "ownershipType" => $userinfo[0]["noe_malekiat"],
+                        // "status" => 1,
+                        // "credit" => 1,
+                        // "general" => 0,
+                        // "provincialCountry" => 0,
+                        // "ipStatic" => 0, //ToDo
+                        // "ip" => "", //ToDo
+                        // "subnet" => "", //ToDo                        
+                        // "startDate" => $start_service,
                         "endDate" => $end_service,
 
                     ],
@@ -1343,24 +2572,24 @@ class ShahkarHelper
         } else {
             if ($userinfo[0]['noe_moshtarak'] === 1) {
                 //haghighi khareji
-                if($userinfo[0]['noe_shenase_hoviati']===1){
+                if ($userinfo[0]['noe_shenase_hoviati'] === 1) {
                     //passport miladi sayer shamsi
-                    $date=explode('-',$userinfo[0]['tarikhe_tavalod']);
-                    if(strlen($date[1])<2){
+                    $date = explode('-', $userinfo[0]['tarikhe_tavalod']);
+                    if (strlen($date[1]) < 2) {
                         $date[1] = "0" . (string) $date[1];
                     }
-                    if(strlen($date[2])<2){
+                    if (strlen($date[2]) < 2) {
                         $date[2] = "0" . (string) $date[2];
                     }
                     $date = $date[0] . $date[1] . $date[2];
-                }else{
+                } else {
                     $date = Helper::dateConvertInitialize($userinfo[0]['tarikhe_tavalod'], '-');
                     $date = Helper::gregorian_to_jalali($date[0], $date[1], $date[2]);
                     $date[0] = (string) $date[0];
-                    if(strlen($date[1])<2){
+                    if (strlen($date[1]) < 2) {
                         $date[1] = "0" . (string) $date[1];
                     }
-                    if(strlen($date[2])<2){
+                    if (strlen($date[2]) < 2) {
                         $date[2] = "0" . (string) $date[2];
                     }
                     $date = $date[0] . $date[1] . $date[2];
@@ -1380,94 +2609,96 @@ class ShahkarHelper
                     "gender" => $userinfo[0]["jensiat"],
                     "person" => $userinfo[0]['noe_moshtarak'],
                     "resellerCode" => "0",
-                    "address" => [                        
+                    "address" => [
                         "street2" => $userinfo[0]["tel1_street2"],
                         "address" => $userinfo[0]["address"],
                         "houseNumber" => $userinfo[0]["tel1_vahed"],
                         "tel" => $userinfo[0]["telephone"],
                         "provinceName" => $userinfo[0]["tel1_ostan_name"],
                         "postalCode" => $userinfo[0]["code_posti"],
+                        "townshipName" => Helper::str_trim($userinfo[0]["tel1_shahr_name"]),
                     ],
                     "service" => [
                         "type" => $servicecode,
-                        "phoneNumber" => $userinfo[0]["telephone"],
-                        "province" =>(string) $userinfo[0]["tel1_ostan_code"],
-                        "county" => $userinfo[0]["tel1_ostan_name_en"],
-                        "ownershipType" => $userinfo[0]["noe_malekiat"],
-                        "status" => 1,
-                        "credit" => 1,
-                        "general" => 0,
-                        "provincialCountry" => 0,
-                        "ipStatic" => 0, //ToDo
-                        "ip" => "", //ToDo
-                        "subnet" => "", //ToDo                        
-                        "startDate" => $start_service,
+                        "cardSerial" => $userinfo[0]['fid'],
+                        // "phoneNumber" => $userinfo[0]["telephone"],
+                        // "province" =>(string) $userinfo[0]["tel1_ostan_code"],
+                        // "county" => $userinfo[0]["tel1_ostan_name_en"],
+                        // "ownershipType" => $userinfo[0]["noe_malekiat"],
+                        // "status" => 1,
+                        // "credit" => 1,
+                        // "general" => 0,
+                        // "provincialCountry" => 0,
+                        // "ipStatic" => 0, //ToDo
+                        // "ip" => "", //ToDo
+                        // "subnet" => "", //ToDo                        
+                        // "startDate" => $start_service,
                         "endDate" => $end_service,
 
                     ],
                 ];
-            }else{
+            } else {
                 //hoghoghi khareji
-                if($userinfo[0]['noe_shenase_hoviati']===1){
+                if ($userinfo[0]['noe_shenase_hoviati'] === 1) {
                     //passport miladi sayer shamsi
-                    $date=explode('-',$userinfo[0]['tarikhe_tavalod']);
-                    if(strlen($date[1])<2){
+                    $date = explode('-', $userinfo[0]['tarikhe_tavalod']);
+                    if (strlen($date[1]) < 2) {
                         $date[1] = "0" . (string) $date[1];
                     }
-                    if(strlen($date[2])<2){
+                    if (strlen($date[2]) < 2) {
                         $date[2] = "0" . (string) $date[2];
                     }
                     $date = $date[0] . $date[1] . $date[2];
-                }else{
+                } else {
                     $date = Helper::dateConvertInitialize($userinfo[0]['tarikhe_tavalod'], '-');
                     $date = Helper::gregorian_to_jalali($date[0], $date[1], $date[2]);
                     $date[0] = (string) $date[0];
-                    if(strlen($date[1])<2){
+                    if (strlen($date[1]) < 2) {
                         $date[1] = "0" . (string) $date[1];
                     }
-                    if(strlen($date[2])<2){
+                    if (strlen($date[2]) < 2) {
                         $date[2] = "0" . (string) $date[2];
                     }
                     $date = $date[0] . $date[1] . $date[2];
                 }
 
 
-                if($userinfo[0]['namayande_isirani']===1){
+                if ($userinfo[0]['namayande_isirani'] === 1) {
                     //bayad code meli bashad
-                    if($userinfo[0]['noe_shenase_hoviati']===0){
+                    if ($userinfo[0]['noe_shenase_hoviati'] === 0) {
                         $date = Helper::dateConvertInitialize($userinfo[0]['tarikhe_tavalod'], '-');
                         $date = Helper::gregorian_to_jalali($date[0], $date[1], $date[2]);
                         $date[0] = (string) $date[0];
-                        if(strlen($date[1])<2){
+                        if (strlen($date[1]) < 2) {
                             $date[1] = "0" . (string) $date[1];
                         }
-                        if(strlen($date[2])<2){
+                        if (strlen($date[2]) < 2) {
                             $date[2] = "0" . (string) $date[2];
                         }
                         $date = $date[0] . $date[1] . $date[2];
-                    }else{
+                    } else {
                         return false;
                     }
-                }else{
+                } else {
                     //namayande khareji
-                    if($userinfo[0]['noe_shenase_hoviati']===1){
+                    if ($userinfo[0]['noe_shenase_hoviati'] === 1) {
                         //passport miladi sayer shamsi
-                        $date=explode('-',$userinfo[0]['tarikhe_tavalod']);
-                        if(strlen($date[1])<2){
+                        $date = explode('-', $userinfo[0]['tarikhe_tavalod']);
+                        if (strlen($date[1]) < 2) {
                             $date[1] = "0" . (string) $date[1];
                         }
-                        if(strlen($date[2])<2){
+                        if (strlen($date[2]) < 2) {
                             $date[2] = "0" . (string) $date[2];
                         }
                         $date = $date[0] . $date[1] . $date[2];
-                    }else{
+                    } else {
                         $date = Helper::dateConvertInitialize($userinfo[0]['tarikhe_tavalod'], '-');
                         $date = Helper::gregorian_to_jalali($date[0], $date[1], $date[2]);
                         $date[0] = (string) $date[0];
-                        if(strlen($date[1])<2){
+                        if (strlen($date[1]) < 2) {
                             $date[1] = "0" . (string) $date[1];
                         }
-                        if(strlen($date[2])<2){
+                        if (strlen($date[2]) < 2) {
                             $date[2] = "0" . (string) $date[2];
                         }
                         $date = $date[0] . $date[1] . $date[2];
@@ -1488,28 +2719,30 @@ class ShahkarHelper
                     "gender" => $userinfo[0]["jensiat"],
                     "person" => $userinfo[0]['noe_moshtarak'],
                     "resellerCode" => "0",
-                    "address" => [                        
+                    "address" => [
                         "street2" => $userinfo[0]["tel1_street2"],
                         "address" => $userinfo[0]["address"],
                         "houseNumber" => $userinfo[0]["tel1_vahed"],
                         "tel" => $userinfo[0]["telephone"],
                         "provinceName" => $userinfo[0]["tel1_ostan_name"],
                         "postalCode" => $userinfo[0]["code_posti"],
+                        "townshipName" => Helper::str_trim($userinfo[0]["tel1_shahr_name"]),
                     ],
                     "service" => [
                         "type" => $servicecode,
-                        "phoneNumber" => $userinfo[0]["telephone"],
-                        "province" =>(string) $userinfo[0]["tel1_ostan_code"],
-                        "county" => $userinfo[0]["tel1_ostan_name_en"],
-                        "ownershipType" => $userinfo[0]["noe_malekiat"],
-                        "status" => 1,
-                        "credit" => 1,
-                        "general" => 0,
-                        "provincialCountry" => 0,
-                        "ipStatic" => 0, //ToDo
-                        "ip" => "", //ToDo
-                        "subnet" => "", //ToDo                        
-                        "startDate" => $start_service,
+                        "cardSerial" => $userinfo[0]['fid'],
+                        // "phoneNumber" => $userinfo[0]["telephone"],
+                        // "province" =>(string) $userinfo[0]["tel1_ostan_code"],
+                        // "county" => $userinfo[0]["tel1_ostan_name_en"],
+                        // "ownershipType" => $userinfo[0]["noe_malekiat"],
+                        // "status" => 1,
+                        // "credit" => 1,
+                        // "general" => 0,
+                        // "provincialCountry" => 0,
+                        // "ipStatic" => 0, //ToDo
+                        // "ip" => "", //ToDo
+                        // "subnet" => "", //ToDo                        
+                        // "startDate" => $start_service,
                         "endDate" => $end_service,
                     ],
                 ];
@@ -1518,15 +2751,15 @@ class ShahkarHelper
         return $data;
     }
 
-    public static function putOrgination($userinfo)
+    public static function updateOrgination($userinfo)
     {
         //todo ... check ip static and fill parameters
         //service type code
-        if(! $userinfo){
+        if (!$userinfo) {
             return false;
         }
-        $servicecode=self::serviceCode($userinfo[0]['servicetype']);
-        if(! $servicecode){
+        $servicecode = self::serviceCode($userinfo[0]['servicetype']);
+        if (!$servicecode) {
             return false;
         }
         //start service
@@ -1552,451 +2785,166 @@ class ShahkarHelper
         }
         $end_service = $end_service[0] . $end_service[1] . $end_service[2];
         /////////////////////////////////////////////////////////////////////////////////////
-        if ($userinfo[0]['isirani'] === 1) {
-            if ($userinfo[0]['noe_moshtarak'] === 1) {
+        if ($userinfo[0]['noe_moshtarak'] === 1) {
+            if ($userinfo[0]['isirani'] === 1) {
                 //haghighi irani
-                if ($userinfo[0]['noe_shenase_hoviati'] !== 0) {
-                    return false;
-                }
-                $date = Helper::dateConvertInitialize($userinfo[0]['tarikhe_tavalod'], '-');
-                $date = Helper::gregorian_to_jalali($date[0], $date[1], $date[2]);
-                $date[0] = (string) $date[0];
-                if(strlen($date[1])<2){
-                    $date[1] = "0" . (string) $date[1];
-                }
-                if(strlen($date[2])<2){
-                    $date[2] = "0" . (string) $date[2];
-                }
-                $date = $date[0] . $date[1] . $date[2];
-                $data = [
-                    "name" => $userinfo[0]["name"],
-                    "family" => $userinfo[0]["f_name"],
-                    "fatherName" => $userinfo[0]["name_pedar"],
-                    "certificateNo" => $userinfo[0]["shomare_shenasname"],
-                    "iranian" => $userinfo[0]["isirani"],
-                    "identificationType" => $userinfo[0]["noe_shenase_hoviati"],
-                    "birthDate" => $date,
-                    "identificationNo" => $userinfo[0]["code_meli"],
-                    "birthPlace" => $userinfo[0]["shahre_tavalod_name"],
-                    "mobile" => $userinfo[0]["telephone_hamrah"],
-                    "email" => $userinfo[0]["email"],
-                    "gender" => $userinfo[0]["jensiat"],
-                    "person" => $userinfo[0]['noe_moshtarak'],
-                    "resellerCode" => "0",
-                    "address" => [
-                        "street2" => $userinfo[0]["tel1_street2"],
-                        "address" => $userinfo[0]["address"],
-                        "houseNumber" => $userinfo[0]["tel1_vahed"],
-                        "tel" => $userinfo[0]["telephone"],
-                        "provinceName" => $userinfo[0]["tel1_ostan_name"],
-                        "postalCode" => $userinfo[0]["code_posti"],
-                    ],
-                    "service" => [
-                        "type" => $servicecode,
-                        "cardSerial" => $userinfo[0]['fid'],
-                        // "phoneNumber" => $userinfo[0]["telephone"],
-                        // "province" =>(string) $userinfo[0]["tel1_ostan_code"],
-                        // "county" => $userinfo[0]["tel1_ostan_name_en"],
-                        // "ownershipType" => $userinfo[0]["noe_malekiat"],
-                        // "status" => 1,
-                        // "credit" => 1,
-                        // "general" => 0,
-                        // "provincialCountry" => 0,
-                        // "ipStatic" => 0, //ToDo
-                        // "ip" => "", //ToDo
-                        // "subnet" => "", //ToDo                        
-                        // "startDate" => $start_service,
-                        "endDate" => $end_service,
-                    ],
+                $data["customerUpdate"] = [
+                    "name" => Helper::str_trim($userinfo[0]["name"]),
+                    "family" => Helper::str_trim($userinfo[0]["f_name"]),
+                    "email" => Helper::str_trim($userinfo[0]["email"]),
                 ];
             } else {
-                //hoghoghi irani
-
-                ///tarikhe sabt
-                $tarikhe_sabt_sherkat = Helper::dateConvertInitialize($userinfo[0]['tarikhe_sabt'], '-');
-                $tarikhe_sabt_sherkat = Helper::gregorian_to_jalali($tarikhe_sabt_sherkat[0], $tarikhe_sabt_sherkat[1], $tarikhe_sabt_sherkat[2]);
-                $tarikhe_sabt_sherkat[0] = (string) $tarikhe_sabt_sherkat[0];
-                if ($tarikhe_sabt_sherkat[1] < 10) {
-                    $tarikhe_sabt_sherkat[1] = "0" . (string) $tarikhe_sabt_sherkat[1];
-                }
-                if ($tarikhe_sabt_sherkat[2] < 10) {
-                    $tarikhe_sabt_sherkat[2] = "0" . (string) $tarikhe_sabt_sherkat[2];
-                }
-                $tarikhe_sabt_sherkat = $tarikhe_sabt_sherkat[0] . $tarikhe_sabt_sherkat[1] . $tarikhe_sabt_sherkat[2];
-                //check namayande meliat va noeshenasehoviati
-                if($userinfo[0]['namayande_isirani']===1){
-                    //bayad code meli bashad
-                    if($userinfo[0]['noe_shenase_hoviati']===0){
-                        //passport miladi sayer shamsi
-                        $date = Helper::dateConvertInitialize($userinfo[0]['tarikhe_tavalod'], '-');
-                        $date = Helper::gregorian_to_jalali($date[0], $date[1], $date[2]);
-                        $date[0] = (string) $date[0];
-                        if(strlen($date[1])<2){
-                            $date[1] = "0" . (string) $date[1];
-                        }
-                        if(strlen($date[2])<2){
-                            $date[2] = "0" . (string) $date[2];
-                        }
-                        $date = $date[0] . $date[1] . $date[2];
-                    }else{
-                        return false;
-                    }
-                }else{
-                    //namayande khareji
-                    if($userinfo[0]['noe_shenase_hoviati']===1){
-                        //passport miladi sayer shamsi
-                        $date=explode('-',$userinfo[0]['tarikhe_tavalod']);
-                        if(strlen($date[1])<2){
-                            $date[1] = "0" . (string) $date[1];
-                        }
-                        if(strlen($date[2])<2){
-                            $date[2] = "0" . (string) $date[2];
-                        }
-                        $date = $date[0] . $date[1] . $date[2];
-                    }else{
-                        $date = Helper::dateConvertInitialize($userinfo[0]['tarikhe_tavalod'], '-');
-                        $date = Helper::gregorian_to_jalali($date[0], $date[1], $date[2]);
-                        $date[0] = (string) $date[0];
-                        if(strlen($date[1])<2){
-                            $date[1] = "0" . (string) $date[1];
-                        }
-                        if(strlen($date[2])<2){
-                            $date[2] = "0" . (string) $date[2];
-                        }
-                        $date = $date[0] . $date[1] . $date[2];
-                    }
-                }
-                $data = [
-                    "companyName" => $userinfo[0]["name_sherkat"],
-                    "iranian" => $userinfo[0]["isirani"],
-                    "identificationType" => 5,
-                    "registrationDate" => $tarikhe_sabt_sherkat,
-                    "identificationNo" => $userinfo[0]["shenase_meli"],
-                    "companyType" => $userinfo[0]['companytype'],
-                    "registrationNo" => $userinfo[0]['shomare_sabt'],
-                    "agentFirstName" => $userinfo[0]["name"],
-                    "agentLastName" => $userinfo[0]["f_name"],
-                    "agentFatherName" => $userinfo[0]["name_pedar"],
-                    "agentIdentificationType" => $userinfo[0]["noe_shenase_hoviati"],
-                    "agentIdentificationNo" => $userinfo[0]["code_meli"],
-                    "agentNationality" => $userinfo[0]["meliatcode"],
-                    "agentBirthCertificateNo" => $userinfo[0]["shomare_shenasname"],
-                    "agentBirthDate" => $date,
-                    "agentbirthPlace" => $userinfo[0]["shahre_tavalod"],
-                    "mobile" => $userinfo[0]["telephone_hamrah"],
-                    "email" => $userinfo[0]["email"],
-                    "gender" => $userinfo[0]["jensiat"],
-                    "person" => $userinfo[0]['noe_moshtarak'],
-                    "resellerCode" => "0",
-                    "address" => [                        
-                        "street2" => $userinfo[0]["tel1_street2"],
-                        "address" => $userinfo[0]["address"],
-                        "houseNumber" => $userinfo[0]["tel1_vahed"],
-                        "tel" => $userinfo[0]["telephone"],
-                        "provinceName" => $userinfo[0]["tel1_ostan_name"],
-                        "postalCode" => $userinfo[0]["code_posti"],
-                    ],
-                    "service" => [
-                        "type" => $servicecode,
-                        "cardSerial" => $userinfo[0]['fid'],
-                        // "phoneNumber" => $userinfo[0]["telephone"],
-                        // "province" =>(string) $userinfo[0]["tel1_ostan_code"],
-                        // "county" => $userinfo[0]["tel1_ostan_name_en"],
-                        // "ownershipType" => $userinfo[0]["noe_malekiat"],
-                        // "status" => 1,
-                        // "credit" => 1,
-                        // "general" => 0,
-                        // "provincialCountry" => 0,
-                        // "ipStatic" => 0, //ToDo
-                        // "ip" => "", //ToDo
-                        // "subnet" => "", //ToDo                        
-                        // "startDate" => $start_service,
-                        "endDate" => $end_service,
-
-                    ],
+                //haghighi khareji 
+                $data["customerUpdate"] = [
+                    "name" => Helper::str_trim($userinfo[0]["name"]),
+                    "family" => Helper::str_trim($userinfo[0]["f_name"]),
+                    "email" => Helper::str_trim($userinfo[0]["email"]),
                 ];
             }
         } else {
-            if ($userinfo[0]['noe_moshtarak'] === 1) {
-                //haghighi khareji
-                if($userinfo[0]['noe_shenase_hoviati']===1){
-                    //passport miladi sayer shamsi
-                    $date=explode('-',$userinfo[0]['tarikhe_tavalod']);
-                    if(strlen($date[1])<2){
-                        $date[1] = "0" . (string) $date[1];
-                    }
-                    if(strlen($date[2])<2){
-                        $date[2] = "0" . (string) $date[2];
-                    }
-                    $date = $date[0] . $date[1] . $date[2];
-                }else{
-                    $date = Helper::dateConvertInitialize($userinfo[0]['tarikhe_tavalod'], '-');
-                    $date = Helper::gregorian_to_jalali($date[0], $date[1], $date[2]);
-                    $date[0] = (string) $date[0];
-                    if(strlen($date[1])<2){
-                        $date[1] = "0" . (string) $date[1];
-                    }
-                    if(strlen($date[2])<2){
-                        $date[2] = "0" . (string) $date[2];
-                    }
-                    $date = $date[0] . $date[1] . $date[2];
-                }
-                $data = [
-                    "name" => $userinfo[0]["name"],
-                    "family" => $userinfo[0]["f_name"],
-                    "fatherName" => $userinfo[0]["name_pedar"],
-                    "certificateNo" => $userinfo[0]["shomare_shenasname"],
-                    "iranian" => $userinfo[0]["isirani"],
-                    "identificationType" => $userinfo[0]["noe_shenase_hoviati"],
-                    "birthDate" => $date,
-                    "identificationNo" => $userinfo[0]["code_meli"],
-                    "birthPlace" => $userinfo[0]["shahre_tavalod"],
-                    "mobile" => $userinfo[0]["telephone_hamrah"],
-                    "email" => $userinfo[0]["email"],
-                    "gender" => $userinfo[0]["jensiat"],
-                    "person" => $userinfo[0]['noe_moshtarak'],
-                    "resellerCode" => "0",
-                    "address" => [                        
-                        "street2" => $userinfo[0]["tel1_street2"],
-                        "address" => $userinfo[0]["address"],
-                        "houseNumber" => $userinfo[0]["tel1_vahed"],
-                        "tel" => $userinfo[0]["telephone"],
-                        "provinceName" => $userinfo[0]["tel1_ostan_name"],
-                        "postalCode" => $userinfo[0]["code_posti"],
-                    ],
-                    "service" => [
-                        "type" => $servicecode,
-                        "cardSerial" => $userinfo[0]['fid'],
-                        // "phoneNumber" => $userinfo[0]["telephone"],
-                        // "province" =>(string) $userinfo[0]["tel1_ostan_code"],
-                        // "county" => $userinfo[0]["tel1_ostan_name_en"],
-                        // "ownershipType" => $userinfo[0]["noe_malekiat"],
-                        // "status" => 1,
-                        // "credit" => 1,
-                        // "general" => 0,
-                        // "provincialCountry" => 0,
-                        // "ipStatic" => 0, //ToDo
-                        // "ip" => "", //ToDo
-                        // "subnet" => "", //ToDo                        
-                        // "startDate" => $start_service,
-                        "endDate" => $end_service,
-
-                    ],
+            if ($userinfo[0]['isirani'] === 1) {
+                //hoghoghi irani
+                $data["customerUpdate"] = [
+                    "mobile" => Helper::str_trim($userinfo[0]["telephone_hamrah"]),
+                    "companyName" => Helper::str_trim($userinfo[0]["name_sherkat"]),
+                    "email" => Helper::str_trim($userinfo[0]["email"]),
+                    "agentFatherName" => Helper::str_trim($userinfo[0]["name_pedar"])
                 ];
-            }else{
+            } else {
                 //hoghoghi khareji
-                if($userinfo[0]['noe_shenase_hoviati']===1){
-                    //passport miladi sayer shamsi
-                    $date=explode('-',$userinfo[0]['tarikhe_tavalod']);
-                    if(strlen($date[1])<2){
-                        $date[1] = "0" . (string) $date[1];
-                    }
-                    if(strlen($date[2])<2){
-                        $date[2] = "0" . (string) $date[2];
-                    }
-                    $date = $date[0] . $date[1] . $date[2];
-                }else{
-                    $date = Helper::dateConvertInitialize($userinfo[0]['tarikhe_tavalod'], '-');
-                    $date = Helper::gregorian_to_jalali($date[0], $date[1], $date[2]);
-                    $date[0] = (string) $date[0];
-                    if(strlen($date[1])<2){
-                        $date[1] = "0" . (string) $date[1];
-                    }
-                    if(strlen($date[2])<2){
-                        $date[2] = "0" . (string) $date[2];
-                    }
-                    $date = $date[0] . $date[1] . $date[2];
-                }
-
-
-                if($userinfo[0]['namayande_isirani']===1){
-                    //bayad code meli bashad
-                    if($userinfo[0]['noe_shenase_hoviati']===0){
-                        $date = Helper::dateConvertInitialize($userinfo[0]['tarikhe_tavalod'], '-');
-                        $date = Helper::gregorian_to_jalali($date[0], $date[1], $date[2]);
-                        $date[0] = (string) $date[0];
-                        if(strlen($date[1])<2){
-                            $date[1] = "0" . (string) $date[1];
-                        }
-                        if(strlen($date[2])<2){
-                            $date[2] = "0" . (string) $date[2];
-                        }
-                        $date = $date[0] . $date[1] . $date[2];
-                    }else{
-                        return false;
-                    }
-                }else{
-                    //namayande khareji
-                    if($userinfo[0]['noe_shenase_hoviati']===1){
-                        //passport miladi sayer shamsi
-                        $date=explode('-',$userinfo[0]['tarikhe_tavalod']);
-                        if(strlen($date[1])<2){
-                            $date[1] = "0" . (string) $date[1];
-                        }
-                        if(strlen($date[2])<2){
-                            $date[2] = "0" . (string) $date[2];
-                        }
-                        $date = $date[0] . $date[1] . $date[2];
-                    }else{
-                        $date = Helper::dateConvertInitialize($userinfo[0]['tarikhe_tavalod'], '-');
-                        $date = Helper::gregorian_to_jalali($date[0], $date[1], $date[2]);
-                        $date[0] = (string) $date[0];
-                        if(strlen($date[1])<2){
-                            $date[1] = "0" . (string) $date[1];
-                        }
-                        if(strlen($date[2])<2){
-                            $date[2] = "0" . (string) $date[2];
-                        }
-                        $date = $date[0] . $date[1] . $date[2];
-                    }
-                }
-                $data = [
-                    "name" => $userinfo[0]["name"],
-                    "family" => $userinfo[0]["f_name"],
-                    "fatherName" => $userinfo[0]["name_pedar"],
-                    "certificateNo" => $userinfo[0]["shomare_shenasname"],
-                    "iranian" => $userinfo[0]["isirani"],
-                    "identificationType" => $userinfo[0]["noe_shenase_hoviati"],
-                    "birthDate" => $date,
-                    "identificationNo" => $userinfo[0]["code_meli"],
-                    "birthPlace" => $userinfo[0]["shahre_tavalod"],
-                    "mobile" => $userinfo[0]["telephone_hamrah"],
-                    "email" => $userinfo[0]["email"],
-                    "gender" => $userinfo[0]["jensiat"],
-                    "person" => $userinfo[0]['noe_moshtarak'],
-                    "resellerCode" => "0",
-                    "address" => [                        
-                        "street2" => $userinfo[0]["tel1_street2"],
-                        "address" => $userinfo[0]["address"],
-                        "houseNumber" => $userinfo[0]["tel1_vahed"],
-                        "tel" => $userinfo[0]["telephone"],
-                        "provinceName" => $userinfo[0]["tel1_ostan_name"],
-                        "postalCode" => $userinfo[0]["code_posti"],
-                    ],
-                    "service" => [
-                        "type" => $servicecode,
-                        "cardSerial" => $userinfo[0]['fid'],
-                        // "phoneNumber" => $userinfo[0]["telephone"],
-                        // "province" =>(string) $userinfo[0]["tel1_ostan_code"],
-                        // "county" => $userinfo[0]["tel1_ostan_name_en"],
-                        // "ownershipType" => $userinfo[0]["noe_malekiat"],
-                        // "status" => 1,
-                        // "credit" => 1,
-                        // "general" => 0,
-                        // "provincialCountry" => 0,
-                        // "ipStatic" => 0, //ToDo
-                        // "ip" => "", //ToDo
-                        // "subnet" => "", //ToDo                        
-                        // "startDate" => $start_service,
-                        "endDate" => $end_service,
-                    ],
+                $data["customerUpdate"] = [
+                    "mobile" => Helper::str_trim($userinfo[0]["telephone_hamrah"]),
+                    "companyName" => Helper::str_trim($userinfo[0]["name_sherkat"]),
+                    "email" => Helper::str_trim($userinfo[0]["email"]),
+                    "agentFatherName" => Helper::str_trim($userinfo[0]["name_pedar"])
                 ];
             }
         }
+        $data["resellerCode"] = "0";
+        $data["id"] = Helper::str_trim($userinfo[0]['shahkarcode']);
+        $data["serviceNumber"] = Helper::str_trim($userinfo[0]["telephone"]);
+        $data["addressUpdate"] = [
+            "postalCode" => Helper::str_trim($userinfo[0]["code_posti"]),
+            "townshipName" => Helper::str_trim($userinfo[0]["tel1_shahr_name"]),
+            "tel" => Helper::str_trim($userinfo[0]["telephone"]),
+        ];
+        $data["serviceUpdate"] = [
+            // "bandwidth" => Helper::str_trim($userinfo[0]["hadeaxar_sorat_daryaft"]),
+            "ownershipType" => $userinfo[0]["noe_malekiat"],
+            "startDate" => $start_service,
+            "endDate" => $end_service,
+            "province" => (string) $userinfo[0]["tel1_ostan_code"],
+            "ipStatic" => "0",
+            "ip" => "",
+            "subnet" => "",
+            "status" => "1",
+        ];
         return $data;
     }
 
     public static function wirelessUserInfo(int $factorid)
     {
         //daryafte kamele etelaate moshtarak va service kharidari shode
+        // "townshipName" => Helper::str_trim($userinfo[0]["tel1_shahr_name"]),
         $sql = "SELECT
-        sst.id substationid,
-        sst.station_id,
-        sub.id subscriber_id,
-        sub.telephone1 telephone,
-        sub.code_posti1 code_posti,
-        sub.noe_malekiat1 noe_malekiat,
-        IF( sub.noe_moshtarak = 'real', 1, 0 ) noe_moshtarak,
-        CONCAT(
+            sst.id substationid,
+            sst.station_id,
+            sub.id subscriber_id,
+            sub.telephone1 telephone,
+            sub.code_posti1 code_posti,
+            sub.noe_malekiat1 noe_malekiat,
+            IF( sub.noe_moshtarak = 'real', 1, 0 ) noe_moshtarak,
+            CONCAT(
+                sub.tel1_street,
+                ' ',
+                sub.tel1_street2,
+                ' پلاک ',
+                sub.tel1_housenumber,
+                ' طبقه ',
+                sub.tel1_tabaghe,
+                ' واحد ',
+                sub.tel1_vahed ) 'address',
+            sub.name,
+            sub.f_name,
+            sub.name_pedar,
+            sub.code_meli,
+            sub.branch_id,
+            sub.email,
+            sub.telephone_hamrah,
+            sub.telephone_hamrahe_sherkat,
+            sub.jensiat,
+            sub.tarikhe_tavalod,
+            sub.shomare_shenasname,
+            sub.shenase_meli,
+            sub.name_sherkat,
+            sub.shomare_sabt,
+            sub.tarikhe_sabt,
             sub.tel1_street,
-            ' ',
+            sub.tel2_street,
+            sub.tel3_street,
             sub.tel1_street2,
-            ' پلاک ',
+            sub.tel2_street2,
+            sub.tel3_street2,
             sub.tel1_housenumber,
-            ' طبقه ',
+            sub.tel2_housenumber,
+            sub.tel3_housenumber,
             sub.tel1_tabaghe,
-            ' واحد ',
-            sub.tel1_vahed ) 'address',
-        sub.name,
-        sub.f_name,
-        sub.name_pedar,
-        sub.code_meli,
-        sub.branch_id,
-        sub.email,
-        sub.telephone_hamrah,
-        sub.telephone_hamrahe_sherkat,
-        sub.jensiat,
-        sub.tarikhe_tavalod,
-        sub.shomare_shenasname,
-        sub.shenase_meli,
-        sub.name_sherkat,
-        sub.shomare_sabt,
-        sub.tarikhe_sabt,
-        sub.tel1_street,
-        sub.tel2_street,
-        sub.tel3_street,
-        sub.tel1_street2,
-        sub.tel2_street2,
-        sub.tel3_street2,
-        sub.tel1_housenumber,
-        sub.tel2_housenumber,
-        sub.tel3_housenumber,
-        sub.tel1_tabaghe,
-        sub.tel2_tabaghe,
-        sub.tel3_tabaghe,
-        sub.tel1_vahed,
-        sub.tel2_vahed,
-        sub.tel3_vahed,
-        sub.name_malek1,
-        sub.f_name_malek1,
-    IF( sub.noe_moshtarak = 'real', 1, 0 ) noe_moshtarak,
-        sub.noe_shenase_hoviati,
-        ser.hadeaxar_sorat_daryaft bandwidth,
-        ser.type servicetype,
-        ser.id serviceid,
-        ser.hadeaxar_sorat_daryaft,
-        fa.id fid,
-        fa.emkanat_id emkanatid,
-        fa.tarikhe_shoroe_service start_service,
-        fa.tarikhe_payane_service end_service,
-        ostan.code_ostan_shahkar ostane_tavalod_code,
-        os.NAME ostane_sokonat_name,
-        os.name_en ostane_sokonat_name_en,
-        os.code_ostan_shahkar ostane_sokonat_code,
-        o1.NAME tel1_ostan_name,
-        o1.code_ostan_shahkar tel1_ostan_code,
-        o1.name_en tel1_ostan_name_en,
-        shahr.NAME shahre_tavalod_name,
-        country.CODE meliatcode,
-        ncountry.CODE namayande_meliatcode,
-    IF( country.CODE = 'IRN', 1, 0 ) isirani,
-    IF( ncountry.CODE = 'IRN', 1, 0 ) namayande_isirani,
-        company.code_noe_sherkat companytype,
-        company.noe_sherkat companytypefarsi 
-    FROM
-        bnm_factor fa
-        INNER JOIN bnm_subscribers sub ON sub.id = fa.subscriber_id
-        INNER JOIN bnm_services ser ON ser.id = fa.service_id
-        INNER JOIN bnm_ostan ostan ON ostan.id = sub.ostane_tavalod
-        INNER JOIN bnm_ostan os ON os.id = sub.ostane_sokonat
-        INNER JOIN bnm_ostan o1 ON o1.id = sub.tel1_ostan
-        INNER JOIN bnm_shahr s1 ON s1.id = sub.tel1_shahr
-        INNER JOIN bnm_shahr ss ON ss.id = sub.shahre_sokonat
-        INNER JOIN bnm_shahr shahr ON shahr.id = sub.shahre_tavalod
-        INNER JOIN bnm_countries country ON country.id = sub.meliat
-        INNER JOIN bnm_sub_station sst ON sst.id = fa.emkanat_id 
-        AND sst.sub_id = sub.id
-        INNER JOIN bnm_wireless_station st ON st.id = sst.station_id
-        LEFT JOIN bnm_countries ncountry ON ncountry.id = sub.meliat_namayande
-        LEFT JOIN bnm_company_types company ON company.id = sub.noe_sherkat 
-    WHERE
-        fa.id = ?
+            sub.tel2_tabaghe,
+            sub.tel3_tabaghe,
+            sub.tel1_vahed,
+            sub.tel2_vahed,
+            sub.tel3_vahed,
+            sub.name_malek1,
+            sub.f_name_malek1,
+        IF( sub.noe_moshtarak = 'real', 1, 0 ) noe_moshtarak,
+            sub.noe_shenase_hoviati,
+            ser.hadeaxar_sorat_daryaft bandwidth,
+            ser.type servicetype,
+            ser.id serviceid,
+            ser.hadeaxar_sorat_daryaft,
+            fa.id fid,
+            fa.emkanat_id emkanatid,
+            fa.tarikhe_shoroe_service start_service,
+            fa.tarikhe_payane_service end_service,
+            ostan.code_ostan_shahkar ostane_tavalod_code,
+            os.NAME ostane_sokonat_name,
+            os.name_en ostane_sokonat_name_en,
+            os.code_ostan_shahkar ostane_sokonat_code,
+            o1.NAME tel1_ostan_name,
+            o1.code_ostan_shahkar tel1_ostan_code,
+            o1.name_en tel1_ostan_name_en,
+            s1.name tel1_shahr_name,
+            shahr.NAME shahre_tavalod_name,
+            country.CODE meliatcode,
+            ncountry.CODE namayande_meliatcode,
+        IF( country.CODE = 'IRN', 1, 0 ) isirani,
+        IF( ncountry.CODE = 'IRN', 1, 0 ) namayande_isirani,
+            company.code_noe_sherkat companytype,
+            company.noe_sherkat companytypefarsi 
+        FROM
+            bnm_factor fa
+            INNER JOIN bnm_subscribers sub ON sub.id = fa.subscriber_id
+            INNER JOIN bnm_services ser ON ser.id = fa.service_id
+            INNER JOIN bnm_ostan ostan ON ostan.id = sub.ostane_tavalod
+            INNER JOIN bnm_ostan os ON os.id = sub.ostane_sokonat
+            INNER JOIN bnm_ostan o1 ON o1.id = sub.tel1_ostan
+            INNER JOIN bnm_shahr s1 ON s1.id = sub.tel1_shahr
+            INNER JOIN bnm_shahr ss ON ss.id = sub.shahre_sokonat
+            INNER JOIN bnm_shahr shahr ON shahr.id = sub.shahre_tavalod
+            INNER JOIN bnm_countries country ON country.id = sub.meliat
+            INNER JOIN bnm_sub_station sst ON sst.id = fa.emkanat_id 
+            AND sst.sub_id = sub.id
+            INNER JOIN bnm_wireless_station st ON st.id = sst.station_id
+            LEFT JOIN bnm_countries ncountry ON ncountry.id = sub.meliat_namayande
+            LEFT JOIN bnm_company_types company ON company.id = sub.noe_sherkat 
+        WHERE
+            fa.id = ?
         ";
         $res = Db::secure_fetchall($sql, [$factorid]);
-        if($res){
-            $res[0]['wirelessusername']= Helper::getIbsUsername($res[0]['subscriber_id'], $res[0]['servicetype'], $res[0]['emkanatid']);
+        if ($res) {
+            $res[0]['wirelessusername'] = Helper::getIbsUsername($res[0]['subscriber_id'], $res[0]['servicetype'], $res[0]['emkanatid'])[0]['ibsusername'];
             return $res;
-        }else{
+        } else {
             return false;
         }
     }
@@ -2006,8 +2954,8 @@ class ShahkarHelper
     {
         //todo ... check ip static and fill parameters
         //service type code
-        $servicecode=self::serviceCode($userinfo[0]['servicetype']);
-        if(! $servicecode){
+        $servicecode = self::serviceCode($userinfo[0]['servicetype']);
+        if (!$servicecode) {
             return false;
         }
         //start service
@@ -2042,10 +2990,10 @@ class ShahkarHelper
                 $date = Helper::dateConvertInitialize($userinfo[0]['tarikhe_tavalod'], '-');
                 $date = Helper::gregorian_to_jalali($date[0], $date[1], $date[2]);
                 $date[0] = (string) $date[0];
-                if(strlen($date[1])<2){
+                if (strlen($date[1]) < 2) {
                     $date[1] = "0" . (string) $date[1];
                 }
-                if(strlen($date[2])<2){
+                if (strlen($date[2]) < 2) {
                     $date[2] = "0" . (string) $date[2];
                 }
                 $date = $date[0] . $date[1] . $date[2];
@@ -2071,6 +3019,7 @@ class ShahkarHelper
                         "tel" => $userinfo[0]["telephone"],
                         "provinceName" => $userinfo[0]["tel1_ostan_name"],
                         "postalCode" => $userinfo[0]["code_posti"],
+                        "townshipName" => Helper::str_trim($userinfo[0]["tel1_shahr_name"]),
                     ],
                     "service" => [
                         "type" => $servicecode,
@@ -2081,7 +3030,7 @@ class ShahkarHelper
                         "startDate" => $start_service,
                         "endDate" => $end_service,
                         "ownershipType" => $userinfo[0]["noe_malekiat"],
-                        "province" =>(string) $userinfo[0]["tel1_ostan_code"],
+                        "province" => (string) $userinfo[0]["tel1_ostan_code"],
                         "wirelessId" => $userinfo[0]["wirelessusername"],
                         "phoneNumber" => $userinfo[0]["telephone"],
 
@@ -2101,21 +3050,21 @@ class ShahkarHelper
                 }
                 $tarikhe_sabt_sherkat = $tarikhe_sabt_sherkat[0] . $tarikhe_sabt_sherkat[1] . $tarikhe_sabt_sherkat[2];
                 //check namayande meliat va noeshenasehoviati
-                if($userinfo[0]['namayande_isirani']===1){
+                if ($userinfo[0]['namayande_isirani'] === 1) {
                     //bayad code meli bashad
-                    if($userinfo[0]['noe_shenase_hoviati']===0){
+                    if ($userinfo[0]['noe_shenase_hoviati'] === 0) {
                         //passport miladi sayer shamsi
                         $date = Helper::dateConvertInitialize($userinfo[0]['tarikhe_tavalod'], '-');
                         $date = Helper::gregorian_to_jalali($date[0], $date[1], $date[2]);
                         $date[0] = (string) $date[0];
-                        if(strlen($date[1])<2){
+                        if (strlen($date[1]) < 2) {
                             $date[1] = "0" . (string) $date[1];
                         }
-                        if(strlen($date[2])<2){
+                        if (strlen($date[2]) < 2) {
                             $date[2] = "0" . (string) $date[2];
                         }
                         $date = $date[0] . $date[1] . $date[2];
-                    }else{
+                    } else {
                         return false;
                     }
                     $data = [
@@ -2147,6 +3096,7 @@ class ShahkarHelper
                             "tel" => $userinfo[0]["telephone"],
                             "provinceName" => $userinfo[0]["tel1_ostan_name"],
                             "postalCode" => $userinfo[0]["code_posti"],
+                            "townshipName" => Helper::str_trim($userinfo[0]["tel1_shahr_name"]),
                         ],
                         "service" => [
                             "type" => $servicecode,
@@ -2157,32 +3107,32 @@ class ShahkarHelper
                             "startDate" => $start_service,
                             "endDate" => $end_service,
                             "ownershipType" => $userinfo[0]["noe_malekiat"],
-                            "province" =>(string) $userinfo[0]["tel1_ostan_code"],
+                            "province" => (string) $userinfo[0]["tel1_ostan_code"],
                             "wirelessId" => $userinfo[0]["wirelessusername"],
                             "phoneNumber" => $userinfo[0]["telephone"],
-    
+
                         ],
                     ];
-                }else{
+                } else {
                     //namayande khareji
-                    if($userinfo[0]['noe_shenase_hoviati']===1){
+                    if ($userinfo[0]['noe_shenase_hoviati'] === 1) {
                         //passport miladi sayer shamsi
-                        $date=explode('-',$userinfo[0]['tarikhe_tavalod']);
-                        if(strlen($date[1])<2){
+                        $date = explode('-', $userinfo[0]['tarikhe_tavalod']);
+                        if (strlen($date[1]) < 2) {
                             $date[1] = "0" . (string) $date[1];
                         }
-                        if(strlen($date[2])<2){
+                        if (strlen($date[2]) < 2) {
                             $date[2] = "0" . (string) $date[2];
                         }
                         $date = $date[0] . $date[1] . $date[2];
-                    }else{
+                    } else {
                         $date = Helper::dateConvertInitialize($userinfo[0]['tarikhe_tavalod'], '-');
                         $date = Helper::gregorian_to_jalali($date[0], $date[1], $date[2]);
                         $date[0] = (string) $date[0];
-                        if(strlen($date[1])<2){
+                        if (strlen($date[1]) < 2) {
                             $date[1] = "0" . (string) $date[1];
                         }
-                        if(strlen($date[2])<2){
+                        if (strlen($date[2]) < 2) {
                             $date[2] = "0" . (string) $date[2];
                         }
                         $date = $date[0] . $date[1] . $date[2];
@@ -2217,6 +3167,7 @@ class ShahkarHelper
                         "tel" => $userinfo[0]["telephone"],
                         "provinceName" => $userinfo[0]["tel1_ostan_name"],
                         "postalCode" => $userinfo[0]["code_posti"],
+                        "townshipName" => Helper::str_trim($userinfo[0]["tel1_shahr_name"]),
                     ],
                     "service" => [
                         "type" => $servicecode,
@@ -2227,7 +3178,7 @@ class ShahkarHelper
                         "startDate" => $start_service,
                         "endDate" => $end_service,
                         "ownershipType" => $userinfo[0]["noe_malekiat"],
-                        "province" =>(string) $userinfo[0]["tel1_ostan_code"],
+                        "province" => (string) $userinfo[0]["tel1_ostan_code"],
                         "wirelessId" => $userinfo[0]["wirelessusername"],
                         "phoneNumber" => $userinfo[0]["telephone"],
 
@@ -2237,24 +3188,24 @@ class ShahkarHelper
         } else {
             if ($userinfo[0]['noe_moshtarak'] === 1) {
                 //haghighi khareji
-                if($userinfo[0]['noe_shenase_hoviati']===1){
+                if ($userinfo[0]['noe_shenase_hoviati'] === 1) {
                     //passport miladi sayer shamsi
-                    $date=explode('-',$userinfo[0]['tarikhe_tavalod']);
-                    if(strlen($date[1])<2){
+                    $date = explode('-', $userinfo[0]['tarikhe_tavalod']);
+                    if (strlen($date[1]) < 2) {
                         $date[1] = "0" . (string) $date[1];
                     }
-                    if(strlen($date[2])<2){
+                    if (strlen($date[2]) < 2) {
                         $date[2] = "0" . (string) $date[2];
                     }
                     $date = $date[0] . $date[1] . $date[2];
-                }else{
+                } else {
                     $date = Helper::dateConvertInitialize($userinfo[0]['tarikhe_tavalod'], '-');
                     $date = Helper::gregorian_to_jalali($date[0], $date[1], $date[2]);
                     $date[0] = (string) $date[0];
-                    if(strlen($date[1])<2){
+                    if (strlen($date[1]) < 2) {
                         $date[1] = "0" . (string) $date[1];
                     }
-                    if(strlen($date[2])<2){
+                    if (strlen($date[2]) < 2) {
                         $date[2] = "0" . (string) $date[2];
                     }
                     $date = $date[0] . $date[1] . $date[2];
@@ -2281,6 +3232,7 @@ class ShahkarHelper
                         "tel" => $userinfo[0]["telephone"],
                         "provinceName" => $userinfo[0]["tel1_ostan_name"],
                         "postalCode" => $userinfo[0]["code_posti"],
+                        "townshipName" => Helper::str_trim($userinfo[0]["tel1_shahr_name"]),
                     ],
                     "service" => [
                         "type" => $servicecode,
@@ -2291,74 +3243,74 @@ class ShahkarHelper
                         "ownershipType" => $userinfo[0]["noe_malekiat"],
                         "startDate" => $start_service,
                         "endDate" => $end_service,
-                        "province" =>(string) $userinfo[0]["tel1_ostan_code"],
+                        "province" => (string) $userinfo[0]["tel1_ostan_code"],
                         "wirelessId" => $userinfo[0]["wirelessusername"],
                         "phoneNumber" => $userinfo[0]["telephone"],
 
                     ],
                 ];
-            }else{
+            } else {
                 //hoghoghi khareji
-                if($userinfo[0]['noe_shenase_hoviati']===1){
+                if ($userinfo[0]['noe_shenase_hoviati'] === 1) {
                     //passport miladi sayer shamsi
-                    $date=explode('-',$userinfo[0]['tarikhe_tavalod']);
-                    if(strlen($date[1])<2){
+                    $date = explode('-', $userinfo[0]['tarikhe_tavalod']);
+                    if (strlen($date[1]) < 2) {
                         $date[1] = "0" . (string) $date[1];
                     }
-                    if(strlen($date[2])<2){
+                    if (strlen($date[2]) < 2) {
                         $date[2] = "0" . (string) $date[2];
                     }
                     $date = $date[0] . $date[1] . $date[2];
-                }else{
+                } else {
                     $date = Helper::dateConvertInitialize($userinfo[0]['tarikhe_tavalod'], '-');
                     $date = Helper::gregorian_to_jalali($date[0], $date[1], $date[2]);
                     $date[0] = (string) $date[0];
-                    if(strlen($date[1])<2){
+                    if (strlen($date[1]) < 2) {
                         $date[1] = "0" . (string) $date[1];
                     }
-                    if(strlen($date[2])<2){
+                    if (strlen($date[2]) < 2) {
                         $date[2] = "0" . (string) $date[2];
                     }
                     $date = $date[0] . $date[1] . $date[2];
                 }
 
 
-                if($userinfo[0]['namayande_isirani']===1){
+                if ($userinfo[0]['namayande_isirani'] === 1) {
                     //bayad code meli bashad
-                    if($userinfo[0]['noe_shenase_hoviati']===0){
+                    if ($userinfo[0]['noe_shenase_hoviati'] === 0) {
                         $date = Helper::dateConvertInitialize($userinfo[0]['tarikhe_tavalod'], '-');
                         $date = Helper::gregorian_to_jalali($date[0], $date[1], $date[2]);
                         $date[0] = (string) $date[0];
-                        if(strlen($date[1])<2){
+                        if (strlen($date[1]) < 2) {
                             $date[1] = "0" . (string) $date[1];
                         }
-                        if(strlen($date[2])<2){
+                        if (strlen($date[2]) < 2) {
                             $date[2] = "0" . (string) $date[2];
                         }
                         $date = $date[0] . $date[1] . $date[2];
-                    }else{
+                    } else {
                         return false;
                     }
-                }else{
+                } else {
                     //namayande khareji
-                    if($userinfo[0]['noe_shenase_hoviati']===1){
+                    if ($userinfo[0]['noe_shenase_hoviati'] === 1) {
                         //passport miladi sayer shamsi
-                        $date=explode('-',$userinfo[0]['tarikhe_tavalod']);
-                        if(strlen($date[1])<2){
+                        $date = explode('-', $userinfo[0]['tarikhe_tavalod']);
+                        if (strlen($date[1]) < 2) {
                             $date[1] = "0" . (string) $date[1];
                         }
-                        if(strlen($date[2])<2){
+                        if (strlen($date[2]) < 2) {
                             $date[2] = "0" . (string) $date[2];
                         }
                         $date = $date[0] . $date[1] . $date[2];
-                    }else{
+                    } else {
                         $date = Helper::dateConvertInitialize($userinfo[0]['tarikhe_tavalod'], '-');
                         $date = Helper::gregorian_to_jalali($date[0], $date[1], $date[2]);
                         $date[0] = (string) $date[0];
-                        if(strlen($date[1])<2){
+                        if (strlen($date[1]) < 2) {
                             $date[1] = "0" . (string) $date[1];
                         }
-                        if(strlen($date[2])<2){
+                        if (strlen($date[2]) < 2) {
                             $date[2] = "0" . (string) $date[2];
                         }
                         $date = $date[0] . $date[1] . $date[2];
@@ -2386,6 +3338,7 @@ class ShahkarHelper
                         "tel" => $userinfo[0]["telephone"],
                         "provinceName" => $userinfo[0]["tel1_ostan_name"],
                         "postalCode" => $userinfo[0]["code_posti"],
+                        "townshipName" => Helper::str_trim($userinfo[0]["tel1_shahr_name"]),
                     ],
                     "service" => [
                         "type" => $servicecode,
@@ -2396,7 +3349,7 @@ class ShahkarHelper
                         "ownershipType" => $userinfo[0]["noe_malekiat"],
                         "startDate" => $start_service,
                         "endDate" => $end_service,
-                        "province" =>(string) $userinfo[0]["tel1_ostan_code"],
+                        "province" => (string) $userinfo[0]["tel1_ostan_code"],
                         "wirelessId" => $userinfo[0]["wirelessusername"],
                         "phoneNumber" => $userinfo[0]["telephone"],
 
@@ -2404,6 +3357,98 @@ class ShahkarHelper
                 ];
             }
         }
+        return $data;
+    }
+
+    public static function updateWireless($userinfo)
+    {
+        //todo ... check ip static and fill parameters
+        //service type code
+        $servicecode = self::serviceCode($userinfo[0]['servicetype']);
+        if (!$servicecode) {
+            return false;
+        }
+        //start service
+        $start_service = Helper::dateConvertInitialize($userinfo[0]["start_service"], '-');
+        $start_service = Helper::gregorian_to_jalali($start_service[0], $start_service[1], $start_service[2]);
+        $start_service[0] = (string) $start_service[0];
+        if ($start_service[1] < 10) {
+            $start_service[1] = "0" . (string) $start_service[1];
+        }
+        if ($start_service[2] < 10) {
+            $start_service[2] = "0" . (string) $start_service[2];
+        }
+        $start_service = $start_service[0] . $start_service[1] . $start_service[2];
+        //end service
+        $end_service = Helper::dateConvertInitialize($userinfo[0]["end_service"], '-');
+        $end_service = Helper::gregorian_to_jalali($end_service[0], $end_service[1], $end_service[2]);
+        $end_service[0] = (string) $end_service[0];
+        if ($end_service[1] < 10) {
+            $end_service[1] = "0" . (string) $end_service[1];
+        }
+        if ($end_service[2] < 10) {
+            $end_service[2] = "0" . (string) $end_service[2];
+        }
+        $end_service = $end_service[0] . $end_service[1] . $end_service[2];
+        /////////////////////////////////////////////////////////////////////////////////////
+        if ($userinfo[0]['noe_moshtarak'] === 1) {
+            if ($userinfo[0]['isirani'] === 1) {
+                //haghighi irani
+                $data["customerUpdate"] = [
+                    "name" => Helper::str_trim($userinfo[0]["name"]),
+                    "family" => Helper::str_trim($userinfo[0]["f_name"]),
+                    "email" => Helper::str_trim($userinfo[0]["email"]),
+                ];
+            } else {
+                //haghighi khareji 
+                $data["customerUpdate"] = [
+                    "name" => Helper::str_trim($userinfo[0]["name"]),
+                    "family" => Helper::str_trim($userinfo[0]["f_name"]),
+                    "email" => Helper::str_trim($userinfo[0]["email"]),
+                ];
+            }
+        } else {
+            if ($userinfo[0]['isirani'] === 1) {
+                //hoghoghi irani
+                $data["customerUpdate"] = [
+                    "mobile" => Helper::str_trim($userinfo[0]["telephone_hamrah"]),
+                    "companyName" => Helper::str_trim($userinfo[0]["name_sherkat"]),
+                    "email" => Helper::str_trim($userinfo[0]["email"]),
+                    "agentFatherName" => Helper::str_trim($userinfo[0]["name_pedar"])
+                ];
+            } else {
+                //hoghoghi khareji
+                $data["customerUpdate"] = [
+                    "mobile" => Helper::str_trim($userinfo[0]["telephone_hamrah"]),
+                    "companyName" => Helper::str_trim($userinfo[0]["name_sherkat"]),
+                    "email" => Helper::str_trim($userinfo[0]["email"]),
+                    "agentFatherName" => Helper::str_trim($userinfo[0]["name_pedar"])
+                ];
+            }
+        }
+        $data["resellerCode"] = "0";
+        $data["id"] = Helper::str_trim($userinfo[0]['shahkarcode']);
+        $data["serviceNumber"] = Helper::str_trim($userinfo[0]["wirelessusername"]);
+        $data["addressUpdate"] = [
+            "street2" => $userinfo[0]["tel1_street2"],
+            "address" => $userinfo[0]["address"],
+            "houseNumber" => (string)$userinfo[0]["tel1_vahed"],
+            "tel" => $userinfo[0]["telephone"],
+            "provinceName" => $userinfo[0]["tel1_ostan_name"],
+            "postalCode" => $userinfo[0]["code_posti"],
+            "townshipName" => Helper::str_trim($userinfo[0]["tel1_shahr_name"]),
+        ];
+        $data["serviceUpdate"] = [
+            "bandwidth" => Helper::str_trim($userinfo[0]["hadeaxar_sorat_daryaft"]),
+            "ownershipType" => $userinfo[0]["noe_malekiat"],
+            "startDate" => $start_service,
+            "endDate" => $end_service,
+            "province" => (string) $userinfo[0]["tel1_ostan_code"],
+            "ipStatic" => "0",
+            "ip" => "",
+            "subnet" => "",
+        ];
+
         return $data;
     }
 
@@ -2462,16 +3507,15 @@ class ShahkarHelper
             fa.emkanat_id emkanatid,
             fa.tarikhe_shoroe_service start_service,
             fa.tarikhe_payane_service end_service,
-            
             ostan.code_ostan_shahkar ostane_tavalod_code,
             os.name ostane_sokonat_name,
             os.name_en ostane_sokonat_name_en,
             os.code_ostan_shahkar ostane_sokonat_code,
+            s1.name tel1_shahr_name,
             t1ostan.name tel1_ostan_name,
             t1ostan.code_ostan_shahkar tel1_ostan_code,
             t1ostan.name_en tel1_ostan_name_en,
             shahr.name shahre_tavalod_name,
-
             country.code meliatcode,
             ncountry.code namayande_meliatcode,
             IF( country.code = 'IRN', 1, 0 ) isirani,
@@ -2488,6 +3532,7 @@ class ShahkarHelper
                 INNER JOIN bnm_ostan t1ostan ON t1ostan.id = sub.tel1_ostan
                 INNER JOIN bnm_shahr ss ON ss.id = sub.shahre_sokonat
                 INNER JOIN bnm_shahr t1shahr ON t1shahr.id = sub.tel1_shahr
+                INNER JOIN bnm_shahr s1 ON s1.id = sub.tel1_shahr
                 INNER JOIN bnm_countries country ON country.id = sub.meliat
                 INNER JOIN bnm_tdlte_sim sim ON sim.id = fa.emkanat_id
                 LEFT JOIN bnm_countries ncountry ON ncountry.id = sub.meliat_namayande
@@ -2496,9 +3541,9 @@ class ShahkarHelper
             fa.id = ?
         ";
         $res = Db::secure_fetchall($sql, [$factorid]);
-        if($res){
+        if ($res) {
             return $res;
-        } else{
+        } else {
             return false;
         }
     }
@@ -2692,7 +3737,6 @@ class ShahkarHelper
             WHERE fa.id = ?";
             $res = Db::secure_fetchall($sql, [$factor_id]);
             return $res;
-
         }
     }
 
@@ -2742,9 +3786,7 @@ class ShahkarHelper
 
     public static function DataEstestDailyReport($request_id)
     {
-        $data = [
-
-        ];
+        $data = [];
         if ($data) {
             return $data;
         }
@@ -2759,7 +3801,7 @@ class ShahkarHelper
         ];
         if ($data) {
             return $data;
-        }else{
+        } else {
             return false;
         }
     }
@@ -2855,7 +3897,7 @@ class ShahkarHelper
             'fatherName' => $userinfo[0]['name_pedar'],
             'identificationType' => (int) $userinfo[0]['noe_shenase_hoviati'],
             'identificationNo' => $userinfo[0]['code_meli'],
-            'nationality'=>$userinfo[0]['codecountry'],
+            'nationality' => $userinfo[0]['codecountry'],
             'birthDate' => $date,
             'certificateNo' => $userinfo[0]['shomare_shenasname'],
             "iranian" => $userinfo[0]["isirani"],
@@ -2883,15 +3925,15 @@ class ShahkarHelper
 
 
         $date = Helper::dateConvertInitialize($userinfo[0]['tarikhe_tavalod'], '-');
-                $date = Helper::gregorian_to_jalali($date[0], $date[1], $date[2]);
-                $date[0] = (string) $date[0];
-                if(strlen($date[1])<2){
-                    $date[1] = "0" . (string) $date[1];
-                }
-                if(strlen($date[2])<2){
-                    $date[2] = "0" . (string) $date[2];
-                }
-                $date = $date[0] . $date[1] . $date[2];
+        $date = Helper::gregorian_to_jalali($date[0], $date[1], $date[2]);
+        $date[0] = (string) $date[0];
+        if (strlen($date[1]) < 2) {
+            $date[1] = "0" . (string) $date[1];
+        }
+        if (strlen($date[2]) < 2) {
+            $date[2] = "0" . (string) $date[2];
+        }
+        $date = $date[0] . $date[1] . $date[2];
         $data = [
             "estelaamType" => 0,
             "name" => $userinfo[0]['name'],
@@ -2924,31 +3966,31 @@ class ShahkarHelper
         $date = Helper::dateConvertInitialize($userinfo[0]['tarikhe_tavalod'], '-');
         $date = Helper::gregorian_to_jalali($date[0], $date[1], $date[2]);
         $date[0] = (string) $date[0];
-        if(strlen($date[1])<2){
+        if (strlen($date[1]) < 2) {
             $date[1] = "0" . (string) $date[1];
         }
-        if(strlen($date[2])<2){
+        if (strlen($date[2]) < 2) {
             $date[2] = "0" . (string) $date[2];
         }
         $date = $date[0] . $date[1] . $date[2];
 
 
-        
+
         //tarikhe_sabte_sherkat
         $ts = Helper::dateConvertInitialize($userinfo[0]['tarikhe_sabt'], '-');
         $ts = Helper::gregorian_to_jalali($ts[0], $ts[1], $ts[2]);
         $ts[0] = (string) $ts[0];
 
 
-        if(strlen($ts[1])<2){
+        if (strlen($ts[1]) < 2) {
             $ts[1] = "0" . (string) $ts[1];
         }
-        if(strlen($ts[2])<2){
+        if (strlen($ts[2]) < 2) {
             $ts[2] = "0" . (string) $ts[2];
         }
         $ts = $ts[0] . $ts[1] . $ts[2];
 
-        
+
         $arr = [
             'estelaamType' => 0,
             'companyName' => $userinfo[0]["name_sherkat"],
@@ -3134,5 +4176,4 @@ class ShahkarHelper
             return false;
         }
     }
-
 }

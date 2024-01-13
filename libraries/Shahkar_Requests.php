@@ -24,6 +24,10 @@ class Shahkar_Requests{
         $res= self::sendRequest('putservice', $method, 'rest/shahkar/put', $data);
         return $res;
     }
+    public static function updateService(array $data, string $method='post'){
+        $res= self::sendRequest('updateservice', $method, 'rest/shahkar/update', $data);
+        return $res;
+    }
     public static function estAuthSub(array $data, string $method='post'){
         $res= self::sendRequest('estauthsub', $method, 'rest/shahkar/estelaam', $data);
         return $res;

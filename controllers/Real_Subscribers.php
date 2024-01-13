@@ -95,6 +95,9 @@ class Real_Subscribers extends Controller
                         } else {
                             unset($_POST['r_t_sayer']);
                         }
+                        if((int)$_POST['noe_shenase_hoviati']===0 && Helper::str_trim($_POST['shomare_shenasname'])===''){
+                            echo Helper::Alert_Custom_Message("شماره شناسنامه مشترک خالی ارسال شده!");
+                        }else{
                         $_POST = Helper::xss_check_array($_POST);
                         if ($_POST['id'] == "empty") {
                             if (!Helper::checkSubExist($_POST['code_meli'], $_POST['telephone_hamrah'], $_POST['telephone1'])) {
@@ -288,6 +291,7 @@ class Real_Subscribers extends Controller
                             }
 
                         }
+                    }
 
                         break;
 

@@ -3,6 +3,7 @@
 //02644267845
 class Bootstrap
 {
+    // {"result":"OK.","requestId":"026220231226212048454800","response":200,"comment":"\u062f\u0631\u062e\u0648\u0627\u0633\u062a \u0628\u0627 \u0645\u0648\u0641\u0642\u06cc\u062a \u062b\u0628\u062a \u0634\u062f","providerName":"\u0645\u062e\u0627\u0628\u0631\u0627\u062a \u0627\u06cc\u0631\u0627\u0646"}
     public function __construct()
     {
         $_SESSION['dashboard_menu_names'] = Helper::get_all_dashboard_menu_names();
@@ -1096,8 +1097,7 @@ class Bootstrap
             $_POST = Helper::reformAjaxRequest($_POST);
             if (isset($_POST['factorid'])) {
                 if ($_POST['factorid']) {
-                    $res = ShahkarHelper::putServices($_POST['factorid']);
-                    die(json_encode($res));
+                    $res = ShahkarHelper::sabteShahkar($_POST['factorid']);
                     if ($res) {
                         $msg = "شناسه : " . $res;
                         die(Helper::Custom_Msg($msg, 1));
@@ -1257,8 +1257,8 @@ class Bootstrap
         if (isset($_POST['send_change_service_password'])) {
             parse_str($_POST[key($_POST)], $_POST);
             $_POST = Helper::xss_check_array($_POST);
-            unset($_POST['send_change_service_password']);
-            unset($_POST['currentpassword']);
+            // unset($_POST['send_change_service_password']);
+            // unset($_POST['currentpassword']);
             $checkvalues = Helper::allArrayElementsHasValue($_POST);
             if (!$checkvalues) {
                 $msg = "هیچ فیلدی نباید خالی ارسال شود";
@@ -1272,6 +1272,7 @@ class Bootstrap
             if (!$res_factor) die(Helper::Custom_Msg('اطلاعات سرویس یافت نشد با پشتیبانی تماس بگیرید'));
             if (!$res_factor[0]['ibsusername']) die(Helper::Custom_Msg('اطلاعات سرویس یافت نشد با پشتیبانی تماس بگیرید'));
             // die(json_encode($res_factor));
+            $newpass='';
             switch ($res_factor[0]['sertype']) {
                 case 'adsl':
                 case 'vdsl':
@@ -1279,7 +1280,7 @@ class Bootstrap
                 case 'wireless':
                 case 'tdlte':
                     $res_usrid = $GLOBALS['ibs_internet']->getUserIdByNormalUsername($res_factor[0]['ibsusername']);
-                    $res = $GLOBALS['ibs_internet']->setNormalUserAuth((string) $res_usrid[1], $res_factor[0]['ibsusername'], $_POST['newpassword']);
+                    $res = $GLOBALS['ibs_internet']->setNormalUserAuth((string) $res_usrid, $res_factor[0]['ibsusername'], $_POST['newpassword']);
                     $userinfo = $GLOBALS['ibs_internet']->getUserInfoByNormalUserName($res_factor[0]['ibsusername']);
                     break;
                 case 'voip':
@@ -1293,17 +1294,17 @@ class Bootstrap
                     break;
             }
             if (!$userinfo) die(Helper::Json_Message('e'));
-            //todo... send sms to user
+            $newpass=$userinfo[1][$res_usrid]['attrs']['normal_password'];
             $smsmessage = __OWNER__ . " ";
             $smsmessage .= "نام کاربری سرویس:" . " ";
             $smsmessage .= $res_factor[0]['ibsusername'] . " ";
             $smsmessage .= "رمز عبور جدید:" . " ";
-            $smsmessage .= $_POST['newpassword'];
+            $smsmessage .= $newpass;
             $sms = Helper::Send_Sms_Single($res_factor[0]['telephone_hamrah'], $smsmessage);
             $msg = "نام کاربری سرویس:" . " ";
             $msg .= $res_factor[0]['ibsusername'] . " ";
             $msg .= "رمز عبور جدید:" . " ";
-            $msg .= $_POST['newpassword'];
+            $msg .= $newpass;
             die(Helper::Custom_Msg(Helper::Messages('s') . " " . $msg, 1));
             // if($_POST['new_password'] && $_POST[''])
             // if (isset($_POST['ibsusername']) && isset($_POST['noeservice']) && isset($_POST['userid']) && isset($_POST['newpassword'])) {
