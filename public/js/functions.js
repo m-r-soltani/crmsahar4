@@ -964,8 +964,8 @@ function DATEPICKER_YYYYMMDD(selector) {
                 "enabled": true
             },
             "text": {
-                "btnNextText": "<",
-                "btnPrevText": ">"
+                "btnNextText": "بعد",
+                "btnPrevText": "قبل"
             }
         },
         "toolbox": {
@@ -1992,7 +1992,7 @@ function DataTable(selector = 'view_table', path, type = "POST", cols, callback)
             }
         ],*/
         //order: [[0, "asc"]],
-        scrollY: 2000,
+        scrollY: 450,
         scrollX: true,
         scrollCollapse: true,
         scroller: true,
@@ -2033,10 +2033,12 @@ function DataTable(selector = 'view_table', path, type = "POST", cols, callback)
             sLengthMenu: 'نمایش <select id="datatable_rownum">' +
                 '<option value="10">10</option>' +
                 '<option value="20">20</option>' +
-                '<option value="30">30</option>' +
-                '<option value="40">40</option>' +
                 '<option value="50">50</option>' +
                 '<option value="100">100</option>' +
+                '<option value="200">200</option>' +
+                '<option value="500">500</option>' +
+                '<option value="1000">1000</option>' +
+                
                 '</select> رکورد',
 
         },
@@ -2077,7 +2079,7 @@ function DataTable_Render(selector = 'view_table', path, type = "POST", cols, re
             }
         ],*/
         //order: [[0, "asc"]],
-        scrollY: 2000,
+        scrollY: 450,
         scrollX: true,
         scrollCollapse: true,
 
@@ -2116,12 +2118,13 @@ function DataTable_Render(selector = 'view_table', path, type = "POST", cols, re
             sInfoFiltered: "فیلتر شده از _MAX_ رکورد",
             sInfoThousands: "K",
             sLengthMenu: 'نمایش <select id="datatable_rownum">' +
-                '<option value="10">10</option>' +
-                '<option value="20">20</option>' +
-                '<option value="30">30</option>' +
-                '<option value="40">40</option>' +
-                '<option value="50">50</option>' +
-                '<option value="100">100</option>' +
+            '<option value="10">10</option>' +
+            '<option value="20">20</option>' +
+            '<option value="50">50</option>' +
+            '<option value="100">100</option>' +
+            '<option value="200">200</option>' +
+            '<option value="500">500</option>' +
+            '<option value="1000">1000</option>' +
                 '</select> رکورد',
 
         },
@@ -2162,7 +2165,7 @@ function DataTable2(selector = 'view_table', path, type = "POST", cols, conditio
             }
         ],*/
         //order: [[0, "asc"]],
-        scrollY: 2000,
+        scrollY: 450,
         scrollX: true,
         scrollCollapse: true,
         paging: true,
@@ -2200,12 +2203,13 @@ function DataTable2(selector = 'view_table', path, type = "POST", cols, conditio
             sInfoFiltered: "فیلتر شده از _MAX_ رکورد",
             sInfoThousands: "K",
             sLengthMenu: 'نمایش <select id="datatable_rownum">' +
-                '<option value="10">10</option>' +
-                '<option value="20">20</option>' +
-                '<option value="30">30</option>' +
-                '<option value="40">40</option>' +
-                '<option value="50">50</option>' +
-                '<option value="100">100</option>' +
+            '<option value="10">10</option>' +
+            '<option value="20">20</option>' +
+            '<option value="50">50</option>' +
+            '<option value="100">100</option>' +
+            '<option value="200">200</option>' +
+            '<option value="500">500</option>' +
+            '<option value="1000">1000</option>' +
                 '</select> رکورد',
 
         },
@@ -2254,7 +2258,7 @@ function DataTable3(selector = 'view_table', path, request, request2, type = "PO
         order: [
             ['0', 'desc']
         ],
-        scrollY: 2000,
+        scrollY: 450,
         scrollX: true,
         scrollCollapse: true,
         scroller: true,
@@ -2293,12 +2297,13 @@ function DataTable3(selector = 'view_table', path, request, request2, type = "PO
             sInfoFiltered: "فیلتر شده از _MAX_ رکورد",
             sInfoThousands: "K",
             sLengthMenu: 'نمایش <select id="datatable_rownum">' +
-                '<option value="10">10</option>' +
-                '<option value="20">20</option>' +
-                '<option value="30">30</option>' +
-                '<option value="40">40</option>' +
-                '<option value="50">50</option>' +
-                '<option value="100">100</option>' +
+            '<option value="10">10</option>' +
+            '<option value="20">20</option>' +
+            '<option value="50">50</option>' +
+            '<option value="100">100</option>' +
+            '<option value="200">200</option>' +
+            '<option value="500">500</option>' +
+            '<option value="1000">1000</option>' +
                 '</select> رکورد',
 
         },
@@ -2346,7 +2351,7 @@ function DataTable4(selector = 'view_table', path, request, request2, request3, 
         // order: [
         //     [0, "desc"]
         // ],
-        scrollY: 2000,
+        scrollY: 450,
         scrollX: true,
         scrollCollapse: true,
         scroller: true,
@@ -2385,12 +2390,13 @@ function DataTable4(selector = 'view_table', path, request, request2, request3, 
             sInfoFiltered: "فیلتر شده از _MAX_ رکورد",
             sInfoThousands: "K",
             sLengthMenu: 'نمایش <select id="datatable_rownum">' +
-                '<option value="10">10</option>' +
-                '<option value="20">20</option>' +
-                '<option value="30">30</option>' +
-                '<option value="40">40</option>' +
-                '<option value="50">50</option>' +
-                '<option value="100">100</option>' +
+            '<option value="10">10</option>' +
+            '<option value="20">20</option>' +
+            '<option value="50">50</option>' +
+            '<option value="100">100</option>' +
+            '<option value="200">200</option>' +
+            '<option value="500">500</option>' +
+            '<option value="1000">1000</option>' +
                 '</select> رکورد',
 
         },
@@ -2435,7 +2441,12 @@ function DataTable5(selector = 'view_table', path, request, request2, filter1 = 
             {
                 extend: 'csv',
                 text: 'خروجی csv',
-                attr: { title: 'csv', id: 'csvbtn', class: 'btn btn-secondary col-lg-auto float-lg-right' }
+                charset: 'UTF-8',
+                fieldSeparator: ';',
+                bom: true,
+                filename: 'CsvReport',
+                title: 'CsvReport',
+                attr: { title: 'csv', id: 'csvbtn', class: 'btn btn-secondary col-lg-auto float-lg-right' },
             },
             {
                 extend: 'print',
@@ -2446,7 +2457,7 @@ function DataTable5(selector = 'view_table', path, request, request2, filter1 = 
         order: [
             [0, "desc"]
         ],
-        scrollY: 2000,
+        scrollY: 450,
         scrollX: true,
         scrollCollapse: true,
         scroller: true,
@@ -2487,10 +2498,11 @@ function DataTable5(selector = 'view_table', path, request, request2, filter1 = 
             sLengthMenu: 'نمایش <select id="datatable_rownum">' +
                 '<option value="10">10</option>' +
                 '<option value="20">20</option>' +
-                '<option value="30">30</option>' +
-                '<option value="40">40</option>' +
                 '<option value="50">50</option>' +
                 '<option value="100">100</option>' +
+                '<option value="200">200</option>' +
+                '<option value="500">500</option>' +
+                '<option value="1000">1000</option>' +
                 '</select> رکورد',
 
         },
@@ -2540,7 +2552,7 @@ function DT6_noebutton(selector = 'view_table', path, request, request2, filter1
         order: [
             [0, "desc"]
         ],
-        scrollY: 2000,
+        scrollY: 450,
         scrollX: true,
         scrollCollapse: true,
         scroller: true,
@@ -2579,12 +2591,13 @@ function DT6_noebutton(selector = 'view_table', path, request, request2, filter1
             sInfoFiltered: "فیلتر شده از _MAX_ رکورد",
             sInfoThousands: "K",
             sLengthMenu: 'نمایش <select id="datatable_rownum">' +
-                '<option value="10">10</option>' +
-                '<option value="20">20</option>' +
-                '<option value="30">30</option>' +
-                '<option value="40">40</option>' +
-                '<option value="50">50</option>' +
-                '<option value="100">100</option>' +
+            '<option value="10">10</option>' +
+            '<option value="20">20</option>' +
+            '<option value="50">50</option>' +
+            '<option value="100">100</option>' +
+            '<option value="200">200</option>' +
+            '<option value="500">500</option>' +
+            '<option value="1000">1000</option>' +
                 '</select> رکورد',
 
         },
@@ -2632,7 +2645,7 @@ function DataTable6(selector = 'view_table', path, request, request2, filter1 = 
             }
         ],*/
         //order: [[0, "asc"]],
-        scrollY: 2000,
+        scrollY: 450,
         scrollX: true,
         scrollCollapse: true,
         scroller: true,
@@ -2671,12 +2684,13 @@ function DataTable6(selector = 'view_table', path, request, request2, filter1 = 
             sInfoFiltered: "فیلتر شده از _MAX_ رکورد",
             sInfoThousands: "K",
             sLengthMenu: 'نمایش <select id="datatable_rownum">' +
-                '<option value="10">10</option>' +
-                '<option value="20">20</option>' +
-                '<option value="30">30</option>' +
-                '<option value="40">40</option>' +
-                '<option value="50">50</option>' +
-                '<option value="100">100</option>' +
+            '<option value="10">10</option>' +
+            '<option value="20">20</option>' +
+            '<option value="50">50</option>' +
+            '<option value="100">100</option>' +
+            '<option value="200">200</option>' +
+            '<option value="500">500</option>' +
+            '<option value="1000">1000</option>' +
                 '</select> رکورد',
 
         },
@@ -2708,10 +2722,22 @@ function DataTable_array_datasource(selector, dataset, cols, callback, custombut
                 responsive: true,
                 //altEditor: true,      // Enable altEditor ****
                 dom: 'Bflrtip', // element order: NEEDS BUTTON CONTAINER (B) ****
-                buttons: [{
+                buttons: [
+                    {
+                        extend: 'copy',
+                        footer: true,
+                        text: 'کپی',
+                        attr: { title: 'copy', id: 'copybtn', class: 'btn btn-secondary col-lg-auto float-lg-right' }
+                    },
+                    {
                         extend: 'csv',
                         text: 'خروجی csv',
-                        attr: { title: 'csv', id: 'csvbtn', class: 'btn btn-secondary col-lg-auto float-lg-right' }
+                        charset: 'UTF-8',
+                        fieldSeparator: ';',
+                        bom: true,
+                        filename: 'CsvReport',
+                        title: 'CsvReport',
+                        attr: { title: 'csv', id: 'csvbtn', class: 'btn btn-secondary col-lg-auto float-lg-right' },
                     },
                     {
                         extend: 'print',
@@ -2724,7 +2750,7 @@ function DataTable_array_datasource(selector, dataset, cols, callback, custombut
                     },
                 ],
                 //order: [[0, "asc"]],
-                scrollY: 2000,
+                scrollY: 450,
                 scrollX: true,
                 scrollCollapse: true,
                 scroller: true,
@@ -2765,11 +2791,11 @@ function DataTable_array_datasource(selector, dataset, cols, callback, custombut
                     sLengthMenu: 'نمایش <select id="datatable_rownum">' +
                         '<option value="10">10</option>' +
                         '<option value="20">20</option>' +
-                        '<option value="30">30</option>' +
-                        '<option value="40">40</option>' +
                         '<option value="50">50</option>' +
                         '<option value="100">100</option>' +
                         '<option value="200">200</option>' +
+                        '<option value="500">500</option>' +
+                        '<option value="1000">1000</option>' +
                         '</select> رکورد',
 
                 },
@@ -2787,10 +2813,22 @@ function DataTable_array_datasource(selector, dataset, cols, callback, custombut
                 responsive: true,
                 //altEditor: true,      // Enable altEditor ****
                 dom: 'Bflrtip', // element order: NEEDS BUTTON CONTAINER (B) ****
-                buttons: [{
+                buttons: [
+                    {
+                        extend: 'copy',
+                        footer: true,
+                        text: 'کپی',
+                        attr: { title: 'copy', id: 'copybtn', class: 'btn btn-secondary col-lg-auto float-lg-right' }
+                    },
+                    {
                         extend: 'csv',
                         text: 'خروجی csv',
-                        attr: { title: 'csv', id: 'csvbtn', class: 'btn btn-secondary col-lg-auto float-lg-right' }
+                        charset: 'UTF-8',
+                        fieldSeparator: ';',
+                        bom: true,
+                        filename: 'CsvReport',
+                        title: 'CsvReport',
+                        attr: { title: 'csv', id: 'csvbtn', class: 'btn btn-secondary col-lg-auto float-lg-right' },
                     },
                     {
                         extend: 'print',
@@ -2799,7 +2837,7 @@ function DataTable_array_datasource(selector, dataset, cols, callback, custombut
                     },
                 ],
                 //order: [[0, "asc"]],
-                scrollY: 2000,
+                scrollY: 450,
                 scrollX: true,
                 scrollCollapse: true,
                 scroller: true,
@@ -2840,11 +2878,11 @@ function DataTable_array_datasource(selector, dataset, cols, callback, custombut
                     sLengthMenu: 'نمایش <select id="datatable_rownum">' +
                         '<option value="10">10</option>' +
                         '<option value="20">20</option>' +
-                        '<option value="30">30</option>' +
-                        '<option value="40">40</option>' +
                         '<option value="50">50</option>' +
                         '<option value="100">100</option>' +
                         '<option value="200">200</option>' +
+                        '<option value="500">500</option>' +
+                        '<option value="1000">1000</option>' +
                         '</select> رکورد',
 
                 },
@@ -2918,10 +2956,11 @@ function DataTable_array_datasource2(selector = '', dataset, cols, callback) {
                 sLengthMenu: 'نمایش <select id="datatable_rownum">' +
                     '<option value="10">10</option>' +
                     '<option value="20">20</option>' +
-                    '<option value="30">30</option>' +
-                    '<option value="40">40</option>' +
                     '<option value="50">50</option>' +
                     '<option value="100">100</option>' +
+                    '<option value="200">200</option>' +
+                    '<option value="500">500</option>' +
+                    '<option value="1000">1000</option>' +
                     '</select> رکورد',
 
             },

@@ -12,34 +12,20 @@ class Login extends Controller
     public function index()
     {
         if (isset($_POST['send_login_form'])) {
-            // die(json_encode($_POST['send_login_form']));
-            // parse_str($_POST[key($_POST)], $_POST);
-            // die(json_encode($_POST));
-            // die(json_encode([111]));
-            // die(Helper::Custom_Msg('اطلاعات ارسال شده صحیح نمیباشد در صورت تکرار آی پی شما مسدود خواهد شد.', 2));
-            // die(json_encode(array('login_fail', 'msg' => 'اطلاعات ارسال شده صحیح نمیباشد در صورت تکرار آی پی شما مسدود خواهد شد.')));
             $_POST = Helper::Create_Post_Array_Without_Key($_POST);
             $_POST = Helper::xss_check_array($_POST);
-            // Helper::cLog(['dfg']);
-            // die();
             $msg   = "درخواست ناموفق لطفا مجددا تلاش کنید";
             if (isset($_POST['g-recaptcha-response'])) {
                 $captcha = $_POST['g-recaptcha-response'];
             }
-            
             if (!$captcha) {
                 die(json_encode(array('login_fail', 'msg' => 'اطلاعات ارسال شده صحیح نمیباشد در صورت تکرار آی پی شما مسدود خواهد شد.')));
-                // die(Helper::Custom_Msg('اطلاعات ارسال شده صحیح نمیباشد در صورت تکرار آی پی شما مسدود خواهد شد.', 2));
             }
             $response = file_get_contents("https://www.google.com/recaptcha/api/siteverify?secret=6LfBEcIZAAAAAEV3QpcrAp3-8il9mOhVWjJgpMHS&response=" . $captcha . "&remoteip=" . $_SERVER['REMOTE_ADDR']);
             $response=json_decode($response, true);
-            // die(json_encode(gettype($response)));
-            
-            // die(json_encode($response));
             if ($response['success'] === false) {
                 die(json_encode(array('login_fail', 'msg' => 'اطلاعات ارسال شده صحیح نمیباشد در صورت تکرار آی پی شما مسدود خواهد شد.')));
             }
-            
             try {
                 $_SESSION['dashboard_menu']          = Helper::get_all_dashboard_menu();
                 $_SESSION['dashboard_menu_category'] = Helper::get_all_dashboard_menu_category();

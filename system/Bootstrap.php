@@ -7,8 +7,27 @@ class Bootstrap
     public function __construct()
     {
         $_SESSION['dashboard_menu_names'] = Helper::get_all_dashboard_menu_names();
-        // Helper::cLog($_SESSION);
-
+        if (isset($_POST['send_sold_services'])) {
+            parse_str($_POST[key($_POST)], $_POST);
+            $_POST['timefrom']=Helper::regulateNumber($_POST['timefrom']);
+            $_POST['timeto']=Helper::regulateNumber($_POST['timeto']);
+            $fd=Helper::TabdileTarikh($_POST['timefrom'], 2, '/', '-', false);
+            $td=Helper::TabdileTarikh($_POST['timeto'], 2, '/', '-', false);
+            if($_POST['service']==='dsl'){
+                $sertype=['adsl', 'vdsl', 'bitstream'];
+            }elseif($_POST['service']==='adsl'){
+                $sertype=['adsl', 'bitstream'];
+            }elseif($_POST['service']==='vdsl'){
+                $sertype=['vdsl', 'bitstream'];
+            }else{
+                $sertype=[$_POST['service']];
+            }
+            $res=Helper::getServiceInfoBySertypeOstanShahr($sertype,(int) $_POST['ostan'],(int) $_POST['shahr'], $fd, $td, (int) $_POST['status']);
+            if(! $res) die(Helper::Custom_Msg(Helper::Messages('nf'), 2));
+            $res=Helper::tabdileTarikhIndexArray($res, 'tts_formatted', 1, '-', '-', true);
+            $res=Helper::tabdileTarikhIndexArray($res, 'tps_formatted', 1, '-', '-', true);
+            die(json_encode($res));
+        }
         if (isset($_POST['send_pre_asiatech_bitstream_emkansanji'])) {
             parse_str($_POST[key($_POST)], $_POST);
             $_POST['noe_service']       = Helper::str_trim($_POST['noe_service']);

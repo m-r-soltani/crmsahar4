@@ -10,8 +10,9 @@ class Helper
             return false;
         }
     }
-    public static function asiatechEmkanSanji(string $tel,string $sertype, bool $chechotherpap){
-        $arr=[];
+    public static function asiatechEmkanSanji(string $tel, string $sertype, bool $chechotherpap)
+    {
+        $arr = [];
         $telecenter = $GLOBALS['bs']->getLocationFromPhonePrefix($tel);
         if ($GLOBALS['bs']->errorCheck($telecenter)) {
             $telename = "مرکز : " . $telecenter['result']['data']['ciname'] . '-' . $telecenter['result']['data']['loname'];
@@ -19,7 +20,7 @@ class Helper
         } else {
             // return $telecenter['result']['errmsg'];
             // die(Helper::Custom_Msg($GLOBALS['bs']->getMessage($telecenter)));
-            return ['hasError'=> true, 'msg'=>$telecenter['result']['errmsg']];
+            return ['hasError' => true, 'msg' => $telecenter['result']['errmsg']];
         }
         $arr['interfacetype']       = $sertype;
         $arr['checkOtherPap']       = $chechotherpap;
@@ -29,61 +30,63 @@ class Helper
         $arr['bmsPriorityCheck']    = "high";
         $result = $GLOBALS['bs']->resourceFeasibilityCheck($arr);
         if ($GLOBALS['bs']->errorCheck($result)) {
-            return ['hasError'=> false, 'msg'=>$result['result']['errmsg']];
+            return ['hasError' => false, 'msg' => $result['result']['errmsg']];
         } else {
             // die(Helper::Custom_Msg($GLOBALS['bs']->getMessage($result) . '<br>' . $telename, 2));
-            return ['hasError'=> true, 'msg'=>$result['result']['errmsg']. '<br>' . $telename];
+            return ['hasError' => true, 'msg' => $result['result']['errmsg'] . '<br>' . $telename];
         }
     }
-    public static function getClientIp(){
-        $ip = isset($_SERVER['HTTP_CLIENT_IP']) 
-            ? $_SERVER['HTTP_CLIENT_IP'] 
-            : (isset($_SERVER['HTTP_X_FORWARDED_FOR']) 
-            ? $_SERVER['HTTP_X_FORWARDED_FOR'] 
-            : $_SERVER['REMOTE_ADDR']);
-        if($ip){
+    public static function getClientIp()
+    {
+        $ip = isset($_SERVER['HTTP_CLIENT_IP'])
+            ? $_SERVER['HTTP_CLIENT_IP']
+            : (isset($_SERVER['HTTP_X_FORWARDED_FOR'])
+                ? $_SERVER['HTTP_X_FORWARDED_FOR']
+                : $_SERVER['REMOTE_ADDR']);
+        if ($ip) {
             return $ip;
-        }else{
+        } else {
             return false;
         }
-        
     }
     // public static function 
-    public static function getCurrentUserInfo(){
-        $arr=[];
+    public static function getCurrentUserInfo()
+    {
+        $arr = [];
         switch ($_SESSION['user_type']) {
             case __ADMINUSERTYPE__:
             case __ADMINOPERATORUSERTYPE__:
-                $sql="SELECT * FROM bnm_users WHERE id = ?";
-                $user=Db::secure_fetchall($sql, [$_SESSION['id']]);
-                if(! $user) return false;
-                $arr['name']=$user[0]['name'];
-                $arr['fname']=$user[0]['name_khanevadegi'];
-                $arr['mobile']=$user[0]['mobile'];
-                $arr['code_meli']=$user[0]['code_meli'];
-            break;
+                $sql = "SELECT * FROM bnm_users WHERE id = ?";
+                $user = Db::secure_fetchall($sql, [$_SESSION['id']]);
+                if (!$user) return false;
+                $arr['name'] = $user[0]['name'];
+                $arr['fname'] = $user[0]['name_khanevadegi'];
+                $arr['mobile'] = $user[0]['mobile'];
+                $arr['code_meli'] = $user[0]['code_meli'];
+                break;
             case __MODIRUSERTYPE__:
             case __MODIR2USERTYPE__:
             case __OPERATORUSERTYPE__:
             case __OPERATOR2USERTYPE__:
-                $sql="SELECT * FROM bnm_operator WHERE id = ?";
-                $user=Db::secure_fetchall($sql, [$_SESSION['user_id']]);
-                if(! $user) return false;
-                $arr['name']=$user[0]['name'];
-                $arr['fname']=$user[0]['name_khanevadegi'];
-                $arr['mobile']=$user[0]['telephone_hamrah'];
-                $arr['code_meli']=$user[0]['code_meli'];
-            break;
-            //todo get subinfo...
-            
+                $sql = "SELECT * FROM bnm_operator WHERE id = ?";
+                $user = Db::secure_fetchall($sql, [$_SESSION['user_id']]);
+                if (!$user) return false;
+                $arr['name'] = $user[0]['name'];
+                $arr['fname'] = $user[0]['name_khanevadegi'];
+                $arr['mobile'] = $user[0]['telephone_hamrah'];
+                $arr['code_meli'] = $user[0]['code_meli'];
+                break;
+                //todo get subinfo...
+
             default:
                 return false;
-            break;
+                break;
         }
         return $arr;
     }
 
-    public static function onlyAdminAndBranches(){
+    public static function onlyAdminAndBranches()
+    {
         switch ($_SESSION['user_type']) {
             case __ADMINUSERTYPE__:
             case __ADMINOPERATORUSERTYPE__:
@@ -92,8 +95,8 @@ class Helper
             case __OPERATORUSERTYPE__:
             case __OPERATOR2USERTYPE__:
                 return true;
-            break;
-            
+                break;
+
             default:
                 return false;
                 break;
@@ -101,70 +104,73 @@ class Helper
         return false;
     }
 
-    public static function IsDateValid($myDateString){
+    public static function IsDateValid($myDateString)
+    {
         return (bool)strtotime($myDateString);
     }
 
-    public static function logLockInternetService($username, $requestedby, $susptype, $susporder='', $refnum='', $comment=''){
-        $id=$GLOBALS['ibs_internet']->getUserIdByNormalUsername($username);
-        if(! $id) return 111;
-        $arr=[];
-        $arr['username']=$username;
-        $arr['ibsid']=$id;
-        $arr['suspid']=0;
-        $arr['susptype']=$susptype;
-        $arr['susporder']=$susporder;
-        $arr['requestedby']=$requestedby;
-        $arr['isvalid']=1;
-        $arr['refnum']=$refnum;
-        $arr['comment']=$comment;
+    public static function logLockInternetService($username, $requestedby, $susptype, $susporder = '', $refnum = '', $comment = '')
+    {
+        $id = $GLOBALS['ibs_internet']->getUserIdByNormalUsername($username);
+        if (!$id) return 111;
+        $arr = [];
+        $arr['username'] = $username;
+        $arr['ibsid'] = $id;
+        $arr['suspid'] = 0;
+        $arr['susptype'] = $susptype;
+        $arr['susporder'] = $susporder;
+        $arr['requestedby'] = $requestedby;
+        $arr['isvalid'] = 1;
+        $arr['refnum'] = $refnum;
+        $arr['comment'] = $comment;
         switch ((int)$susptype) {
             case 0:
-                $arr['tarikhe_darkhast']=Helper::Today_Miladi_Date('-').' '.Helper::nowTimeTehran();
-                $arr['tarikhe_vasl']=Helper::Today_Miladi_Date('-').' '.Helper::nowTimeTehran();
-            break;
+                $arr['tarikhe_darkhast'] = Helper::Today_Miladi_Date('-') . ' ' . Helper::nowTimeTehran();
+                $arr['tarikhe_vasl'] = Helper::Today_Miladi_Date('-') . ' ' . Helper::nowTimeTehran();
+                break;
             case 1:
-                $arr['tarikhe_darkhast']=Helper::Today_Miladi_Date('-').' '.Helper::nowTimeTehran();
-                $arr['tarikhe_vasl']=date('Y-m-d', strtotime("+5 year")).' '.Helper::nowTimeTehran();
-            break;
+                $arr['tarikhe_darkhast'] = Helper::Today_Miladi_Date('-') . ' ' . Helper::nowTimeTehran();
+                $arr['tarikhe_vasl'] = date('Y-m-d', strtotime("+5 year")) . ' ' . Helper::nowTimeTehran();
+                break;
             case 2:
-                $arr['tarikhe_darkhast']=Helper::Today_Miladi_Date('-').' '.Helper::nowTimeTehran();
-                $arr['tarikhe_vasl']=date('Y-m-d', strtotime("+1 day")).' '.Helper::nowTimeTehran();
-            break;
+                $arr['tarikhe_darkhast'] = Helper::Today_Miladi_Date('-') . ' ' . Helper::nowTimeTehran();
+                $arr['tarikhe_vasl'] = date('Y-m-d', strtotime("+1 day")) . ' ' . Helper::nowTimeTehran();
+                break;
             case 3:
-                $arr['tarikhe_darkhast']=Helper::Today_Miladi_Date('-').' '.Helper::nowTimeTehran();
-                $arr['tarikhe_vasl']=date('Y-m-d', strtotime("+3 day")).' '.Helper::nowTimeTehran();
-            break;
+                $arr['tarikhe_darkhast'] = Helper::Today_Miladi_Date('-') . ' ' . Helper::nowTimeTehran();
+                $arr['tarikhe_vasl'] = date('Y-m-d', strtotime("+3 day")) . ' ' . Helper::nowTimeTehran();
+                break;
             case 4:
-                $arr['tarikhe_darkhast']=Helper::Today_Miladi_Date('-').' '.Helper::nowTimeTehran();
-                $arr['tarikhe_vasl']=date('Y-m-d', strtotime("+7 day")).' '.Helper::nowTimeTehran();
-            break;
+                $arr['tarikhe_darkhast'] = Helper::Today_Miladi_Date('-') . ' ' . Helper::nowTimeTehran();
+                $arr['tarikhe_vasl'] = date('Y-m-d', strtotime("+7 day")) . ' ' . Helper::nowTimeTehran();
+                break;
             case 5:
-                $arr['tarikhe_darkhast']=Helper::Today_Miladi_Date('-').' '.Helper::nowTimeTehran();
-                $arr['tarikhe_vasl']=date('Y-m-d', strtotime("+15 day")).' '.Helper::nowTimeTehran();
-            break;
+                $arr['tarikhe_darkhast'] = Helper::Today_Miladi_Date('-') . ' ' . Helper::nowTimeTehran();
+                $arr['tarikhe_vasl'] = date('Y-m-d', strtotime("+15 day")) . ' ' . Helper::nowTimeTehran();
+                break;
             case 6:
-                $arr['tarikhe_darkhast']=Helper::Today_Miladi_Date('-').' '.Helper::nowTimeTehran();
-                $arr['tarikhe_vasl']=date('Y-m-d', strtotime("+30 day")).' '.Helper::nowTimeTehran();
-            break;
+                $arr['tarikhe_darkhast'] = Helper::Today_Miladi_Date('-') . ' ' . Helper::nowTimeTehran();
+                $arr['tarikhe_vasl'] = date('Y-m-d', strtotime("+30 day")) . ' ' . Helper::nowTimeTehran();
+                break;
             default:
                 return 222;
-            break;
+                break;
         }
 
-        $sql=self::Insert_Generator($arr, 'bnm_susp');
-        $res=Db::secure_insert_array($sql, $arr);
-        if(is_numeric($res)){
+        $sql = self::Insert_Generator($arr, 'bnm_susp');
+        $res = Db::secure_insert_array($sql, $arr);
+        if (is_numeric($res)) {
             return $res;
-        }else{
+        } else {
             return 333;
         }
     }
 
-    public static function logUnlockInternetService($username, $requestedby, $susptype, $susporder='', $refnum='', $comment=''){
-        $id=$GLOBALS['ibs_internet']->getUserIdByNormalUsername($username);
-        $foundlockrow=false;
-        $sql="SELECT
+    public static function logUnlockInternetService($username, $requestedby, $susptype, $susporder = '', $refnum = '', $comment = '')
+    {
+        $id = $GLOBALS['ibs_internet']->getUserIdByNormalUsername($username);
+        $foundlockrow = false;
+        $sql = "SELECT
                     * 
                 FROM
                     bnm_susp 
@@ -175,49 +181,50 @@ class Helper
                     AND susptype <> 0
                     AND isvalid = 1 
                     AND tarikhe_vasl >= CURRENT_TIMESTAMP()";
-        $locks=Db::secure_fetchall($sql, [$username, $requestedby]);
-        if($locks){
-            if($refnum){
+        $locks = Db::secure_fetchall($sql, [$username, $requestedby]);
+        if ($locks) {
+            if ($refnum) {
                 foreach ($locks as $k => $v) {
-                    if($v['refnum']===$refnum){
-                        $foundlockrow=true;
+                    if ($v['refnum'] === $refnum) {
+                        $foundlockrow = true;
                         // $sql="UPDATE bnm_susp SET isvalid=0 WHERE ";
-                        $sql=Helper::Update_Generator(['id'=>$v['id'], 'isvalid'=>0], 'bnm_susp','WHERE id=:id', ['refnum']);
-                        $query=Db::secure_update_array($sql, ['id'=>$v['id'], 'isvalid'=>0]);
+                        $sql = Helper::Update_Generator(['id' => $v['id'], 'isvalid' => 0], 'bnm_susp', 'WHERE id=:id', ['refnum']);
+                        $query = Db::secure_update_array($sql, ['id' => $v['id'], 'isvalid' => 0]);
                         break;
                     }
                 }
-                if(! $foundlockrow){
-                    $sql=Helper::Update_Generator(['id'=>$locks[0]['id'], 'isvalid'=>0], 'bnm_susp','WHERE id=:id', ['refnum']);
-                    $query=Db::secure_update_array($sql, ['id'=> $locks[0]['id'], 'isvalid'=>0]);
+                if (!$foundlockrow) {
+                    $sql = Helper::Update_Generator(['id' => $locks[0]['id'], 'isvalid' => 0], 'bnm_susp', 'WHERE id=:id', ['refnum']);
+                    $query = Db::secure_update_array($sql, ['id' => $locks[0]['id'], 'isvalid' => 0]);
                 }
             }
         }
-        if(! $id) return false;
-        $arr=[];
-        $arr['username']=$username;
-        $arr['ibsid']=$id;
-        $arr['suspid']=1;
-        $arr['susptype']=$susptype;
-        $arr['susporder']=$susporder;
-        $arr['tarikhe_darkhast']=Helper::Today_Miladi_Date('-').' '.Helper::nowTimeTehran();
-        $arr['requestedby']=$requestedby;
-        $arr['isvalid']=1;
-        $arr['refnum']=$refnum;
-        $arr['comment']=$comment;
-        $sql=self::Insert_Generator($arr, 'bnm_susp');
-        $res=Db::secure_insert_array($sql, $arr);
-        if(is_numeric($res)){
+        if (!$id) return false;
+        $arr = [];
+        $arr['username'] = $username;
+        $arr['ibsid'] = $id;
+        $arr['suspid'] = 1;
+        $arr['susptype'] = $susptype;
+        $arr['susporder'] = $susporder;
+        $arr['tarikhe_darkhast'] = Helper::Today_Miladi_Date('-') . ' ' . Helper::nowTimeTehran();
+        $arr['requestedby'] = $requestedby;
+        $arr['isvalid'] = 1;
+        $arr['refnum'] = $refnum;
+        $arr['comment'] = $comment;
+        $sql = self::Insert_Generator($arr, 'bnm_susp');
+        $res = Db::secure_insert_array($sql, $arr);
+        if (is_numeric($res)) {
             return $res;
-        }else{
+        } else {
             return false;
         }
     }
 
-    public static function checkUserCanBeUnsuspended($username, $requestedby){
+    public static function checkUserCanBeUnsuspended($username, $requestedby)
+    {
         //$requestedby 1= crm, 2= siam
-        $isitok=false;
-        $sql="SELECT
+        $isitok = false;
+        $sql = "SELECT
                 count(*) num
             FROM
                 bnm_susp 
@@ -228,7 +235,7 @@ class Helper
                 AND username= ?
                 AND requestedby = ?
                 AND isvalid = ?";
-        $sghat=Db::secure_fetchall($sql, [$username, $requestedby, 1]);
+        $sghat = Db::secure_fetchall($sql, [$username, $requestedby, 1]);
         // if($sghat){
         //     $sql="SELECT
         //             count(*) num
@@ -244,149 +251,152 @@ class Helper
         // }else{
         //     $isitok=true;
         // }
-        if($sghat[0]['num']>0){
+        if ($sghat[0]['num'] > 0) {
             return false;
-        }else{
+        } else {
             return true;
         }
         // return $isitok;
     }
 
-    public static function ibsGetUserInfoByArrayId($ids, $resultfix=true, $groupservicetype='internet'){
-        if(! $ids) return false;
-        $str='';
-        for ($i=0; $i <count($ids) ; $i++) { 
-            if($i !== array_key_last($ids)){
-                $str.=(string)$ids[$i].",";
-            }else{
-                $str.=(string)$ids[$i];
+    public static function ibsGetUserInfoByArrayId($ids, $resultfix = true, $groupservicetype = 'internet')
+    {
+        if (!$ids) return false;
+        $str = '';
+        for ($i = 0; $i < count($ids); $i++) {
+            if ($i !== array_key_last($ids)) {
+                $str .= (string)$ids[$i] . ",";
+            } else {
+                $str .= (string)$ids[$i];
             }
         }
-        if(! $str) return false;
-        if($groupservicetype==='internet'){
-            $res=$GLOBALS['ibs_internet']->getUserInfoByUserID($str, true);
-        }else{
-            $res=$GLOBALS['ibs_voip']->getUserInfoByUserID($str, true);
+        if (!$str) return false;
+        if ($groupservicetype === 'internet') {
+            $res = $GLOBALS['ibs_internet']->getUserInfoByUserID($str, true);
+        } else {
+            $res = $GLOBALS['ibs_voip']->getUserInfoByUserID($str, true);
         }
-        $arr=[];
-        if($resultfix){
-            if(isset($res)){
-                if($res){
+        $arr = [];
+        if ($resultfix) {
+            if (isset($res)) {
+                if ($res) {
                     foreach ($res as $k => $v) {
-                        $arr[]=$v;
+                        $arr[] = $v;
                     }
-                    if(! $arr) return false;
+                    if (!$arr) return false;
                     return $arr;
                 }
             }
         }
-        if(! isset($res)){
+        if (!isset($res)) {
             return false;
         }
-        if(! $res){
+        if (!$res) {
             return false;
         }
         return $res;
     }
 
-    public static function GetIbsiUserInfoByArrayUsername($usernames, $resultfix=true){
-        if(! $usernames) return false;
-        $ids=[];
-        $usernames=array_unique($usernames);
+    public static function GetIbsiUserInfoByArrayUsername($usernames, $resultfix = true)
+    {
+        if (!$usernames) return false;
+        $ids = [];
+        $usernames = array_unique($usernames);
         foreach ($usernames as $k => $v) {
-            if(! in_array($v,$ids) && $v){
-                $ids[]=$GLOBALS['ibs_internet']->getUserIdByNormalUsername($v);
+            if (!in_array($v, $ids) && $v) {
+                $ids[] = $GLOBALS['ibs_internet']->getUserIdByNormalUsername($v);
             }
         }
-        if(! $ids) return false;
-        $ids=array_unique($ids);
-        $str='';
-        for ($i=0; $i <count($ids) ; $i++) { 
-            if($i !== array_key_last($ids)){
-                $str.=(string)$ids[$i].",";
-            }else{
-                $str.=(string)$ids[$i];
+        if (!$ids) return false;
+        $ids = array_unique($ids);
+        $str = '';
+        for ($i = 0; $i < count($ids); $i++) {
+            if ($i !== array_key_last($ids)) {
+                $str .= (string)$ids[$i] . ",";
+            } else {
+                $str .= (string)$ids[$i];
             }
         }
-        if(! $str) return false;
-        $res=$GLOBALS['ibs_internet']->getUserInfoByUserID($str, true);
-        $arr=[];
-        if($resultfix){
-            if(isset($res)){
-                if($res){
+        if (!$str) return false;
+        $res = $GLOBALS['ibs_internet']->getUserInfoByUserID($str, true);
+        $arr = [];
+        if ($resultfix) {
+            if (isset($res)) {
+                if ($res) {
                     foreach ($res as $k => $v) {
-                        $arr[]=$v;
+                        $arr[] = $v;
                     }
-                    if(! $arr) return false;
+                    if (!$arr) return false;
                     return $arr;
                 }
             }
         }
-        if(! isset($res)){
+        if (!isset($res)) {
             return false;
         }
-        if(! $res){
+        if (!$res) {
             return false;
         }
         return $res;
     }
 
-    public static function ibsGetOnlineUserInfoByArrayId($ids, $fixresult=true){
-        if(! $ids) return false;
-        $str='';
-        for ($i=0; $i <count($ids) ; $i++) { 
-            if($i !== array_key_last($ids)){
-                $str.=(string)$ids[$i].",";
-            }else{
-                $str.=(string)$ids[$i];
+    public static function ibsGetOnlineUserInfoByArrayId($ids, $fixresult = true)
+    {
+        if (!$ids) return false;
+        $str = '';
+        for ($i = 0; $i < count($ids); $i++) {
+            if ($i !== array_key_last($ids)) {
+                $str .= (string)$ids[$i] . ",";
+            } else {
+                $str .= (string)$ids[$i];
             }
         }
-        if(! $str) return false;
-        if($fixresult){
-            $res=$GLOBALS['ibs_internet']->getUserInfoByUserID($str, true);
-            $arr=[];
+        if (!$str) return false;
+        if ($fixresult) {
+            $res = $GLOBALS['ibs_internet']->getUserInfoByUserID($str, true);
+            $arr = [];
             foreach ($res as $key => $value) {
-                if($res[$key]){
-                    if($res[$key]['online_status']){
-                        $res[$key]['user_id']=$key;
-                        $arr[]=$res[$key];
+                if ($res[$key]) {
+                    if ($res[$key]['online_status']) {
+                        $res[$key]['user_id'] = $key;
+                        $arr[] = $res[$key];
                     }
                 }
             }
-            if($arr){
+            if ($arr) {
                 return $arr;
-            }else{
+            } else {
                 return false;
             }
-        }else{
-            $res=$GLOBALS['ibs_internet']->getUserInfoByUserID($str, false);
+        } else {
+            $res = $GLOBALS['ibs_internet']->getUserInfoByUserID($str, false);
             return $res;
         }
-        
-
     }
-    public static function multipleSelectWithId($table, $ids){
-        $sql="SELECT * FROM ".$table." WHERE id IN ";
-        for ($i=0; $i <count($ids) ; $i++) { 
-            if($i===array_key_first($ids)){
-                $sql.="(?,";
-            }elseif($i===array_key_last($ids)){
-                $sql.="?)";
-            }else{
-                $sql.="?,";
+    public static function multipleSelectWithId($table, $ids)
+    {
+        $sql = "SELECT * FROM " . $table . " WHERE id IN ";
+        for ($i = 0; $i < count($ids); $i++) {
+            if ($i === array_key_first($ids)) {
+                $sql .= "(?,";
+            } elseif ($i === array_key_last($ids)) {
+                $sql .= "?)";
+            } else {
+                $sql .= "?,";
             }
         }
-        $res=Db::secure_fetchall($sql, $ids);
+        $res = Db::secure_fetchall($sql, $ids);
         return $res;
     }
-    
-    public static function checkIbsResultExist($ibsresult){
-        if(isset($ibsresult)){
-            if($ibsresult){
-                if(isset($ibsresult[0])){
-                    if($ibsresult[0]){
-                        if(isset($ibsresult[1])){
-                            if($ibsresult[1]){
+
+    public static function checkIbsResultExist($ibsresult)
+    {
+        if (isset($ibsresult)) {
+            if ($ibsresult) {
+                if (isset($ibsresult[0])) {
+                    if ($ibsresult[0]) {
+                        if (isset($ibsresult[1])) {
+                            if ($ibsresult[1]) {
                                 return true;
                             }
                         }
@@ -396,15 +406,16 @@ class Helper
         }
         return false;
     }
-    public static function checkIbsResultStrict($ibsresult){
-        if(isset($ibsresult)){
-            if($ibsresult){
-                if(isset($ibsresult[0])){
-                    if($ibsresult[0]){
-                        if(isset($ibsresult[1])){
-                            if($ibsresult[1]){
-                                if(isset($ibsresult[1][1])){
-                                    if($ibsresult[1][1]){
+    public static function checkIbsResultStrict($ibsresult)
+    {
+        if (isset($ibsresult)) {
+            if ($ibsresult) {
+                if (isset($ibsresult[0])) {
+                    if ($ibsresult[0]) {
+                        if (isset($ibsresult[1])) {
+                            if ($ibsresult[1]) {
+                                if (isset($ibsresult[1][1])) {
+                                    if ($ibsresult[1][1]) {
                                         return true;
                                     }
                                 }
@@ -416,42 +427,43 @@ class Helper
         }
         return false;
     }
-    public static function createDateRange( $first, $last, $step = '+1 day', $format = 'Y-m-d' ) {
+    public static function createDateRange($first, $last, $step = '+1 day', $format = 'Y-m-d')
+    {
         $dates = [];
-        $current = strtotime( $first );
-        $last = strtotime( $last );
-    
-        while( $current <= $last ) {
-    
-            $dates[] = date( $format, $current );
-            $current = strtotime( $step, $current );
+        $current = strtotime($first);
+        $last = strtotime($last);
+
+        while ($current <= $last) {
+
+            $dates[] = date($format, $current);
+            $current = strtotime($step, $current);
         }
-    
+
         return $dates;
     }
-    
+
     public static function setIbsCustomfieldsByFactorid($fid)
     {
-        if(! $fid) return false;
-        $serinfo=self::getServiceInfoByFactoridNoAuth($fid);
-        if($serinfo){
-            $subinfo=self::Select_By_Id('bnm_subscribers', $serinfo[0]['subid']);
+        if (!$fid) return false;
+        $serinfo = self::getServiceInfoByFactoridNoAuth($fid);
+        if ($serinfo) {
+            $subinfo = self::Select_By_Id('bnm_subscribers', $serinfo[0]['subid']);
             switch (strtolower($serinfo[0]['general_sertype'])) {
-                    case 'bitstream':
-                    case 'adsl':
-                    case 'vdsl':
-                        $service_name='ADSL';
-                        $userid=$GLOBALS['ibs_internet']->getUserIdByNormalUsername($serinfo[0]['ibsusername']);
-                        if($userid[0] && isset($service_name)){
-                            $id=$userid[1];
-                            $res=$GLOBALS['ibs_internet']->setUserCustomField((string) $id, 'service_name', $service_name);
-                        }
+                case 'bitstream':
+                case 'adsl':
+                case 'vdsl':
+                    $service_name = 'ADSL';
+                    $userid = $GLOBALS['ibs_internet']->getUserIdByNormalUsername($serinfo[0]['ibsusername']);
+                    if ($userid[0] && isset($service_name)) {
+                        $id = $userid[1];
+                        $res = $GLOBALS['ibs_internet']->setUserCustomField((string) $id, 'service_name', $service_name);
+                    }
                     break;
-                    case 'wireless':
-                        $service_name='WIRELESS';
-                        $userid=$GLOBALS['ibs_internet']->getUserIdByNormalUsername($serinfo[0]['ibsusername']);
-                        if($userid[0] && isset($service_name)){
-                            $sql="SELECT
+                case 'wireless':
+                    $service_name = 'WIRELESS';
+                    $userid = $GLOBALS['ibs_internet']->getUserIdByNormalUsername($serinfo[0]['ibsusername']);
+                    if ($userid[0] && isset($service_name)) {
+                        $sql = "SELECT
                                 ss.id ssid,
                                 ss.station_id stationid,
                                 ss.sub_id subid,
@@ -464,51 +476,52 @@ class Helper
                             WHERE
                                 ss.id = ?
                                 GROUP BY ss.id";
-                            $res_station=Db::secure_fetchall($sql, [$serinfo[0]['emkanat_id']]);
-                            if($res_station){
-                                // $tol=self::decimalToLL($res_station[0]['tol_joghrafiai']);
-                                // $arz=self::decimalToLL($res_station[0]['arz_joghrafiai']);
-                                $id=$userid[1];
-                                $res=$GLOBALS['ibs_internet']->setUserCustomField((string) $id, 'service_name', $service_name);
-                                $res=$GLOBALS['ibs_internet']->setUserCustomField((string) $id, 'location1', $res_station[0]['tol_joghrafiai'].','.$res_station[0]['arz_joghrafiai']);
-                            }else{
-                                return false;
-                            }
-                        }else{
+                        $res_station = Db::secure_fetchall($sql, [$serinfo[0]['emkanat_id']]);
+                        if ($res_station) {
+                            // $tol=self::decimalToLL($res_station[0]['tol_joghrafiai']);
+                            // $arz=self::decimalToLL($res_station[0]['arz_joghrafiai']);
+                            $id = $userid[1];
+                            $res = $GLOBALS['ibs_internet']->setUserCustomField((string) $id, 'service_name', $service_name);
+                            $res = $GLOBALS['ibs_internet']->setUserCustomField((string) $id, 'location1', $res_station[0]['tol_joghrafiai'] . ',' . $res_station[0]['arz_joghrafiai']);
+                        } else {
                             return false;
                         }
-                           
+                    } else {
+                        return false;
+                    }
+
                     break;
-                    case 'tdlte':
-                        $service_name='TD_LTE';
-                        $userid=$GLOBALS['ibs_internet']->getUserIdByNormalUsername($serinfo[0]['ibsusername']);
-                        if($userid[0] && isset($service_name)){
-                            $id=$userid[1];
-                            $res=$GLOBALS['ibs_internet']->setUserCustomField((string) $id, 'service_name', $service_name);
-                        }
+                case 'tdlte':
+                    $service_name = 'TD_LTE';
+                    $userid = $GLOBALS['ibs_internet']->getUserIdByNormalUsername($serinfo[0]['ibsusername']);
+                    if ($userid[0] && isset($service_name)) {
+                        $id = $userid[1];
+                        $res = $GLOBALS['ibs_internet']->setUserCustomField((string) $id, 'service_name', $service_name);
+                    }
                     break;
-                    
-                    default:
-                        
+
+                default:
+
                     break;
-                
             }
             return true;
         }
     }
-    
-    public static function crmDailyReportLog($mtarikh, $status = 1){
-        $tmp=['status'=>$status, 'mtarikh'=>$mtarikh. ' '. self::nowShamsihisv()];
-        $sql=self::Insert_Generator($tmp, 'bnm_crmdailyreportlog');
-        $res=Db::secure_insert_array($sql, $tmp);
-        if($res){
+
+    public static function crmDailyReportLog($mtarikh, $status = 1)
+    {
+        $tmp = ['status' => $status, 'mtarikh' => $mtarikh . ' ' . self::nowShamsihisv()];
+        $sql = self::Insert_Generator($tmp, 'bnm_crmdailyreportlog');
+        $res = Db::secure_insert_array($sql, $tmp);
+        if ($res) {
             return true;
-        }else{
+        } else {
             return false;
         }
     }
-    public static function quickCrmReport($date, $fd, $td){
-        $name   = "CRM_".$date."_"."SaharErtebat.csv";
+    public static function quickCrmReport($date, $fd, $td)
+    {
+        $name   = "CRM_" . $date . "_" . "SaharErtebat.csv";
         $res    = CrmReport::reportByCustomDates($fd, $td);
         $csv    = self::createCrmReportCsv($res, 'dump');
         if ($csv) {
@@ -517,47 +530,46 @@ class Helper
         }
         return false;
     }
-    public static function sendCrmReportFileWithFtp($host, $user, $pass, $localfilepath, $localfilename, $destfilepath, $destfilename){
+    public static function sendCrmReportFileWithFtp($host, $user, $pass, $localfilepath, $localfilename, $destfilepath, $destfilename)
+    {
         // $user='Sahar_Ertebat';
         // $pass='XxeNhfmq';
         // connect to FTP server
         $ftp_conn = ftp_connect($host);
-        if(! $ftp_conn){
+        if (!$ftp_conn) {
             return false;
         }
         //login to FTP server
         $login = ftp_login($ftp_conn, $user, $pass);
         // upload file
-        if (ftp_put($ftp_conn, $destfilepath.$destfilename, $localfilepath.$localfilename, FTP_ASCII))
-        {
+        if (ftp_put($ftp_conn, $destfilepath . $destfilename, $localfilepath . $localfilename, FTP_ASCII)) {
             //success
             ftp_close($ftp_conn);
             return true;
-        }else
-        {
+        } else {
             //fail
             ftp_close($ftp_conn);
             return false;
         }
     }
-    
-    public static function createCrmReportCsv(string $data,string $filename, $path=''){
+
+    public static function createCrmReportCsv(string $data, string $filename, $path = '')
+    {
         $data       = [[$data]];
-        $f = fopen($path.$filename.".csv", 'w+');
-        if (! $f) {
+        $f = fopen($path . $filename . ".csv", 'w+');
+        if (!$f) {
             return false;
         }
         foreach ($data as $row) {
-            fprintf($f, chr(0xEF).chr(0xBB).chr(0xBF));
+            fprintf($f, chr(0xEF) . chr(0xBB) . chr(0xBF));
             fputcsv($f, $row);
         }
         fclose($f);
         return true;
-
     }
 
     public static function ToLL($north, $east, $utmZone)
-    { 
+    {
         // This is the lambda knot value in the reference
         $LngOrigin = Deg2Rad($utmZone * 6 - 183);
 
@@ -573,7 +585,7 @@ class Helper
         $EccSq = $Ecc * $Ecc;
         $Ecc2Sq = $EccSq / (1. - $EccSq);
         $Ecc2 = sqrt($Ecc2Sq);      // Secondary eccentricity
-        $E1 = ( 1 - sqrt(1-$EccSq) ) / ( 1 + sqrt(1-$EccSq) );
+        $E1 = (1 - sqrt(1 - $EccSq)) / (1 + sqrt(1 - $EccSq));
         $E12 = $E1 * $E1;
         $E13 = $E12 * $E1;
         $E14 = $E13 * $E1;
@@ -585,16 +597,16 @@ class Helper
         // Calculate the Cassini projection parameters
 
         $M1 = ($north - $FalseNorth) / $ScaleFactor;
-        $Mu1 = $M1 / ( $SemiMajor * (1 - $EccSq/4.0 - 3.0*$EccSq*$EccSq/64.0 - 5.0*$EccSq*$EccSq*$EccSq/256.0) );
+        $Mu1 = $M1 / ($SemiMajor * (1 - $EccSq / 4.0 - 3.0 * $EccSq * $EccSq / 64.0 - 5.0 * $EccSq * $EccSq * $EccSq / 256.0));
 
-        $Phi1 = $Mu1 + (3.0*$E1/2.0 - 27.0*$E13/32.0) * sin(2.0*$Mu1);
-            + (21.0*$E12/16.0 - 55.0*$E14/32.0)           * sin(4.0*$Mu1);
-            + (151.0*$E13/96.0)                          * sin(6.0*$Mu1);
-            + (1097.0*$E14/512.0)                        * sin(8.0*$Mu1);
+        $Phi1 = $Mu1 + (3.0 * $E1 / 2.0 - 27.0 * $E13 / 32.0) * sin(2.0 * $Mu1);
+        + (21.0 * $E12 / 16.0 - 55.0 * $E14 / 32.0)           * sin(4.0 * $Mu1);
+        + (151.0 * $E13 / 96.0)                          * sin(6.0 * $Mu1);
+        + (1097.0 * $E14 / 512.0)                        * sin(8.0 * $Mu1);
 
         $sin2phi1 = sin($Phi1) * sin($Phi1);
-        $Rho1 = ($SemiMajor * (1.0-$EccSq) ) / pow(1.0-$EccSq*$sin2phi1,1.5);
-        $Nu1 = $SemiMajor / sqrt(1.0-$EccSq*$sin2phi1);
+        $Rho1 = ($SemiMajor * (1.0 - $EccSq)) / pow(1.0 - $EccSq * $sin2phi1, 1.5);
+        $Nu1 = $SemiMajor / sqrt(1.0 - $EccSq * $sin2phi1);
 
         // Compute parameters as defined in the POSC specification.  T, C and D
 
@@ -610,11 +622,11 @@ class Helper
         $D6 = $D5 * $D;
 
         // Compute the Latitude and Longitude and convert to degrees
-        $lat = $Phi1 - $Nu1*tan($Phi1)/$Rho1 * ( $D2/2.0 - (5.0 + 3.0*$T1 + 10.0*$C1 - 4.0*$C12 - 9.0*$Ecc2Sq)*$D4/24.0 + (61.0 + 90.0*$T1 + 298.0*$C1 + 45.0*$T12 - 252.0*$Ecc2Sq - 3.0*$C12)*$D6/720.0 );
+        $lat = $Phi1 - $Nu1 * tan($Phi1) / $Rho1 * ($D2 / 2.0 - (5.0 + 3.0 * $T1 + 10.0 * $C1 - 4.0 * $C12 - 9.0 * $Ecc2Sq) * $D4 / 24.0 + (61.0 + 90.0 * $T1 + 298.0 * $C1 + 45.0 * $T12 - 252.0 * $Ecc2Sq - 3.0 * $C12) * $D6 / 720.0);
 
         $lat = Rad2Deg($lat);
 
-        $lon = $LngOrigin + ($D - (1.0 + 2.0*$T1 + $C1)*$D3/6.0 + (5.0 - 2.0*$C1 + 28.0*$T1 - 3.0*$C12 + 8.0*$Ecc2Sq + 24.0*$T12)*$D5/120.0) / cos($Phi1);
+        $lon = $LngOrigin + ($D - (1.0 + 2.0 * $T1 + $C1) * $D3 / 6.0 + (5.0 - 2.0 * $C1 + 28.0 * $T1 - 3.0 * $C12 + 8.0 * $Ecc2Sq + 24.0 * $T12) * $D5 / 120.0) / cos($Phi1);
 
         $lon = Rad2Deg($lon);
 
@@ -625,8 +637,9 @@ class Helper
         // Returns a PC_LatLon object
         return $PC_LatLon;
     }
-    public static function getShahrinfoById($id){
-        $sql="SELECT
+    public static function getShahrinfoById($id)
+    {
+        $sql = "SELECT
             id,
             NAME faname,
             name_en enname,
@@ -636,15 +649,15 @@ class Helper
             bnm_shahr 
         WHERE
             id = ?";
-        $res=Db::secure_fetchall($sql,[$id]);
-        if(! $res){
+        $res = Db::secure_fetchall($sql, [$id]);
+        if (!$res) {
             return false;
         }
         return $res;
-
     }
-    public static function getOstanInfoById($id){
-        $sql="SELECT
+    public static function getOstanInfoById($id)
+    {
+        $sql = "SELECT
             id,
             NAME faname,
             name_en enname,
@@ -655,130 +668,135 @@ class Helper
             bnm_ostan o
         WHERE
             id = ?";
-        $res=Db::secure_fetchall($sql,[$id]);
-        if(! $res){
+        $res = Db::secure_fetchall($sql, [$id]);
+        if (!$res) {
             return false;
         }
         return $res;
     }
-    public static function getCountryInfoById($id){
-        $sql="SELECT c.id, c.`code`, c.`name` FROM bnm_countries c WHERE id = ?";
-        $res=Db::secure_fetchall($sql,[$id]);
-        if(! $res){
+    public static function getCountryInfoById($id)
+    {
+        $sql = "SELECT c.id, c.`code`, c.`name` FROM bnm_countries c WHERE id = ?";
+        $res = Db::secure_fetchall($sql, [$id]);
+        if (!$res) {
             return false;
         }
         return $res;
     }
 
-    public static function logUserInfoUpdate($subid){
-        $factors=self::getInternetServiceInfoBySubidNoAuth($subid);
-        $ipass=self::getBandWidthServiceBySubidNoAuth($subid);
-        if($factors || $ipass){
-            $arr=[];
-            $arr['mtarikh']=self::Today_Miladi_Date('-').' '.self::nowTimeTehran(':',true, true);
-            $arr['subid']=$subid;
-            $sql=self::Insert_Generator($arr, 'bnm_subinfoupdatelogs');
-            $res=Db::secure_insert_array($sql,$arr);
-            if($res){
+    public static function logUserInfoUpdate($subid)
+    {
+        $factors = self::getInternetServiceInfoBySubidNoAuth($subid);
+        $ipass = self::getBandWidthServiceBySubidNoAuth($subid);
+        if ($factors || $ipass) {
+            $arr = [];
+            $arr['mtarikh'] = self::Today_Miladi_Date('-') . ' ' . self::nowTimeTehran(':', true, true);
+            $arr['subid'] = $subid;
+            $sql = self::Insert_Generator($arr, 'bnm_subinfoupdatelogs');
+            $res = Db::secure_insert_array($sql, $arr);
+            if ($res) {
                 return true;
             }
         }
         return false;
-
     }
-    public static function getBandWidthServiceBySubidNoAuth($subid){
-        $sql="SELECT * FROM bnm_ip_assign WHERE sub = ?";
-        $res=Db::secure_fetchall($sql, [$subid]);
-        if(! $res) return false;
+    public static function getBandWidthServiceBySubidNoAuth($subid)
+    {
+        $sql = "SELECT * FROM bnm_ip_assign WHERE sub = ?";
+        $res = Db::secure_fetchall($sql, [$subid]);
+        if (!$res) return false;
         return $res;
     }
 
-    public static function getIbsLogsByArrayUsernamesDesc($usernames, $fdate=false, $tdate=false, $rows=200, $date_unit=false){
-        if(! is_array($usernames)){
+    public static function getIbsLogsByArrayUsernamesDesc($usernames, $fdate = false, $tdate = false, $rows = 200, $date_unit = false)
+    {
+        if (!is_array($usernames)) {
             return false;
         }
-        if(! $fdate){
-            $fdate=date("Y-m-d H:i:s", strtotime("-6 months"));
+        if (!$fdate) {
+            $fdate = date("Y-m-d H:i:s", strtotime("-6 months"));
         }
-        if(! $tdate){
-            $tdate=date("Y-m-d")." ".self::nowTimeTehran();
+        if (!$tdate) {
+            $tdate = date("Y-m-d") . " " . self::nowTimeTehran();
         }
-        if(! $date_unit){
-            $date_unit='gregorian';
+        if (!$date_unit) {
+            $date_unit = 'gregorian';
         }
-        $ids=[];
-        for ($i=0; $i <count($usernames) ; $i++) { 
-            if($usernames[$i]){
-                $id=$GLOBALS['ibs_internet']->getUserIdByNormalUsername($usernames[$i]);
-                if($id){
-                    $ids[]=$id;
+        $ids = [];
+        for ($i = 0; $i < count($usernames); $i++) {
+            if ($usernames[$i]) {
+                $id = $GLOBALS['ibs_internet']->getUserIdByNormalUsername($usernames[$i]);
+                if ($id) {
+                    $ids[] = $id;
                 }
             }
         }
-        if(! $ids) return false;
-        $ids=array_unique($ids);
-        if(! $ids) return false;
-        $strids='';
-        for ($i=0; $i <count($ids) ; $i++) { 
-            if($ids[$i] && $i===array_key_last($ids)){
-                $strids.=(string)$ids[$i];
-            }elseif ($ids[$i] && $i !== array_key_last($ids)) {
-                $strids.=(string)$ids[$i].",";
+        if (!$ids) return false;
+        $ids = array_unique($ids);
+        if (!$ids) return false;
+        $strids = '';
+        for ($i = 0; $i < count($ids); $i++) {
+            if ($ids[$i] && $i === array_key_last($ids)) {
+                $strids .= (string)$ids[$i];
+            } elseif ($ids[$i] && $i !== array_key_last($ids)) {
+                $strids .= (string)$ids[$i] . ",";
             }
         }
-        if(! $strids) return false;
-        $res=$GLOBALS['ibs_internet']->getConnectionByUserIdAndDateTimeDesc($strids, $fdate, $tdate, $rows, $date_unit);
-        if(self::checkIbsResultStrict($res)){
+        if (!$strids) return false;
+        $res = $GLOBALS['ibs_internet']->getConnectionByUserIdAndDateTimeDesc($strids, $fdate, $tdate, $rows, $date_unit);
+        if (self::checkIbsResultStrict($res)) {
             return $res;
-        }else{
+        } else {
             return false;
         }
     }
 
-    public static function getIbsLogsByArrayUsernamesAndRemoteIpDesc($usernames, $ip, $fdate=false, $tdate=false, $rows=200, $date_unit=false){
-        if(! is_array($usernames)){
+    public static function getIbsLogsByArrayUsernamesAndRemoteIpDesc($usernames, $ip, $fdate = false, $tdate = false, $rows = 200, $date_unit = false)
+    {
+        if (!is_array($usernames)) {
             return false;
         }
-        if(! $fdate){
-            $fdate=date("Y-m-d H:i:s", strtotime("-6 months"));
+        if (!$fdate) {
+            $fdate = date("Y-m-d H:i:s", strtotime("-6 months"));
         }
-        if(! $tdate){
-            $tdate=date("Y-m-d H:i:s")." ".self::nowTimeTehran();
+        if (!$tdate) {
+            $tdate = date("Y-m-d H:i:s") . " " . self::nowTimeTehran();
         }
-        if(! $date_unit){
-            $date_unit='gregorian';
+        if (!$date_unit) {
+            $date_unit = 'gregorian';
         }
-        $ids=[];
-        for ($i=0; $i <count($usernames) ; $i++) { 
-            if($usernames[$i]){
-                $id=$GLOBALS['ibs_internet']->getUserIdByNormalUsername($usernames[$i]);
-                if($id){
-                    $ids[]=$id;
+        $ids = [];
+        for ($i = 0; $i < count($usernames); $i++) {
+            if ($usernames[$i]) {
+                $id = $GLOBALS['ibs_internet']->getUserIdByNormalUsername($usernames[$i]);
+                if ($id) {
+                    $ids[] = $id;
                 }
             }
         }
-        if(! $ids) return false;
-        $ids=array_unique($ids);
-        if(! $ids) return false;
-        $strids='';
-        for ($i=0; $i <count($ids) ; $i++) { 
-            if($ids[$i] && $i===array_key_last($ids)){
-                $strids.=(string)$ids[$i];
-            }elseif ($ids[$i] && $i !== array_key_last($ids)) {
-                $strids.=(string)$ids[$i].",";
+        if (!$ids) return false;
+        $ids = array_unique($ids);
+        if (!$ids) return false;
+        $strids = '';
+        for ($i = 0; $i < count($ids); $i++) {
+            if ($ids[$i] && $i === array_key_last($ids)) {
+                $strids .= (string)$ids[$i];
+            } elseif ($ids[$i] && $i !== array_key_last($ids)) {
+                $strids .= (string)$ids[$i] . ",";
             }
         }
-        if(! $strids) return false;
-        $res=$GLOBALS['ibs_internet']->getConnectionByUserIdAndUserIdAndDateTimeDesc($strids, $ip, $fdate, $tdate, $rows, $date_unit);
-        if(self::checkIbsResultStrict($res)){
+        if (!$strids) return false;
+        $res = $GLOBALS['ibs_internet']->getConnectionByUserIdAndUserIdAndDateTimeDesc($strids, $ip, $fdate, $tdate, $rows, $date_unit);
+        if (self::checkIbsResultStrict($res)) {
             return $res;
-        }else{
+        } else {
             return false;
         }
     }
 
-    public static function getIbsUserinfoByUsernameAndSertype($username, $sertype="internet"){
-        if(! $username || !$sertype) return false;
+    public static function getIbsUserinfoByUsernameAndSertype($username, $sertype = "internet")
+    {
+        if (!$username || !$sertype) return false;
         switch ($sertype) {
             case 'Internet':
             case 'internet':
@@ -790,7 +808,7 @@ class Helper
                 // $res_usrid = $GLOBALS['ibs_internet']->getUserIdByNormalUsername($res_factor[0]['ibsusername']);
                 // $res = $GLOBALS['ibs_internet']->setNormalUserAuth((string) $res_usrid[1], $res_factor[0]['ibsusername'], $_POST['newpassword']);
                 $res = $GLOBALS['ibs_internet']->getUserInfoByNormalUserName($username);
-                if(! $res) return 1;
+                if (!$res) return 1;
                 if (!isset($res[1])) {
                     return false;
                 }
@@ -798,15 +816,15 @@ class Helper
                     return false;
                 }
                 $key = array_keys($res[1])[0];
-                if (! isset($key)){
+                if (!isset($key)) {
                     return false;
                 }
-                if (!$key){
+                if (!$key) {
                     return false;
                 }
-                if(isset($res[1][$key]['attrs']) && isset($res[1][$key]['basic_info'])){
+                if (isset($res[1][$key]['attrs']) && isset($res[1][$key]['basic_info'])) {
                     return $res[1][$key];
-                }else{
+                } else {
                     return false;
                 }
                 break;
@@ -818,22 +836,23 @@ class Helper
                 // $userinfo = $GLOBALS['ibs_internet']->getUserInfoByViopUserName($res_factor[0]['ibsusername']);
                 break;
             default:
-            return false;
+                return false;
                 // die(self::Json_Message('f'));
                 break;
         }
     }
 
-    public static function checkAsiatechBitstreamResponse($res){
-        if(! isset($res)) return false;
-        if(! $res) return false;
-        if(! isset($res['result'])) return false;
-        if($res['result']['errcode'] !== 0) return false;
+    public static function checkAsiatechBitstreamResponse($res)
+    {
+        if (!isset($res)) return false;
+        if (!$res) return false;
+        if (!isset($res['result'])) return false;
+        if ($res['result']['errcode'] !== 0) return false;
         return true;
         // if(isset($res['error']) &&)
 
     }
-    
+
     static public function verifyDate($date, $strict = true)
     {
         $dateTime = DateTime::createFromFormat('m/d/Y', $date);
@@ -850,14 +869,15 @@ class Helper
         $d = DateTime::createFromFormat($format, $date);
         return $d && $d->format($format) == $date;
     }
-    public static function displayPredefiendMessage($res){
-        if($res['HasError']){
+    public static function displayPredefiendMessage($res)
+    {
+        if ($res['HasError']) {
             return self::Custom_Msg($res['Message'], 2);
-        }else{
+        } else {
             return self::Custom_Msg($res['Message'], 1);
         }
     }
-    public static function array2csv($data, $path='c:/' ,$delimiter = ',', $enclosure = '"', $escape_char = "\\")
+    public static function array2csv($data, $path = 'c:/', $delimiter = ',', $enclosure = '"', $escape_char = "\\")
     {
         $f = fopen($path, 'w+');
         foreach ($data as $item) {
@@ -867,70 +887,70 @@ class Helper
         return stream_get_contents($f);
     }
 
-    public static function Get_Ip(){
-        if(!empty($_SERVER['HTTP_CLIENT_IP'])){
-          $ip=$_SERVER['HTTP_CLIENT_IP'];
-        }
-        elseif(!empty($_SERVER['HTTP_X_FORWARDED_FOR'])){
-          $ip=$_SERVER['HTTP_X_FORWARDED_FOR'];
-        }
-        else{
-          $ip=$_SERVER['REMOTE_ADDR'];
+    public static function Get_Ip()
+    {
+        if (!empty($_SERVER['HTTP_CLIENT_IP'])) {
+            $ip = $_SERVER['HTTP_CLIENT_IP'];
+        } elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+            $ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
+        } else {
+            $ip = $_SERVER['REMOTE_ADDR'];
         }
         return  $ip;
-      }
+    }
 
-    public static function decimalToLL($coord,/* */ $resultformat='string')
+    public static function decimalToLL($coord,/* */ $resultformat = 'string')
     {
-        
-        $isnorth = $coord>=0;
+
+        $isnorth = $coord >= 0;
         $coord = abs($coord);
         $deg = floor($coord);
-        $coord = ($coord-$deg)*60;
+        $coord = ($coord - $deg) * 60;
         $min = floor($coord);
-        $sec = floor(($coord-$min)*60);
+        $sec = floor(($coord - $min) * 60);
         // return array($deg, $min, $sec, $isnorth ? 'N' : 'S');
         // or if you want the string representation
         return sprintf("%d&deg;%d'%d\"%s", $deg, $min, $sec, $isnorth ? 'N' : 'S');
     }
     ///convert latitude longitude to decimal
-    public static function DMStoDD($deg,$min,$sec)
+    public static function DMStoDD($deg, $min, $sec)
     {
-        return $deg+((($min*60)+($sec))/3600);
-    }    
+        return $deg + ((($min * 60) + ($sec)) / 3600);
+    }
     ///convert decimal to latitude longitude ( Degrees / minutes / seconds ) 
     public static function DDtoDMS($dec)
     {
-        $vars = explode(".",$dec);
+        $vars = explode(".", $dec);
         $deg = $vars[0];
-        $tempma = "0.".$vars[1];
+        $tempma = "0." . $vars[1];
 
         $tempma = $tempma * 3600;
         $min = floor($tempma / 60);
-        $sec = $tempma - ($min*60);
+        $sec = $tempma - ($min * 60);
 
-        return array("deg"=>$deg,"min"=>$min,"sec"=>$sec);
+        return array("deg" => $deg, "min" => $min, "sec" => $sec);
     }
 
     public static function DECtoDMS($latitude, $longitude)
     {
-        $latitudeDirection = $latitude < 0 ? 'S': 'N';
-        $longitudeDirection = $longitude < 0 ? 'W': 'E';
+        $latitudeDirection = $latitude < 0 ? 'S' : 'N';
+        $longitudeDirection = $longitude < 0 ? 'W' : 'E';
 
-        $latitudeNotation = $latitude < 0 ? '-': '';
-        $longitudeNotation = $longitude < 0 ? '-': '';
+        $latitudeNotation = $latitude < 0 ? '-' : '';
+        $longitudeNotation = $longitude < 0 ? '-' : '';
 
         $latitudeInDegrees = floor(abs($latitude));
         $longitudeInDegrees = floor(abs($longitude));
 
-        $latitudeDecimal = abs($latitude)-$latitudeInDegrees;
-        $longitudeDecimal = abs($longitude)-$longitudeInDegrees;
+        $latitudeDecimal = abs($latitude) - $latitudeInDegrees;
+        $longitudeDecimal = abs($longitude) - $longitudeInDegrees;
 
         $_precision = 3;
-        $latitudeMinutes = round($latitudeDecimal*60,$_precision);
-        $longitudeMinutes = round($longitudeDecimal*60,$_precision);
+        $latitudeMinutes = round($latitudeDecimal * 60, $_precision);
+        $longitudeMinutes = round($longitudeDecimal * 60, $_precision);
 
-        return sprintf('%s%s° %s %s %s%s° %s %s',
+        return sprintf(
+            '%s%s° %s %s %s%s° %s %s',
             $latitudeNotation,
             $latitudeInDegrees,
             $latitudeMinutes,
@@ -940,35 +960,36 @@ class Helper
             $longitudeMinutes,
             $longitudeDirection
         );
-
     }
-    public static function resultArray(bool $haserror, $result=[],string $msg='f'){
-        if($haserror){
+    public static function resultArray(bool $haserror, $result = [], string $msg = 'f')
+    {
+        if ($haserror) {
             return [
-                'HasError'=>$haserror,
-                'Result'=>$result,
-                'Message'=>($msg) ? $msg:'f'
+                'HasError' => $haserror,
+                'Result' => $result,
+                'Message' => ($msg) ? $msg : 'f'
             ];
-        }else{
+        } else {
             return [
-                'HasError'=>$haserror,
-                'Result'=>$result,
-                'Message'=>($msg) ? $msg:'s'
+                'HasError' => $haserror,
+                'Result' => $result,
+                'Message' => ($msg) ? $msg : 's'
             ];
         }
     }
 
-    public static function checkEstAuthSub($subid){
-        $sql="SELECT response, requestname FROM shahkar_log WHERE subscriber_id = ? AND LOWER(requestname) = LOWER('estauthsub') ORDER BY id DESC LIMIT 1";
-        $shahkar=Db::secure_fetchall($sql,[$subid]);
-        if($shahkar){
-            if($shahkar[0]['response']===200){
+    public static function checkEstAuthSub($subid)
+    {
+        $sql = "SELECT response, requestname FROM shahkar_log WHERE subscriber_id = ? AND LOWER(requestname) = LOWER('estauthsub') ORDER BY id DESC LIMIT 1";
+        $shahkar = Db::secure_fetchall($sql, [$subid]);
+        if ($shahkar) {
+            if ($shahkar[0]['response'] === 200) {
                 return true;
                 // die(self::Json_Message('sap'));
-            }else{
+            } else {
                 return false;
             }
-        }else{
+        } else {
             // die(self::Json_Message('sanf'));
             return false;
         }
@@ -981,84 +1002,87 @@ class Helper
         $request_id = $providercode . $resultdate;
         if ($request_id) {
             return $request_id;
-        }else{
-			return false;
-		}
+        } else {
+            return false;
+        }
     }
 
-    public static function suspensionMessages($optype){
+    public static function suspensionMessages($optype)
+    {
         switch ((int)$optype) {
             case 1:
                 return 'فعالسازی: ';
-            break;
+                break;
             case 2:
                 return 'تعلیق دوطرفه: ';
-            break;
+                break;
             case 3:
                 return 'تخلیه: ';
-            break;
+                break;
             case 4:
                 return 'تعلیق یک طرفه: ';
-            break;
+                break;
             case 5:
                 return 'سلب امتیاز: ';
-            break;
+                break;
             case 6:
                 return 'مسدودی: ';
-            break;
+                break;
             default:
-                return false;    
-            break;
+                return false;
+                break;
         }
     }
-    public static function unixTimestampToDateTime($unixts, $format='Y-m-d H:i:s'){
-        $res=date($format, (int)$unixts);
+    public static function unixTimestampToDateTime($unixts, $format = 'Y-m-d H:i:s')
+    {
+        $res = date($format, (int)$unixts);
         return $res;
     }
-    public static function lastSuspensionStatus($subid, $sertype, $emkanatid){
-        $sql="SELECT * FROM bnm_suspensions sus WHERE subid= ? AND servicetype= ? AND emkanatid= ? ORDER BY datetime_auto DESC LIMIT 1";
-        $res=Db::secure_fetchall($sql,[$subid, $sertype, $emkanatid]);
-        if(! $res){
+    public static function lastSuspensionStatus($subid, $sertype, $emkanatid)
+    {
+        $sql = "SELECT * FROM bnm_suspensions sus WHERE subid= ? AND servicetype= ? AND emkanatid= ? ORDER BY datetime_auto DESC LIMIT 1";
+        $res = Db::secure_fetchall($sql, [$subid, $sertype, $emkanatid]);
+        if (!$res) {
             return 'unlocked';
-        }else{
-            if($res[0]['lockstatus']===1){
+        } else {
+            if ($res[0]['lockstatus'] === 1) {
                 return 'locked';
-                
-            }else{
+            } else {
                 return 'unlocked';
             }
         }
     }
-    public static function lockWithLogByUsername($username, $optype, $comment, $time='0', $refnum=''){
-        $premsg=self::suspensionMessages($optype);
-        $sers=self::getAllInternetUsersServicesInfoNoAuth();
-        if($time==='0' || $time===0){
-            $unlockdatetime='';
-        }else{
-            $unlockdatetime=self::Today_Miladi_Date().' '. self::nowTimeTehran(':', true, true);
-            $unlockdatetime=self::Add_Or_Minus_Day_To_Date($time, '+', $unlockdatetime);
+    public static function lockWithLogByUsername($username, $optype, $comment, $time = '0', $refnum = '')
+    {
+        $premsg = self::suspensionMessages($optype);
+        $sers = self::getAllInternetUsersServicesInfoNoAuth();
+        if ($time === '0' || $time === 0) {
+            $unlockdatetime = '';
+        } else {
+            $unlockdatetime = self::Today_Miladi_Date() . ' ' . self::nowTimeTehran(':', true, true);
+            $unlockdatetime = self::Add_Or_Minus_Day_To_Date($time, '+', $unlockdatetime);
         }
-        $arr=[];
+        $arr = [];
         foreach ($sers as $k => $v) {
-            if($v['ibsusername']===$username){
-                $arr['emkanatid']=$v['emkanat_id'];
-                $arr['subid']=$v['subid'];
-                $arr['factorid']=$v['fid'];
-                $arr['servicetype']=$v['sertype'];
-                $arr['modat']=$time;
-                $arr['lockstatus']=1;
-                $arr['lock_datetime']=self::Today_Miladi_Date().' '. self::nowTimeTehran(':', true, true);
-                $arr['tozihate_lock']=$comment;
-                $arr['siam_refnum']=$refnum;
+            if ($v['ibsusername'] === $username) {
+                $arr['emkanatid'] = $v['emkanat_id'];
+                $arr['subid'] = $v['subid'];
+                $arr['factorid'] = $v['fid'];
+                $arr['servicetype'] = $v['sertype'];
+                $arr['modat'] = $time;
+                $arr['lockstatus'] = 1;
+                $arr['lock_datetime'] = self::Today_Miladi_Date() . ' ' . self::nowTimeTehran(':', true, true);
+                $arr['tozihate_lock'] = $comment;
+                $arr['siam_refnum'] = $refnum;
                 break;
             }
         }
-        if(! $arr) return false;        
-        $result=self::lockService($username, 'internet', $premsg.$comment);
-        if(! $result) return false;
-        $sql=self::Insert_Generator($arr, 'bnm_suspensions');
+        if (!$arr) return false;
+        $result = self::lockService($username, 'internet', $premsg . $comment);
+        if (!$result) return false;
+        $sql = self::Insert_Generator($arr, 'bnm_suspensions');
         $ressus = Db::secure_insert_array($sql, $arr);
-        if(! $ressus){
+        if (!$ressus) {
             return self::resultArray(true, [], self::Messages('e'));
         }
         return true;
@@ -1067,216 +1091,220 @@ class Helper
         //     $del=Db::secure_fetchall($sql, [$ressus]);
         //     return self::resultArray(false, [], self::Messages('s'));
         // }
-        
+
     }
-    public static function lockWithLog($operationtype, $factorid, $time="0", $tozihat="قطع بصورت سیستمی", $refnum=""){
-        $premsg=self::suspensionMessages($operationtype);
-        if(! $premsg)self::resultArray(true, [], 'نوع عملیات ناشناخته درخواست خود را اصلاح کنید.');
-        $sql="SELECT fa.subscriber_id , ser.type, fa.emkanat_id FROM bnm_factor fa
+    public static function lockWithLog($operationtype, $factorid, $time = "0", $tozihat = "قطع بصورت سیستمی", $refnum = "")
+    {
+        $premsg = self::suspensionMessages($operationtype);
+        if (!$premsg) self::resultArray(true, [], 'نوع عملیات ناشناخته درخواست خود را اصلاح کنید.');
+        $sql = "SELECT fa.subscriber_id , ser.type, fa.emkanat_id FROM bnm_factor fa
         INNER JOIN bnm_services ser ON ser.id = fa.service_id
         INNER JOIN bnm_subscribers sub ON sub.id = fa.subscriber_id
         WHERE fa.id = ?";
-        $res= Db::secure_fetchall($sql, array($factorid));
-        if(! $res) {
+        $res = Db::secure_fetchall($sql, array($factorid));
+        if (!$res) {
             return self::resultArray(true, [], 'اطلاعات سرویس یا مشخصات مشترک یافت نشد.');
         }
-        $ibsusername= self::getIbsUsername($res[0]['subscriber_id'], $res[0]['type'], $res[0]['emkanat_id']);
-        if(! $ibsusername) {
+        $ibsusername = self::getIbsUsername($res[0]['subscriber_id'], $res[0]['type'], $res[0]['emkanat_id']);
+        if (!$ibsusername) {
             return self::resultArray(true, [], 'اطلاعات سرویس یا مشخصات مشترک یافت نشد.');
         }
-        $laststatus=self::lastSuspensionStatus($res[0]['subscriber_id'], $res[0]['type'], $res[0]['emkanat_id']);
-        if($laststatus==="locked"){
+        $laststatus = self::lastSuspensionStatus($res[0]['subscriber_id'], $res[0]['type'], $res[0]['emkanat_id']);
+        if ($laststatus === "locked") {
             return self::resultArray(true, [], 'این سرویس قبلا مسدود شده');
         }
-        if($time==='0'){
-            $unlockdatetime='';
-        }else{
-            $unlockdatetime=self::Today_Miladi_Date().' '. self::nowTimeTehran(':', true, true);
-            $unlockdatetime=self::Add_Or_Minus_Day_To_Date($time, '+', $unlockdatetime);
+        if ($time === '0') {
+            $unlockdatetime = '';
+        } else {
+            $unlockdatetime = self::Today_Miladi_Date() . ' ' . self::nowTimeTehran(':', true, true);
+            $unlockdatetime = self::Add_Or_Minus_Day_To_Date($time, '+', $unlockdatetime);
         }
-        $arr=[
-            'subid'             =>$res[0]['subscriber_id'],
-            'factorid'          =>$factorid,
-            'tozihate_lock'     =>$premsg.$tozihat,
-            'emkanatid'         =>$res[0]['emkanat_id'],
-            'servicetype'       =>$res[0]['type'],
-            'modat'             =>$time,
-            'lock_datetime'     =>self::Today_Miladi_Date().' '. self::nowTimeTehran(':', true, true),
-            'lockstatus'        =>$operationtype,
+        $arr = [
+            'subid'             => $res[0]['subscriber_id'],
+            'factorid'          => $factorid,
+            'tozihate_lock'     => $premsg . $tozihat,
+            'emkanatid'         => $res[0]['emkanat_id'],
+            'servicetype'       => $res[0]['type'],
+            'modat'             => $time,
+            'lock_datetime'     => self::Today_Miladi_Date() . ' ' . self::nowTimeTehran(':', true, true),
+            'lockstatus'        => $operationtype,
         ];
-        if($refnum){
-            $arr['siam_refnum']     =$refnum;
+        if ($refnum) {
+            $arr['siam_refnum']     = $refnum;
         }
         $sql    = self::Insert_Generator($arr, 'bnm_suspensions');
         $ressus = Db::secure_insert_array($sql, $arr);
-        if(! $ressus){
+        if (!$ressus) {
             return self::resultArray(true, [], self::Messages('e'));
         }
         // return self::resultArray(true, [], self::Messages('test'));
         // return $ressus;
-        if($res[0]['type']==="voip"){
-            $result=self::lockService($ibsusername[0]['ibsusername'], 'voip', $premsg.$tozihat);
-            if(! $result){
-                $sql="DELETE FROM bnm_suspensions WHERE id = ?";
-                $del=Db::secure_fetchall($sql, [$ressus]);
+        if ($res[0]['type'] === "voip") {
+            $result = self::lockService($ibsusername[0]['ibsusername'], 'voip', $premsg . $tozihat);
+            if (!$result) {
+                $sql = "DELETE FROM bnm_suspensions WHERE id = ?";
+                $del = Db::secure_fetchall($sql, [$ressus]);
             }
             return self::resultArray(false, [], self::Messages('s'));
-        }else{
-            $result=self::lockService($ibsusername[0]['ibsusername'], 'internet', $premsg.$tozihat);
-            if(! $result){
-                $sql="DELETE FROM bnm_suspensions WHERE id = ?";
-                $del=Db::secure_fetchall($sql, [$ressus]);
+        } else {
+            $result = self::lockService($ibsusername[0]['ibsusername'], 'internet', $premsg . $tozihat);
+            if (!$result) {
+                $sql = "DELETE FROM bnm_suspensions WHERE id = ?";
+                $del = Db::secure_fetchall($sql, [$ressus]);
                 return self::resultArray(false, [], self::Messages('s'));
             }
         }
     }
 
-    public static function unlockWithLog($operationtype, $factorid, $tozihat="وصل شده بصورت سیستمی", $refnum=""){
-        $premsg=self::suspensionMessages($operationtype);
-        if(! $premsg)self::resultArray(true, [], 'نوع عملیات ناشناخته درخواست خود را اصلاح کنید.');
-        $sql="SELECT fa.subscriber_id , ser.type, fa.emkanat_id FROM bnm_factor fa
+    public static function unlockWithLog($operationtype, $factorid, $tozihat = "وصل شده بصورت سیستمی", $refnum = "")
+    {
+        $premsg = self::suspensionMessages($operationtype);
+        if (!$premsg) self::resultArray(true, [], 'نوع عملیات ناشناخته درخواست خود را اصلاح کنید.');
+        $sql = "SELECT fa.subscriber_id , ser.type, fa.emkanat_id FROM bnm_factor fa
         INNER JOIN bnm_services ser ON ser.id = fa.service_id
         INNER JOIN bnm_subscribers sub ON sub.id = fa.subscriber_id
         WHERE fa.id = ?";
-        $res= Db::secure_fetchall($sql, array($factorid));
-        if(! $res) return self::resultArray(true, [], self::Messages('serinf'));
-        $ibsusername= self::getIbsUsername($res[0]['subscriber_id'], $res[0]['type'], $res[0]['emkanat_id']);
-        if(! $ibsusername) return self::resultArray(true, [], self::Messages('serinf'));
-        $arr                    =[];
-        $arr['subid']           =$res[0]['subscriber_id'];
-        $arr['emkanatid']       =$res[0]['emkanat_id'];
-        $arr['servicetype']     =$res[0]['type'];
-        $arr['tozihate_unlock'] =$premsg.$tozihat;
-        $arr['unlock_datetime'] =self::Today_Miladi_Date().' '. self::nowTimeTehran(':', true, true);
-        $arr['lockstatus']      =$operationtype;
-        if($refnum){
-            $arr['siam_refnum']     =$refnum;
+        $res = Db::secure_fetchall($sql, array($factorid));
+        if (!$res) return self::resultArray(true, [], self::Messages('serinf'));
+        $ibsusername = self::getIbsUsername($res[0]['subscriber_id'], $res[0]['type'], $res[0]['emkanat_id']);
+        if (!$ibsusername) return self::resultArray(true, [], self::Messages('serinf'));
+        $arr                    = [];
+        $arr['subid']           = $res[0]['subscriber_id'];
+        $arr['emkanatid']       = $res[0]['emkanat_id'];
+        $arr['servicetype']     = $res[0]['type'];
+        $arr['tozihate_unlock'] = $premsg . $tozihat;
+        $arr['unlock_datetime'] = self::Today_Miladi_Date() . ' ' . self::nowTimeTehran(':', true, true);
+        $arr['lockstatus']      = $operationtype;
+        if ($refnum) {
+            $arr['siam_refnum']     = $refnum;
         }
-        $sql="SELECT * FROM bnm_suspensions WHERE subid=? AND emkanatid=? AND servicetype=? ORDER BY datetime_auto DESC LIMIT 1";
-        $check= Db::secure_fetchall($sql,[$arr['subid'], $arr['emkanatid'], $arr['servicetype']]);
-        
-        if($check){
+        $sql = "SELECT * FROM bnm_suspensions WHERE subid=? AND emkanatid=? AND servicetype=? ORDER BY datetime_auto DESC LIMIT 1";
+        $check = Db::secure_fetchall($sql, [$arr['subid'], $arr['emkanatid'], $arr['servicetype']]);
+
+        if ($check) {
             //update
-            $arr['id']=$check[0]['id'];
-            $sql=self::Update_Generator($arr, 'bnm_suspensions',"WHERE id=:id");
+            $arr['id'] = $check[0]['id'];
+            $sql = self::Update_Generator($arr, 'bnm_suspensions', "WHERE id=:id");
             $ressus = Db::secure_update_array($sql, $arr);
-            if(! $ressus){
+            if (!$ressus) {
                 return self::resultArray(true, [], self::Messages('e'));
             }
-            $ressus=$arr['id'];
-        }else{
+            $ressus = $arr['id'];
+        } else {
             //insert
-            $arr['modat']=1;
-            $arr['lock_datetime']=self::Add_Or_Minus_Day_To_Date(1, '-', self::Today_Miladi_Date().' '. self::nowTimeTehran(':', true, true));
-            $arr['factorid']=$factorid;
-            $arr['tozihate_lock']='قطع شده بصورت سیستمی';
-            $sql=self::Insert_Generator($arr,'bnm_suspensions');
-            $ressus= Db::secure_insert_array($sql, $arr);
+            $arr['modat'] = 1;
+            $arr['lock_datetime'] = self::Add_Or_Minus_Day_To_Date(1, '-', self::Today_Miladi_Date() . ' ' . self::nowTimeTehran(':', true, true));
+            $arr['factorid'] = $factorid;
+            $arr['tozihate_lock'] = 'قطع شده بصورت سیستمی';
+            $sql = self::Insert_Generator($arr, 'bnm_suspensions');
+            $ressus = Db::secure_insert_array($sql, $arr);
         }
-        if(! $ressus){
+        if (!$ressus) {
             return self::resultArray(true, [], self::Messages('e'));
         }
         // return self::resultArray(true, [], self::Messages('test'));
-        if($res[0]['type']==="voip"){
-            $result=self::unlockService($ibsusername[0]['ibsusername'], 'voip');
-            if(! $result){
-                $sql="DELETE FROM bnm_suspensions WHERE id = ?";
-                $del=Db::secure_fetchall($sql, [$ressus]);
+        if ($res[0]['type'] === "voip") {
+            $result = self::unlockService($ibsusername[0]['ibsusername'], 'voip');
+            if (!$result) {
+                $sql = "DELETE FROM bnm_suspensions WHERE id = ?";
+                $del = Db::secure_fetchall($sql, [$ressus]);
             }
             return self::resultArray(false, [], self::Messages('s'));
-        }else{
-            $result=self::unlockService($ibsusername[0]['ibsusername'], 'internet');
-            if(! $result){
-                $sql="DELETE FROM bnm_suspensions WHERE id = ?";
-                $del=Db::secure_fetchall($sql, [$ressus]);
+        } else {
+            $result = self::unlockService($ibsusername[0]['ibsusername'], 'internet');
+            if (!$result) {
+                $sql = "DELETE FROM bnm_suspensions WHERE id = ?";
+                $del = Db::secure_fetchall($sql, [$ressus]);
             }
             return self::resultArray(false, [], self::Messages('s'));
         }
-
     }
 
-    public static function lockService(string $ibsusername, $sertype='internet', $comment=''){
-        if($sertype==="internet"){
-            $ibsinfo=$GLOBALS['ibs_internet']->getUserInfoByNormalUserName($ibsusername);
-        }else{
-            $ibsinfo=$GLOBALS['ibs_voip']->getUserInfoByVoipUserName($ibsusername);
+    public static function lockService(string $ibsusername, $sertype = 'internet', $comment = '')
+    {
+        if ($sertype === "internet") {
+            $ibsinfo = $GLOBALS['ibs_internet']->getUserInfoByNormalUserName($ibsusername);
+        } else {
+            $ibsinfo = $GLOBALS['ibs_voip']->getUserInfoByVoipUserName($ibsusername);
         }
-        if(isset($ibsinfo)){
-            if($ibsinfo[1]){
-                $key=key($ibsinfo[1]);
-                if(! $key){
+        if (isset($ibsinfo)) {
+            if ($ibsinfo[1]) {
+                $key = key($ibsinfo[1]);
+                if (!$key) {
                     return false;
                 }
-                $ibsuserid=$ibsinfo[1][$key]['basic_info']['user_id'];
-                if(! $ibsuserid){
+                $ibsuserid = $ibsinfo[1][$key]['basic_info']['user_id'];
+                if (!$ibsuserid) {
                     return false;
                 }
-                if($sertype==="internet"){
-                    $res=$GLOBALS['ibs_internet']->lockUser((string) $ibsuserid, $comment);
-                }else{
-                    $res=$GLOBALS['ibs_voip']->lockUser((string) $ibsuserid, $comment);
+                if ($sertype === "internet") {
+                    $res = $GLOBALS['ibs_internet']->lockUser((string) $ibsuserid, $comment);
+                } else {
+                    $res = $GLOBALS['ibs_voip']->lockUser((string) $ibsuserid, $comment);
                 }
                 return true;
-            }else{
+            } else {
                 return false;
             }
-        }else{
+        } else {
             return false;
         }
     }
-    
-    public static function unlockService(string $ibsusername, $sertype= 'internet'){
-        if($sertype==="internet"){
-            $ibsinfo=$GLOBALS['ibs_internet']->getUserInfoByNormalUserName($ibsusername);
-        }else{
-            $ibsinfo=$GLOBALS['ibs_voip']->getUserInfoByVoipUserName($ibsusername);
+
+    public static function unlockService(string $ibsusername, $sertype = 'internet')
+    {
+        if ($sertype === "internet") {
+            $ibsinfo = $GLOBALS['ibs_internet']->getUserInfoByNormalUserName($ibsusername);
+        } else {
+            $ibsinfo = $GLOBALS['ibs_voip']->getUserInfoByVoipUserName($ibsusername);
         }
-        if(isset($ibsinfo)){
-            if($ibsinfo[1]){
-                $key=key($ibsinfo[1]);
-                if(! $key){
+        if (isset($ibsinfo)) {
+            if ($ibsinfo[1]) {
+                $key = key($ibsinfo[1]);
+                if (!$key) {
                     return false;
                 }
-                $ibsuserid=$ibsinfo[1][$key]['basic_info']['user_id'];
-                if(! $ibsuserid){
+                $ibsuserid = $ibsinfo[1][$key]['basic_info']['user_id'];
+                if (!$ibsuserid) {
                     return false;
                 }
-                if($sertype==="internet"){
-                    $res=$GLOBALS['ibs_internet']->unlockUser((string) $ibsuserid);
+                if ($sertype === "internet") {
+                    $res = $GLOBALS['ibs_internet']->unlockUser((string) $ibsuserid);
                     // $res=$GLOBALS['ibs_internet']->setUserAttribute((string) $ibsuserid, 'unlock', 'no');
                     // $res=$GLOBALS['ibs_internet']->deleteUserAttribute((string) $ibsuserid, 'lock');
-                    
-                }else{
-                    $res=$GLOBALS['ibs_voip']->unlockUser((string) $ibsuserid);
+
+                } else {
+                    $res = $GLOBALS['ibs_voip']->unlockUser((string) $ibsuserid);
                 }
                 return true;
-            }else{
+            } else {
                 return false;
             }
-        }else{
+        } else {
             return false;
         }
     }
 
-    public static function seconds2MDH($ss) {
-        $s = $ss%60;
-        $m = floor(($ss%3600)/60);
-        $h = floor(($ss%86400)/3600);
-        $d = floor(($ss%2592000)/86400);
-        $M = floor($ss/2592000);
+    public static function seconds2MDH($ss)
+    {
+        $s = $ss % 60;
+        $m = floor(($ss % 3600) / 60);
+        $h = floor(($ss % 86400) / 3600);
+        $d = floor(($ss % 2592000) / 86400);
+        $M = floor($ss / 2592000);
         // return "$M M, $d d, $h h, $m m, $s s";
-        if($M){
-            return $M."M,".$d."d,".$h."h,".$m."m,".$s."s";
-        }else{
-            if($d){
-                return $d."d,".$h."h,".$m."m,".$s."s";
-            }else{
-                return $h."h,".$m."m,".$s."s";
+        if ($M) {
+            return $M . "M," . $d . "d," . $h . "h," . $m . "m," . $s . "s";
+        } else {
+            if ($d) {
+                return $d . "d," . $h . "h," . $m . "m," . $s . "s";
+            } else {
+                return $h . "h," . $m . "m," . $s . "s";
             }
         }
     }
 
-    public static function formatMac($string,$formatInput,$formatOutput)
+    public static function formatMac($string, $formatInput, $formatOutput)
     {
         // $string = "0025.9073.3014";
         // echo formatMac($string,'%02s%02s.%02s%02s.%02s%02s','%02s:%02s:%02s:%02s:%02s:%02s');
@@ -1289,14 +1317,15 @@ class Helper
         // $string = '00A03D:08EF63';
         // echo formatMac($string,'%02X%02X%02X:%02X%02X%02X','%02x:%02x:%02x:%02x:%02x:%02x');
         // //00:a0:3d:08:ef:63
-      return vsprintf($formatOutput,sscanf($string,$formatInput));
+        return vsprintf($formatOutput, sscanf($string, $formatInput));
     }
-    public static function byteConvertArray(array $arr, string $paramname, $force_unit = NULL, $format = NULL, $si = TRUE){
-        for ($i=0; $i < count($arr); $i++) { 
-            if($arr[$i][$paramname]<1){
-                $arr[$i][$paramname]=0;
+    public static function byteConvertArray(array $arr, string $paramname, $force_unit = NULL, $format = NULL, $si = TRUE)
+    {
+        for ($i = 0; $i < count($arr); $i++) {
+            if ($arr[$i][$paramname] < 1) {
+                $arr[$i][$paramname] = 0;
             }
-            $arr[$i][$paramname]=self::byteConvert($arr[$i][$paramname], $force_unit, $format, $si);
+            $arr[$i][$paramname] = self::byteConvert($arr[$i][$paramname], $force_unit, $format, $si);
         }
         return $arr;
     }
@@ -1306,51 +1335,52 @@ class Helper
         $format = ($format === NULL) ? '%01.2f %s' : (string) $format;
 
         // IEC prefixes (binary)
-        if ($si == FALSE OR strpos($force_unit, 'i') !== FALSE)
-        {
+        if ($si == FALSE or strpos($force_unit, 'i') !== FALSE) {
             $units = array('B', 'KiB', 'MiB', 'GiB', 'TiB', 'PiB');
             $mod   = 1024;
         }
         // SI prefixes (decimal)
-        else
-        {
+        else {
             $units = array('B', 'kB', 'MB', 'GB', 'TB', 'PB');
             $mod   = 1000;
         }
 
         // Determine unit to use
-        if (($power = array_search((string) $force_unit, $units)) === FALSE)
-        {
+        if (($power = array_search((string) $force_unit, $units)) === FALSE) {
             $power = ($bytes > 0) ? floor(log($bytes, $mod)) : 0;
         }
 
         return sprintf($format, $bytes / pow($mod, $power), $units[$power]);
     }
-    
-    public static function isMobile(string $phoneNumber){
-        if(preg_match("/^(\+98|0|0098)?9\d{9}$/", $phoneNumber)) {
+
+    public static function isMobile(string $phoneNumber)
+    {
+        if (preg_match("/^(\+98|0|0098)?9\d{9}$/", $phoneNumber)) {
             return true;
-         }else{
+        } else {
             return false;
-         }
+        }
     }
 
-    public static function isPhone($m){
-        if(preg_match("/^0[0-9]{2,}[0-9]{7,}$/", $m)){
+    public static function isPhone($m)
+    {
+        if (preg_match("/^0[0-9]{2,}[0-9]{7,}$/", $m)) {
             return true;
-        }else{
+        } else {
             return false;
         }
     }
-    public static function isWirelessUsername($m){
-        if(preg_match("/^w-[0-9]{1,9}-[0-9]{10,}$/", $m)){
+    public static function isWirelessUsername($m)
+    {
+        if (preg_match("/^w-[0-9]{1,9}-[0-9]{10,}$/", $m)) {
             return true;
-        }else{
+        } else {
             return false;
         }
     }
-    public static function toByteSize($p_sFormatted) {
-        $aUnits = array('B'=>0, 'KB'=>1, 'MB'=>2, 'GB'=>3, 'TB'=>4, 'PB'=>5, 'EB'=>6, 'ZB'=>7, 'YB'=>8);
+    public static function toByteSize($p_sFormatted)
+    {
+        $aUnits = array('B' => 0, 'KB' => 1, 'MB' => 2, 'GB' => 3, 'TB' => 4, 'PB' => 5, 'EB' => 6, 'ZB' => 7, 'YB' => 8);
         $sUnit = strtoupper(trim(substr($p_sFormatted, -2)));
         if (intval($sUnit) !== 0) {
             $sUnit = 'B';
@@ -1363,10 +1393,11 @@ class Helper
             return false;
         }
         return $iUnits * pow(1024, $aUnits[$sUnit]);
-    }    
+    }
 
-    public static function getAllUsers(){
-        $sql="SELECT
+    public static function getAllUsers()
+    {
+        $sql = "SELECT
             sub.id,
             IF(sub.noe_moshtarak = 'real', CONCAT( sub.name, ' ', sub.f_name ),sub.name_sherkat) name,
             IF(sub.noe_moshtarak = 'real', sub.code_meli,sub.shomare_sabt) code_meli,
@@ -1374,15 +1405,16 @@ class Helper
             sub.telephone_hamrah,
             IF(sub.noe_moshtarak = 'real', 'حقیقی', 'حقوقی') noe_moshtarak
             FROM bnm_subscribers sub ORDER BY id DESC";
-        $res=Db::fetchall_Query($sql);
-        if($res){
+        $res = Db::fetchall_Query($sql);
+        if ($res) {
             return $res;
-        }else{
+        } else {
             return false;
         }
     }
-    public static function getDistinctUserServicesInfo($subid){
-        $sql="SELECT
+    public static function getDistinctUserServicesInfo($subid)
+    {
+        $sql = "SELECT
             fa.id fid,
             fa.emkanat_id,
             fa.subscriber_id,
@@ -1398,15 +1430,16 @@ class Helper
             AND fa.subscriber_id = ?
             AND sub.id = ?
         GROUP BY fa.subscriber_id,ser.type,fa.emkanat_id";
-            $res=Db::secure_fetchall($sql, [1,$subid, $subid]);
-            if($res){
-                return $res;
-            }else{
-                return false;
-            }
+        $res = Db::secure_fetchall($sql, [1, $subid, $subid]);
+        if ($res) {
+            return $res;
+        } else {
+            return false;
+        }
     }
-    public static function getAllUserServices($subid){
-       $sql="SELECT
+    public static function getAllUserServices($subid)
+    {
+        $sql = "SELECT
             fa.id fid,
             fa.emkanat_id,
             fa.subscriber_id,
@@ -1420,30 +1453,32 @@ class Helper
             ser.noe_forosh IN ( 'adi', 'jashnvare' ) 
             AND fa.tasvie_shode = ?
             AND fa.subscriber_id =?";
-        $res=Db::secure_fetchall($sql, [1,$subid]);
+        $res = Db::secure_fetchall($sql, [1, $subid]);
 
-        if($res){
+        if ($res) {
             return $res;
-        }else{
+        } else {
             return false;
         }
     }
 
-    public static function allArrayElementsHasValue($arr){
+    public static function allArrayElementsHasValue($arr)
+    {
         foreach ($arr as $key => $value) {
-            if(! isset($key)){
+            if (!isset($key)) {
                 return false;
             }
-            if(! $value){
+            if (!$value) {
                 return false;
             }
         }
         return true;
     }
 
-    public static function getUserServices(/*all OR subscriber_id*/$subid='all',/*all-internet-voip-adsl-wireless-tdlte*/ $service_group='all'){
-        $res=false;
-        $sql="SELECT
+    public static function getUserServices(/*all OR subscriber_id*/$subid = 'all',/*all-internet-voip-adsl-wireless-tdlte*/ $service_group = 'all')
+    {
+        $res = false;
+        $sql = "SELECT
             sub.name,
             sub.f_name,
             sub.name_sherkat,
@@ -1464,11 +1499,11 @@ class Helper
                 INNER JOIN bnm_services ser ON ser.id = fa.service_id
                 INNER JOIN bnm_subscribers sub ON sub.id = fa.subscriber_id 
             WHERE ";
-        
+
         switch ($service_group) {
             case 'all':
-                if($subid === 'all'){
-                    $sql.="
+                if ($subid === 'all') {
+                    $sql .= "
                     ser.noe_forosh IN ('adi','jashnvare')
                     AND fa.tasvie_shode = ?
                     AND ser.type NOT IN ('ip')
@@ -1477,9 +1512,9 @@ class Helper
                         fa.emkanat_id
                     ORDER BY
                         fa.id DESC";
-                    $res=Db::secure_fetchall($sql, [1]);
-                }else{
-                    $sql.="
+                    $res = Db::secure_fetchall($sql, [1]);
+                } else {
+                    $sql .= "
                     fa.subscriber_id = ?
                     AND ser.noe_forosh IN ('adi','jashnvare')
                     AND fa.tasvie_shode = ?
@@ -1489,12 +1524,12 @@ class Helper
                         fa.emkanat_id
                     ORDER BY
                         fa.id DESC";
-                    $res=Db::secure_fetchall($sql, [$subid, 1]);
+                    $res = Db::secure_fetchall($sql, [$subid, 1]);
                 }
-            break;
+                break;
             case 'internet':
-                if($subid === 'all'){
-                    $sql.="
+                if ($subid === 'all') {
+                    $sql .= "
                     ser.noe_forosh IN ('adi','jashnvare')
                     AND fa.tasvie_shode = ?
                     AND ser.type IN ('adsl', 'vdsl', 'bitstream', 'wireless', 'tdlte')
@@ -1503,9 +1538,9 @@ class Helper
                         fa.emkanat_id
                     ORDER BY
                         fa.id DESC";
-                    $res=Db::secure_fetchall($sql, [1]);
-                }else{
-                    $sql.="
+                    $res = Db::secure_fetchall($sql, [1]);
+                } else {
+                    $sql .= "
                     fa.subscriber_id = ?
                     AND ser.noe_forosh IN ('adi','jashnvare')
                     AND fa.tasvie_shode = ?
@@ -1515,12 +1550,12 @@ class Helper
                         fa.emkanat_id
                     ORDER BY
                         fa.id DESC";
-                    $res=Db::secure_fetchall($sql, [$subid, 1]);
+                    $res = Db::secure_fetchall($sql, [$subid, 1]);
                 }
-            break;
+                break;
             case 'voip':
-                if($subid === 'all'){
-                    $sql.="
+                if ($subid === 'all') {
+                    $sql .= "
                     ser.noe_forosh IN ('adi','jashnvare')
                     AND fa.tasvie_shode = ?
                     AND ser.type IN ('voip')
@@ -1529,9 +1564,9 @@ class Helper
                         fa.emkanat_id
                     ORDER BY
                         fa.id DESC";
-                    $res=Db::secure_fetchall($sql, [1]);
-                }else{
-                    $sql.="
+                    $res = Db::secure_fetchall($sql, [1]);
+                } else {
+                    $sql .= "
                     fa.subscriber_id = ?
                     AND ser.noe_forosh IN ('adi','jashnvare')
                     AND fa.tasvie_shode = ?
@@ -1542,47 +1577,48 @@ class Helper
                         
                     ORDER BY
                         fa.id DESC";
-                    $res=Db::secure_fetchall($sql, [$subid, 1]);
+                    $res = Db::secure_fetchall($sql, [$subid, 1]);
                 }
-            break;
+                break;
             default:
                 return false;
-            break;
+                break;
         }
-        if($res){
-            for ($i=0; $i < count($res); $i++) { 
-                $ibsusername= self::getIbsUsername($subid, $res[$i]['sertype'], $res[$i]['emkanat_id']);
-                if($ibsusername){
-                    $res[$i]['ibsusername']=$ibsusername[0]['ibsusername'];
-                }else{
-                    $res[$i]['ibsusername']=false;
+        if ($res) {
+            for ($i = 0; $i < count($res); $i++) {
+                $ibsusername = self::getIbsUsername($subid, $res[$i]['sertype'], $res[$i]['emkanat_id']);
+                if ($ibsusername) {
+                    $res[$i]['ibsusername'] = $ibsusername[0]['ibsusername'];
+                } else {
+                    $res[$i]['ibsusername'] = false;
                 }
             }
             return $res;
-        }else{
+        } else {
             return false;
         }
-
     }
 
-    public static function getLastSubShahkarEst(){
-        $sql="SELECT count(*) rownum FROM shahkar_log WHERE subscriber_id= ? AND noe_darkhast= ? AND response = ? ORDER BY date DESC LIMIT 1";
-        $res=Db::secure_update_array($sql, [$_SESSION['user_id'], 2, 200]);
-        if($res[0]['rownum']> 0){
+    public static function getLastSubShahkarEst()
+    {
+        $sql = "SELECT count(*) rownum FROM shahkar_log WHERE subscriber_id= ? AND noe_darkhast= ? AND response = ? ORDER BY date DESC LIMIT 1";
+        $res = Db::secure_update_array($sql, [$_SESSION['user_id'], 2, 200]);
+        if ($res[0]['rownum'] > 0) {
             return true;
-        }else{
+        } else {
             return false;
         }
     }
 
-    public static function getUserCurrentCredit(){
+    public static function getUserCurrentCredit()
+    {
         switch ($_SESSION['user_type']) {
             case __MOSHTARAKUSERTYPE__:
-                $sql="SELECT credit FROM bnm_credits WHERE user_or_branch_id= ? AND noe_user = ? ORDER BY update_time DESC LIMIT 1";
-                $res= Db::secure_fetchall($sql,[$_SESSION['user_id'], 1]);
-                if($res){
+                $sql = "SELECT credit FROM bnm_credits WHERE user_or_branch_id= ? AND noe_user = ? ORDER BY update_time DESC LIMIT 1";
+                $res = Db::secure_fetchall($sql, [$_SESSION['user_id'], 1]);
+                if ($res) {
                     return $res;
-                }else{
+                } else {
                     return false;
                 }
                 break;
@@ -1590,17 +1626,17 @@ class Helper
             case __MODIR2USERTYPE__:
             case __OPERATORUSERTYPE__:
             case __OPERATOR2USERTYPE__:
-                $sql="SELECT credit FROM bnm_credits WHERE user_or_branch_id= ? AND noe_user = ? ORDER BY update_time DESC LIMIT 1";
-                $res= Db::secure_fetchall($sql,[$_SESSION['branch_id'], 2]);
-                if($res){
+                $sql = "SELECT credit FROM bnm_credits WHERE user_or_branch_id= ? AND noe_user = ? ORDER BY update_time DESC LIMIT 1";
+                $res = Db::secure_fetchall($sql, [$_SESSION['branch_id'], 2]);
+                if ($res) {
                     return $res;
-                }else{
+                } else {
                     return false;
                 }
-            break;
-            
+                break;
+
             default:
-                return false;    
+                return false;
                 break;
         }
     }
@@ -1637,7 +1673,7 @@ class Helper
                 curl_close($ch);
                 $result = json_decode($result, true);
                 if ($err) {
-                    return "cURL Error #:" . $err." ".self::Messages('e');
+                    return "cURL Error #:" . $err . " " . self::Messages('e');
                 } else {
                     if ($result['data']['code'] === 100) {
                         $arr = [];
@@ -1684,9 +1720,7 @@ class Helper
                         $redirectmsg = "<a href=" . __ROOT__ . 'dashboard' . ">" . "جهت بازگشت به صفحه اصلی اینجا کلیک کنید" . "</a>";
                         echo "<div style='margin-top:50px;text-align:center;font-size:18px;'>" . $msg . $redirectmsg . "</div>";
                         return false;
-                        
                     }
-                    
                 }
             } else {
                 return false;
@@ -1694,11 +1728,10 @@ class Helper
         } else {
             $sql = "UPDATE bnm_zarinpal SET status = ? WHERE authority = ?";
             $res = Db::secure_update_array($sql, [$status, $authority]);
-            $msg = "وضعیت تراکنش نامشخص". "<br><br>";
+            $msg = "وضعیت تراکنش نامشخص" . "<br><br>";
             $redirectmsg = "<a href=" . __ROOT__ . 'dashboard' . ">" . "جهت بازگشت به صفحه اصلی اینجا کلیک کنید" . "</a>";
             echo "<div style='margin-top:50px;text-align:center;font-size:18px;'>" . $msg . $redirectmsg . "</div>";
             return false;
-
         }
         // $sql="SELECT * FROM bnm_zarinpal WHERE authority = ? AND ";
     }
@@ -1710,56 +1743,62 @@ class Helper
         return $d && $d->format($format) === $date;
     }
 
-    public static function isDateValid2($myDateString){
+    public static function isDateValid2($myDateString)
+    {
         return (bool)strtotime($myDateString);
     }
 
-    public static function dateOfDateTime($s){
+    public static function dateOfDateTime($s)
+    {
         $dt = new DateTime($s);
         $date = $dt->format('Y-m-d');
         return $date;
     }
-    public static function ibsConnectionLogFindIp($cl,$ip){
-        for ($i=count($cl); $i >0 ; $i++) { 
-            if(isset($cl[$i]['sub_service_name'])){
-                if($cl[$i]['sub_service_name']==="Master"){
-                    if($cl[$i]['remote_ip']===$ip){
-                        
+    public static function ibsConnectionLogFindIp($cl, $ip)
+    {
+        for ($i = count($cl); $i > 0; $i++) {
+            if (isset($cl[$i]['sub_service_name'])) {
+                if ($cl[$i]['sub_service_name'] === "Master") {
+                    if ($cl[$i]['remote_ip'] === $ip) {
                     }
                 }
             }
         }
     }
-    public static function getServiceInfoWithIbsusername($username){
-        $allservices=self::getAllIbsusername();
-        for ($i=0; $i <count($allservices); $i++) {
-            $ibsusername=self::getIbsUsername($allservices[$i]['subid'], $allservices[$i]['type'], $allservices[$i]['emkanat_id']);
-            if($ibsusername){
-                if((string)$ibsusername[0]['ibsusername']===(string)$username){
-                    $allservices[$i]['ibsusername']=$ibsusername[0]['ibsusername'];
+    public static function getServiceInfoWithIbsusername($username)
+    {
+        $allservices = self::getAllIbsusername();
+        for ($i = 0; $i < count($allservices); $i++) {
+            $ibsusername = self::getIbsUsername($allservices[$i]['subid'], $allservices[$i]['type'], $allservices[$i]['emkanat_id']);
+            if ($ibsusername) {
+                if ((string)$ibsusername[0]['ibsusername'] === (string)$username) {
+                    $allservices[$i]['ibsusername'] = $ibsusername[0]['ibsusername'];
                     return $allservices[$i];
                 }
             }
         }
         return false;
     }
-    public static function checkIbsUserInfo($res){
-        if(! isset($res)) return false;
-        if(! isset($res[1])) return false;
-        if(! $res[1]) return false;
+    public static function checkIbsUserInfo($res)
+    {
+        if (!isset($res)) return false;
+        if (!isset($res[1])) return false;
+        if (!$res[1]) return false;
         return true;
     }
-    public static function getIbsUserInfoId($res){
-        if(! isset($res)) return false;
-        if(! isset($res[1])) return false;
-        $key=array_keys($res[1]);
+    public static function getIbsUserInfoId($res)
+    {
+        if (!isset($res)) return false;
+        if (!isset($res[1])) return false;
+        $key = array_keys($res[1]);
         return $key;
     }
-    public static function reformIbsUserInfo($ibsuserinfo){
-        if(! $ibsuserinfo) return false;
-        if(! $ibsuserinfo[1]) return false;
-        $key= key($ibsuserinfo[1]);
-        if(! $key) return false;
+    public static function reformIbsUserInfo($ibsuserinfo)
+    {
+        if (!$ibsuserinfo) return false;
+        if (!$ibsuserinfo[1]) return false;
+        $key = key($ibsuserinfo[1]);
+        if (!$key) return false;
         return $ibsuserinfo[1][$key];
     }
     // public static function like_match($pattern, $subject)
@@ -1767,7 +1806,8 @@ class Helper
     //     $pattern = str_replace('%', '.*', preg_quote($pattern, '/'));
     //     return (bool) preg_match("/^{$pattern}$/i", $subject);
     // }
-    public static function like($str, $searchTerm) {
+    public static function like($str, $searchTerm)
+    {
         $searchTerm = mb_strtolower($searchTerm);
         $str = mb_strtolower($str);
         $pos = strpos($str, $searchTerm);
@@ -1783,55 +1823,59 @@ class Helper
 
 
 
-    public static function regulateNumber($string, $type=1){
-        if($type===1){
-            return strtr(trim($string), array('۰'=>'0', '۱'=>'1', '۲'=>'2', '۳'=>'3', '۴'=>'4', '۵'=>'5', '۶'=>'6', '۷'=>'7', '۸'=>'8', '۹'=>'9', '٠'=>'0', '١'=>'1', '٢'=>'2', '٣'=>'3', '٤'=>'4', '٥'=>'5', '٦'=>'6', '٧'=>'7', '٨'=>'8', '٩'=>'9'));
-        }elseif($type===2){
-            return strtr(trim($string), array_flip(array('۰'=>'0', '۱'=>'1', '۲'=>'2', '۳'=>'3', '۴'=>'4', '۵'=>'5', '۶'=>'6', '۷'=>'7', '۸'=>'8', '۹'=>'9', '٠'=>'0', '١'=>'1', '٢'=>'2', '٣'=>'3', '٤'=>'4', '٥'=>'5', '٦'=>'6', '٧'=>'7', '٨'=>'8', '٩'=>'9')));
-        }else{
+    public static function regulateNumber($string, $type = 1)
+    {
+        if ($type === 1) {
+            return strtr(trim($string), array('۰' => '0', '۱' => '1', '۲' => '2', '۳' => '3', '۴' => '4', '۵' => '5', '۶' => '6', '۷' => '7', '۸' => '8', '۹' => '9', '٠' => '0', '١' => '1', '٢' => '2', '٣' => '3', '٤' => '4', '٥' => '5', '٦' => '6', '٧' => '7', '٨' => '8', '٩' => '9'));
+        } elseif ($type === 2) {
+            return strtr(trim($string), array_flip(array('۰' => '0', '۱' => '1', '۲' => '2', '۳' => '3', '۴' => '4', '۵' => '5', '۶' => '6', '۷' => '7', '۸' => '8', '۹' => '9', '٠' => '0', '١' => '1', '٢' => '2', '٣' => '3', '٤' => '4', '٥' => '5', '٦' => '6', '٧' => '7', '٨' => '8', '٩' => '9')));
+        } else {
             return false;
         }
     }
-    public static function siamTelephoneForResult($t){
-        if(! $t) return false;
-        if($t[0]==="0"){
-            $t=substr($t, 1);
-            $t="98".$t;
-        }else{
-            $t="98".$t;
+    public static function siamTelephoneForResult($t)
+    {
+        if (!$t) return false;
+        if ($t[0] === "0") {
+            $t = substr($t, 1);
+            $t = "98" . $t;
+        } else {
+            $t = "98" . $t;
         }
         return self::regulateNumber($t, 2);
     }
-    public static function resetIbsChargeRulesByUsername($username='02144755050', $sertype='internet'){
-        if($sertype==="internet"){
-            $ibsuserinfo=$GLOBALS['ibs_internet']->getUserInfoByNormalUserName($username);
-            $check=self::checkIbsUserInfo($ibsuserinfo);
-            if(! $check) return false;
-            $ibsuserinfo=self::reformIbsUserInfo($ibsuserinfo);
-            $ibsid=$ibsuserinfo['basic_info']['user_id'];
-            for ($i=0; $i < count($ibsuserinfo['attrs']['charge_rule_usage']); $i++) { 
+    public static function resetIbsChargeRulesByUsername($username = '02144755050', $sertype = 'internet')
+    {
+        if ($sertype === "internet") {
+            $ibsuserinfo = $GLOBALS['ibs_internet']->getUserInfoByNormalUserName($username);
+            $check = self::checkIbsUserInfo($ibsuserinfo);
+            if (!$check) return false;
+            $ibsuserinfo = self::reformIbsUserInfo($ibsuserinfo);
+            $ibsid = $ibsuserinfo['basic_info']['user_id'];
+            for ($i = 0; $i < count($ibsuserinfo['attrs']['charge_rule_usage']); $i++) {
                 // self::cLog($ibsuserinfo['attrs']['charge_rule_usage'][$i]);
-                $res=$GLOBALS['ibs_internet']->resetOneChargeRuleUsage((string) $ibsid, (string) $ibsuserinfo['attrs']['charge_rule_usage'][$i][0]);
+                $res = $GLOBALS['ibs_internet']->resetOneChargeRuleUsage((string) $ibsid, (string) $ibsuserinfo['attrs']['charge_rule_usage'][$i][0]);
             }
-        }elseif($sertype==="voip"){
-            $ibsuserinfo=$GLOBALS['ibs_voip']->getUserInfoByNormalUserName($username);
-            $check=self::checkIbsUserInfo($ibsuserinfo);
-            if(! $check) return false;
-            $ibsuserinfo=self::reformIbsUserInfo($ibsuserinfo);
-            $ibsid=$ibsuserinfo['basic_info']['user_id'];
-            for ($i=0; $i < count($ibsuserinfo['attrs']['charge_rule_usage']); $i++) { 
+        } elseif ($sertype === "voip") {
+            $ibsuserinfo = $GLOBALS['ibs_voip']->getUserInfoByNormalUserName($username);
+            $check = self::checkIbsUserInfo($ibsuserinfo);
+            if (!$check) return false;
+            $ibsuserinfo = self::reformIbsUserInfo($ibsuserinfo);
+            $ibsid = $ibsuserinfo['basic_info']['user_id'];
+            for ($i = 0; $i < count($ibsuserinfo['attrs']['charge_rule_usage']); $i++) {
                 // self::cLog($ibsuserinfo['attrs']['charge_rule_usage'][$i]);
-                $res=$GLOBALS['ibs_voip']->resetOneChargeRuleUsage((string) $ibsid, (string) $ibsuserinfo['attrs']['charge_rule_usage'][$i][0]);
+                $res = $GLOBALS['ibs_voip']->resetOneChargeRuleUsage((string) $ibsid, (string) $ibsuserinfo['attrs']['charge_rule_usage'][$i][0]);
             }
-        }else{
+        } else {
             return false;
         }
-        if(! isset($res)) return false;
+        if (!isset($res)) return false;
         return true;
     }
 
-    public static function getInternetServiceInfoBySubidEmkanatSertypeNoAuthentication($subid, $emkanat, $sertype){
-        $sql="SELECT * FROM (
+    public static function getInternetServiceInfoBySubidEmkanatSertypeNoAuthentication($subid, $emkanat, $sertype)
+    {
+        $sql = "SELECT * FROM (
             SELECT fid,emkanat_id,fsertype,sertype,telephone1,code_meli,noe_moshtarak,shenase_meli,ssid,reallegal_name,
             subid,telephone_hamrah,branch_id,general_sertype,name_sherkat,
                 CASE 
@@ -1888,13 +1932,14 @@ class Helper
                         f.emkanat_id) tmp
                         )tmp2
                     WHERE ibsusername <> '' AND ibsusername IS NOT NULL AND subid = ? AND emkanat_id = ? AND sertype = ?";
-                $res=Db::secure_fetchall($sql, [$subid, $emkanat, $sertype]);
+        $res = Db::secure_fetchall($sql, [$subid, $emkanat, $sertype]);
     }
-    public static function getServiceInfoByFactorid($factorid){
+    public static function getServiceInfoByFactorid($factorid)
+    {
         switch ($_SESSION['user_type']) {
             case __ADMINUSERTYPE__:
             case __ADMINOPERATORUSERTYPE__:
-                $sql="SELECT * FROM (
+                $sql = "SELECT * FROM (
                     SELECT fid,emkanat_id,fsertype,sertype,telephone1,code_meli,noe_moshtarak,shenase_meli,ssid,reallegal_name,
                     subid,telephone_hamrah,branch_id,general_sertype,name_sherkat,
                         CASE 
@@ -1945,20 +1990,20 @@ class Helper
                             AND (f.type IS NOT NULL OR f.type <> '')
                             AND (f.subscriber_id IS NOT NULL OR f.subscriber_id <> '')
                             AND f.tasvie_shode = 1 ";
-                            $sql.=" AND f.id = ? 
+                $sql .= " AND f.id = ? 
                         GROUP BY
                             f.subscriber_id,
                             f.type,
                             f.emkanat_id) tmp
                             )tmp2
                         WHERE ibsusername <> '' AND ibsusername IS NOT NULL";
-                        $res=Db::secure_fetchall($sql,[$factorid]);
-            break;
+                $res = Db::secure_fetchall($sql, [$factorid]);
+                break;
             case __MODIRUSERTYPE__:
             case __MODIR2USERTYPE__:
             case __OPERATORUSERTYPE__:
             case __OPERATOR2USERTYPE__:
-                $sql="SELECT * FROM (
+                $sql = "SELECT * FROM (
                     SELECT fid,emkanat_id,fsertype,sertype,telephone1,code_meli,noe_moshtarak,shenase_meli,ssid,reallegal_name,
                     subid,telephone_hamrah,branch_id,general_sertype,name_sherkat,
                     CASE 
@@ -2009,7 +2054,7 @@ class Helper
                             AND (f.type IS NOT NULL OR f.type <> '')
                             AND (f.subscriber_id IS NOT NULL OR f.subscriber_id <> '')
                             AND f.tasvie_shode = 1 ";
-                            $sql.="
+                $sql .= "
                             AND f.id = ?
                             AND sub.branch_id = ?
                         GROUP BY
@@ -2018,10 +2063,10 @@ class Helper
                             f.emkanat_id) tmp
                             )tmp2
                         WHERE ibsusername <> '' AND ibsusername IS NOT NULL";
-                        $res=Db::secure_fetchall($sql,[$factorid,$_SESSION['branch_id']]);
-            break;
+                $res = Db::secure_fetchall($sql, [$factorid, $_SESSION['branch_id']]);
+                break;
             case __MOSHTARAKUSERTYPE__:
-                $sql="SELECT * FROM (
+                $sql = "SELECT * FROM (
                     SELECT fid,emkanat_id,fsertype,sertype,telephone1,code_meli,noe_moshtarak,shenase_meli,ssid,reallegal_name,
                     subid,telephone_hamrah,branch_id,general_sertype,name_sherkat,
                     CASE 
@@ -2072,7 +2117,7 @@ class Helper
                             AND (f.type IS NOT NULL OR f.type <> '')
                             AND (f.subscriber_id IS NOT NULL OR f.subscriber_id <> '')
                             AND f.tasvie_shode = 1 ";
-                            $sql.="
+                $sql .= "
                             AND f.id = ?
                             AND sub.branch_id = ?
                             AND sub.id = ?
@@ -2083,20 +2128,21 @@ class Helper
                             f.emkanat_id) tmp
                             )tmp2
                         WHERE ibsusername <> '' AND ibsusername IS NOT NULL";
-                        $res=Db::secure_fetchall($sql,[$factorid, $_SESSION['branch_id'], $_SESSION['user_id'], $_SESSION['user_id']]);
-            break;
+                $res = Db::secure_fetchall($sql, [$factorid, $_SESSION['branch_id'], $_SESSION['user_id'], $_SESSION['user_id']]);
+                break;
             default:
                 return false;
-            break;
+                break;
         }
 
-                if(! $res){
-                    return false;
-                }
-                return $res;
+        if (!$res) {
+            return false;
+        }
+        return $res;
     }
-    public static function getServiceInfoByFactoridNoAuth($factorid){
-                $sql="SELECT * FROM (
+    public static function getServiceInfoByFactoridNoAuth($factorid)
+    {
+        $sql = "SELECT * FROM (
                     SELECT fid,emkanat_id,fsertype,sertype,telephone1,code_meli,noe_moshtarak,shenase_meli,ssid,reallegal_name,
                     subid,telephone_hamrah,branch_id,general_sertype,name_sherkat,
                         CASE 
@@ -2147,24 +2193,25 @@ class Helper
                             AND (f.type IS NOT NULL OR f.type <> '')
                             AND (f.subscriber_id IS NOT NULL OR f.subscriber_id <> '')
                             AND f.tasvie_shode = 1 ";
-                            $sql.=" AND f.id = ? 
+        $sql .= " AND f.id = ? 
                         GROUP BY
                             f.subscriber_id,
                             f.type,
                             f.emkanat_id) tmp
                             )tmp2
                         WHERE ibsusername <> '' AND ibsusername IS NOT NULL";
-                        $res=Db::secure_fetchall($sql,[$factorid]);
+        $res = Db::secure_fetchall($sql, [$factorid]);
 
-                if(! $res){
-                    return false;
-                }
-                return $res;
+        if (!$res) {
+            return false;
+        }
+        return $res;
     }
-    
-    public static function getServiceInfoBySubid($subid){
-        $res=false;
-        $sql="SELECT * FROM (
+
+    public static function getServiceInfoBySubid($subid)
+    {
+        $res = false;
+        $sql = "SELECT * FROM (
             SELECT fid,emkanat_id,fsertype,sertype,telephone1,code_meli,noe_moshtarak,shenase_meli,ssid,reallegal_name,
             subid,telephone_hamrah,branch_id,
             CASE 
@@ -2213,7 +2260,7 @@ class Helper
         switch ($_SESSION['user_type']) {
             case __ADMINUSERTYPE__:
             case __ADMINOPERATORUSERTYPE__:
-                $sql.=" AND (f.emkanat_id IS NOT NULL OR f.emkanat_id <> '')
+                $sql .= " AND (f.emkanat_id IS NOT NULL OR f.emkanat_id <> '')
                     AND (f.type IS NOT NULL OR f.type <> '')
                     AND (f.subscriber_id IS NOT NULL OR f.subscriber_id <> '')
                     AND f.tasvie_shode = 1
@@ -2221,13 +2268,13 @@ class Helper
                         GROUP BY f.subscriber_id,f.type,f.emkanat_id) tmp
                         )tmp2
                     WHERE ibsusername <> '' AND ibsusername IS NOT NULL";
-                $res=Db::secure_fetchall($sql,[$subid]);
-            break;
+                $res = Db::secure_fetchall($sql, [$subid]);
+                break;
             case __MODIRUSERTYPE__:
             case __MODIR2USERTYPE__:
             case __OPERATORUSERTYPE__:
             case __OPERATOR2USERTYPE__:
-                $sql.=" AND (f.emkanat_id IS NOT NULL OR f.emkanat_id <> '')
+                $sql .= " AND (f.emkanat_id IS NOT NULL OR f.emkanat_id <> '')
                     AND (f.type IS NOT NULL OR f.type <> '')
                     AND (f.subscriber_id IS NOT NULL OR f.subscriber_id <> '')
                     AND f.tasvie_shode = 1
@@ -2236,30 +2283,31 @@ class Helper
                         GROUP BY f.subscriber_id,f.type,f.emkanat_id) tmp
                         )tmp2
                     WHERE ibsusername <> '' AND ibsusername IS NOT NULL";
-                $res=Db::secure_fetchall($sql,[$subid, $_SESSION['branch_id']]);
-            break;
+                $res = Db::secure_fetchall($sql, [$subid, $_SESSION['branch_id']]);
+                break;
             case __MOSHTARAKUSERTYPE__:
-                $sql.=" AND (f.emkanat_id IS NOT NULL OR f.emkanat_id <> '')
+                $sql .= " AND (f.emkanat_id IS NOT NULL OR f.emkanat_id <> '')
                     AND (f.type IS NOT NULL OR f.type <> '')
                     AND (f.subscriber_id IS NOT NULL OR f.subscriber_id <> '')
                     AND f.tasvie_shode = 1
                     AND f.subscriber_id = ?
                     GROUP BY f.subscriber_id,f.type,f.emkanat_id) tmp )tmp2
                     WHERE ibsusername <> '' AND ibsusername IS NOT NULL";
-                $res=Db::secure_fetchall($sql,[$_SESSION['user_id']]);
-            break;
+                $res = Db::secure_fetchall($sql, [$_SESSION['user_id']]);
+                break;
             default:
                 return false;
-            break;
+                break;
         }
-        if(! $res){
+        if (!$res) {
             return false;
         }
         return $res;
     }
-    public static function getServiceInfoBySubidNoAuth($subid){
-        $res=false;
-        $sql="SELECT * FROM (
+    public static function getServiceInfoBySubidNoAuth($subid)
+    {
+        $res = false;
+        $sql = "SELECT * FROM (
             SELECT fid,emkanat_id,fsertype,sertype,telephone1,code_meli,noe_moshtarak,shenase_meli,ssid,reallegal_name,
             subid,telephone_hamrah,branch_id,siam_tarikhe_tasvie_shode,crm_tarikhe_tasvie_shode,
             CASE 
@@ -2307,7 +2355,7 @@ class Helper
                     LEFT JOIN bnm_tdlte_sim lte ON lte.id = f.emkanat_id AND lte.subscriber_id = f.subscriber_id AND ser.type IN ('tdlte')
                 WHERE
                     f.type IN ( 'bitstream', 'adsl', 'vdsl', 'wireless', 'tdlte', 'voip' ) ";
-                    $sql.=" AND (f.emkanat_id IS NOT NULL OR f.emkanat_id <> '')
+        $sql .= " AND (f.emkanat_id IS NOT NULL OR f.emkanat_id <> '')
                     AND (f.type IS NOT NULL OR f.type <> '')
                     AND (f.subscriber_id IS NOT NULL OR f.subscriber_id <> '')
                     AND f.tasvie_shode = 1
@@ -2315,15 +2363,16 @@ class Helper
                         GROUP BY f.subscriber_id,f.type,f.emkanat_id) tmp
                         )tmp2
                     WHERE ibsusername <> '' AND ibsusername IS NOT NULL";
-                $res=Db::secure_fetchall($sql,[$subid]);
-        if(! $res){
+        $res = Db::secure_fetchall($sql, [$subid]);
+        if (!$res) {
             return false;
         }
         return $res;
     }
-    public static function getInternetServiceInfoBySubidNoAuth($subid){
-        $res=false;
-        $sql="SELECT * FROM (
+    public static function getInternetServiceInfoBySubidNoAuth($subid)
+    {
+        $res = false;
+        $sql = "SELECT * FROM (
             SELECT fid,emkanat_id,fsertype,sertype,telephone1,code_meli,noe_moshtarak,shenase_meli,ssid,reallegal_name,
             subid,telephone_hamrah,branch_id,
             CASE 
@@ -2369,7 +2418,7 @@ class Helper
                     LEFT JOIN bnm_tdlte_sim lte ON lte.id = f.emkanat_id AND lte.subscriber_id = f.subscriber_id AND ser.type IN ('tdlte')
                 WHERE
                     f.type IN ( 'bitstream', 'adsl', 'vdsl', 'wireless', 'tdlte' ) ";
-                    $sql.=" AND (f.emkanat_id IS NOT NULL OR f.emkanat_id <> '')
+        $sql .= " AND (f.emkanat_id IS NOT NULL OR f.emkanat_id <> '')
                     AND (f.type IS NOT NULL OR f.type <> '')
                     AND (f.subscriber_id IS NOT NULL OR f.subscriber_id <> '')
                     AND f.tasvie_shode = 1
@@ -2377,15 +2426,16 @@ class Helper
                         GROUP BY f.subscriber_id,f.type,f.emkanat_id) tmp
                         )tmp2
                     WHERE ibsusername <> '' AND ibsusername IS NOT NULL";
-                $res=Db::secure_fetchall($sql,[$subid]);
-        if(! $res){
+        $res = Db::secure_fetchall($sql, [$subid]);
+        if (!$res) {
             return false;
         }
         return $res;
     }
-    public static function getInternetServiceTypesByUserid($subid){
-        $res=false;
-        $sql="SELECT DISTINCT(sertype) dsertype,IF(noe_khadamat='BITSTREAM_ADSL','adsl',IF(noe_khadamat='BITSTREAM_VDSL','vdsl',sertype)) sertype FROM (
+    public static function getInternetServiceTypesByUserid($subid)
+    {
+        $res = false;
+        $sql = "SELECT DISTINCT(sertype) dsertype,IF(noe_khadamat='BITSTREAM_ADSL','adsl',IF(noe_khadamat='BITSTREAM_VDSL','vdsl',sertype)) sertype FROM (
             SELECT fid,emkanat_id,fsertype,sertype,telephone1,code_meli,noe_moshtarak,shenase_meli,ssid,reallegal_name,
             subid,telephone_hamrah,branch_id,noe_khadamat,
             CASE 
@@ -2435,7 +2485,7 @@ class Helper
         switch ($_SESSION['user_type']) {
             case __ADMINUSERTYPE__:
             case __ADMINOPERATORUSERTYPE__:
-                $sql.=" AND (f.emkanat_id IS NOT NULL OR f.emkanat_id <> '')
+                $sql .= " AND (f.emkanat_id IS NOT NULL OR f.emkanat_id <> '')
                     AND (f.type IS NOT NULL OR f.type <> '')
                     AND (f.subscriber_id IS NOT NULL OR f.subscriber_id <> '')
                     AND f.tasvie_shode = 1
@@ -2443,13 +2493,13 @@ class Helper
                         GROUP BY f.subscriber_id,f.type,f.emkanat_id) tmp
                         )tmp2
                     WHERE ibsusername <> '' AND ibsusername IS NOT NULL";
-                $res=Db::secure_fetchall($sql,[$subid]);
-            break;
+                $res = Db::secure_fetchall($sql, [$subid]);
+                break;
             case __MODIRUSERTYPE__:
             case __MODIR2USERTYPE__:
             case __OPERATORUSERTYPE__:
             case __OPERATOR2USERTYPE__:
-                $sql.=" AND (f.emkanat_id IS NOT NULL OR f.emkanat_id <> '')
+                $sql .= " AND (f.emkanat_id IS NOT NULL OR f.emkanat_id <> '')
                     AND (f.type IS NOT NULL OR f.type <> '')
                     AND (f.subscriber_id IS NOT NULL OR f.subscriber_id <> '')
                     AND f.tasvie_shode = 1
@@ -2458,34 +2508,34 @@ class Helper
                         GROUP BY f.subscriber_id,f.type,f.emkanat_id) tmp
                         )tmp2
                     WHERE ibsusername <> '' AND ibsusername IS NOT NULL";
-                $res=Db::secure_fetchall($sql,[$subid, $_SESSION['branch_id']]);
-            break;
+                $res = Db::secure_fetchall($sql, [$subid, $_SESSION['branch_id']]);
+                break;
             case __MOSHTARAKUSERTYPE__:
-                $sql.=" AND (f.emkanat_id IS NOT NULL OR f.emkanat_id <> '')
+                $sql .= " AND (f.emkanat_id IS NOT NULL OR f.emkanat_id <> '')
                     AND (f.type IS NOT NULL OR f.type <> '')
                     AND (f.subscriber_id IS NOT NULL OR f.subscriber_id <> '')
                     AND f.tasvie_shode = 1
                     AND f.subscriber_id = ?
                     GROUP BY f.subscriber_id,f.type,f.emkanat_id) tmp )tmp2
                     WHERE ibsusername <> '' AND ibsusername IS NOT NULL";
-                $res=Db::secure_fetchall($sql,[$_SESSION['user_id']]);
-            break;
+                $res = Db::secure_fetchall($sql, [$_SESSION['user_id']]);
+                break;
             default:
                 return false;
-            break;
+                break;
         }
-        if(! $res){
+        if (!$res) {
             return false;
         }
         return $res;
     }
-    public static function getServiceInfoByDynamicSubInfo(array $dsinfo){
-        $tmp="";
-        for ($i=0; $i < count($dsinfo); $i++) { 
-            
+    public static function getServiceInfoByDynamicSubInfo(array $dsinfo)
+    {
+        $tmp = "";
+        for ($i = 0; $i < count($dsinfo); $i++) {
         }
-        $res=false;
-        $sql="SELECT * FROM (
+        $res = false;
+        $sql = "SELECT * FROM (
             SELECT fid,emkanat_id,fsertype,sertype,telephone1,code_meli,noe_moshtarak,shenase_meli,ssid,reallegal_name,
             subid,telephone_hamrah,branch_id,
             CASE 
@@ -2534,7 +2584,7 @@ class Helper
         switch ($_SESSION['user_type']) {
             case __ADMINUSERTYPE__:
             case __ADMINOPERATORUSERTYPE__:
-                $sql.=" AND (f.emkanat_id IS NOT NULL OR f.emkanat_id <> '')
+                $sql .= " AND (f.emkanat_id IS NOT NULL OR f.emkanat_id <> '')
                     AND (f.type IS NOT NULL OR f.type <> '')
                     AND (f.subscriber_id IS NOT NULL OR f.subscriber_id <> '')
                     AND f.tasvie_shode = 1
@@ -2542,13 +2592,13 @@ class Helper
                         GROUP BY f.subscriber_id,f.type,f.emkanat_id) tmp
                         )tmp2
                     WHERE ibsusername <> '' AND ibsusername IS NOT NULL";
-                $res=Db::secure_fetchall($sql,[$subid]);
-            break;
+                $res = Db::secure_fetchall($sql, [$subid]);
+                break;
             case __MODIRUSERTYPE__:
             case __MODIR2USERTYPE__:
             case __OPERATORUSERTYPE__:
             case __OPERATOR2USERTYPE__:
-                $sql.=" AND (f.emkanat_id IS NOT NULL OR f.emkanat_id <> '')
+                $sql .= " AND (f.emkanat_id IS NOT NULL OR f.emkanat_id <> '')
                     AND (f.type IS NOT NULL OR f.type <> '')
                     AND (f.subscriber_id IS NOT NULL OR f.subscriber_id <> '')
                     AND f.tasvie_shode = 1
@@ -2557,33 +2607,34 @@ class Helper
                         GROUP BY f.subscriber_id,f.type,f.emkanat_id) tmp
                         )tmp2
                     WHERE ibsusername <> '' AND ibsusername IS NOT NULL";
-                $res=Db::secure_fetchall($sql,[$subid, $_SESSION['branch_id']]);
-            break;
+                $res = Db::secure_fetchall($sql, [$subid, $_SESSION['branch_id']]);
+                break;
             case __MOSHTARAKUSERTYPE__:
-                $sql.=" AND (f.emkanat_id IS NOT NULL OR f.emkanat_id <> '')
+                $sql .= " AND (f.emkanat_id IS NOT NULL OR f.emkanat_id <> '')
                     AND (f.type IS NOT NULL OR f.type <> '')
                     AND (f.subscriber_id IS NOT NULL OR f.subscriber_id <> '')
                     AND f.tasvie_shode = 1
                     AND f.subscriber_id = ?
                     GROUP BY f.subscriber_id,f.type,f.emkanat_id) tmp )tmp2
                     WHERE ibsusername <> '' AND ibsusername IS NOT NULL";
-                $res=Db::secure_fetchall($sql,[$_SESSION['user_id']]);
-            break;
+                $res = Db::secure_fetchall($sql, [$_SESSION['user_id']]);
+                break;
             default:
                 return false;
-            break;
+                break;
         }
-        if(! $res){
+        if (!$res) {
             return false;
         }
         return $res;
     }
 
-    public static function getAllAsiatechBitstreamReservedOrUnReservedPortUsers(){
+    public static function getAllAsiatechBitstreamReservedOrUnReservedPortUsers()
+    {
         switch ($_SESSION['user_type']) {
             case __ADMINUSERTYPE__:
             case __ADMINOPERATORUSERTYPE__:
-                $sql="SELECT * FROM (SELECT
+                $sql = "SELECT * FROM (SELECT
                 oss.id ossid,
                 res.id resid,
                 res.port,
@@ -2599,13 +2650,13 @@ class Helper
                 INNER JOIN bnm_subscribers sub ON sub.id = oss.user_id
                 GROUP BY oss.user_id, oss.telephone
                 ORDER BY oss.tarikh DESC)tmp WHERE tel <> '' AND LENGTH(tel>10)";
-                $res=Db::fetchall_Query($sql);
-            break;
+                $res = Db::fetchall_Query($sql);
+                break;
             case __MODIRUSERTYPE__:
             case __MODIR2USERTYPE__:
             case __OPERATORUSERTYPE__:
             case __OPERATOR2USERTYPE__:
-                $sql="SELECT * FROM (SELECT
+                $sql = "SELECT * FROM (SELECT
                 oss.id ossid,
                 res.id resid,
                 res.port,
@@ -2622,17 +2673,17 @@ class Helper
                 WHERE sub.branch_id = ?
                 GROUP BY oss.user_id, oss.telephone
                 ORDER BY oss.tarikh DESC)tmp WHERE tel <> '' AND LENGTH(tel>10)";
-                $res=Db::secure_fetchall($sql,[$_SESSION['branch_id']]);
-            break;
+                $res = Db::secure_fetchall($sql, [$_SESSION['branch_id']]);
+                break;
         }
 
         return $res;
-        
     }
 
-    public static function getServiceInfoByServiceTypeNoAuth($sertype){
-        $res=false;
-        $sql="SELECT * FROM (
+    public static function getServiceInfoByServiceTypeNoAuth($sertype)
+    {
+        $res = false;
+        $sql = "SELECT * FROM (
             SELECT fid,emkanat_id,fsertype,sertype,telephone1,code_meli,noe_moshtarak,shenase_meli,ssid,reallegal_name,
             subid,telephone_hamrah,branch_id,general_sertype,
             CASE 
@@ -2686,15 +2737,16 @@ class Helper
                         GROUP BY f.subscriber_id, f.type, f.emkanat_id) tmp
                         )tmp2
                     WHERE ibsusername <> '' AND ibsusername IS NOT NULL";
-                    $res=Db::secure_fetchall($sql,[$sertype]);
-        if(! $res){
+        $res = Db::secure_fetchall($sql, [$sertype]);
+        if (!$res) {
             return false;
         }
         return $res;
     }
-    public static function getServiceInfoByServiceType($sertype){
-        $res=false;
-        $sql="SELECT * FROM (
+    public static function getServiceInfoByServiceType($sertype)
+    {
+        $res = false;
+        $sql = "SELECT * FROM (
             SELECT fid,emkanat_id,fsertype,sertype,telephone1,code_meli,noe_moshtarak,shenase_meli,ssid,reallegal_name,
             subid,telephone_hamrah,branch_id,general_sertype,
             CASE 
@@ -2744,20 +2796,20 @@ class Helper
         switch ($_SESSION['user_type']) {
             case __ADMINUSERTYPE__:
             case __ADMINOPERATORUSERTYPE__:
-                $sql.=" AND (f.emkanat_id IS NOT NULL OR f.emkanat_id <> '')
+                $sql .= " AND (f.emkanat_id IS NOT NULL OR f.emkanat_id <> '')
                     AND (f.type IS NOT NULL OR f.type <> '')
                     AND (f.subscriber_id IS NOT NULL OR f.subscriber_id <> '')
                     AND f.tasvie_shode = 1
                         GROUP BY f.subscriber_id, f.type, f.emkanat_id) tmp
                         )tmp2
                     WHERE ibsusername <> '' AND ibsusername IS NOT NULL";
-                $res=Db::secure_fetchall($sql,[$sertype]);
-            break;
+                $res = Db::secure_fetchall($sql, [$sertype]);
+                break;
             case __MODIRUSERTYPE__:
             case __MODIR2USERTYPE__:
             case __OPERATORUSERTYPE__:
             case __OPERATOR2USERTYPE__:
-                $sql.=" AND (f.emkanat_id IS NOT NULL OR f.emkanat_id <> '')
+                $sql .= " AND (f.emkanat_id IS NOT NULL OR f.emkanat_id <> '')
                     AND (f.type IS NOT NULL OR f.type <> '')
                     AND (f.subscriber_id IS NOT NULL OR f.subscriber_id <> '')
                     AND f.tasvie_shode = 1
@@ -2765,31 +2817,32 @@ class Helper
                         GROUP BY f.subscriber_id,f.type,f.emkanat_id) tmp
                         )tmp2
                     WHERE ibsusername <> '' AND ibsusername IS NOT NULL";
-                $res=Db::secure_fetchall($sql,[$sertype, $_SESSION['branch_id']]);
-            break;
+                $res = Db::secure_fetchall($sql, [$sertype, $_SESSION['branch_id']]);
+                break;
             case __MOSHTARAKUSERTYPE__:
-                $sql.=" AND (f.emkanat_id IS NOT NULL OR f.emkanat_id <> '')
+                $sql .= " AND (f.emkanat_id IS NOT NULL OR f.emkanat_id <> '')
                     AND (f.type IS NOT NULL OR f.type <> '')
                     AND (f.subscriber_id IS NOT NULL OR f.subscriber_id <> '')
                     AND f.tasvie_shode = 1
                     AND f.subscriber_id = ?
                     GROUP BY f.subscriber_id,f.type,f.emkanat_id) tmp )tmp2
                     WHERE ibsusername <> '' AND ibsusername IS NOT NULL";
-                $res=Db::secure_fetchall($sql,[$sertype, $_SESSION['user_id']]);
-            break;
+                $res = Db::secure_fetchall($sql, [$sertype, $_SESSION['user_id']]);
+                break;
             default:
                 return false;
-            break;
+                break;
         }
-        if(! $res){
+        if (!$res) {
             return false;
         }
         return $res;
     }
-    public static function getServiceInfoByMultipleServiceTypes(array $sertype){
+    public static function getServiceInfoByMultipleServiceTypes(array $sertype)
+    {
 
-        $res=false;
-        $sql="SELECT * FROM (
+        $res = false;
+        $sql = "SELECT * FROM (
             SELECT fid,emkanat_id,fsertype,sertype,telephone1,code_meli,noe_moshtarak,shenase_meli,ssid,reallegal_name,
             subid,telephone_hamrah,branch_id,
             CASE 
@@ -2835,33 +2888,33 @@ class Helper
                     LEFT JOIN bnm_tdlte_sim lte ON lte.id = f.emkanat_id AND lte.subscriber_id = f.subscriber_id AND ser.type IN ('tdlte')
                 WHERE
                     f.type IN (";
-                    for ($i=0; $i <count($sertype) ; $i++) { 
-                        if($i<count($sertype) && isset($sertype[$i+1])){
-                            $sql.= '?'.",";
-                        }else{
-                            $sql.='?'.")";
-                        }
-                    }
+        for ($i = 0; $i < count($sertype); $i++) {
+            if ($i < count($sertype) && isset($sertype[$i + 1])) {
+                $sql .= '?' . ",";
+            } else {
+                $sql .= '?' . ")";
+            }
+        }
         switch ($_SESSION['user_type']) {
             case __ADMINUSERTYPE__:
             case __ADMINOPERATORUSERTYPE__:
-                $sql.=" AND (f.emkanat_id IS NOT NULL OR f.emkanat_id <> '')
+                $sql .= " AND (f.emkanat_id IS NOT NULL OR f.emkanat_id <> '')
                     AND (f.type IS NOT NULL OR f.type <> '')
                     AND (f.subscriber_id IS NOT NULL OR f.subscriber_id <> '')
                     AND f.tasvie_shode = 1
                         GROUP BY f.subscriber_id, f.type, f.emkanat_id) tmp
                         )tmp2
                     WHERE ibsusername <> '' AND ibsusername IS NOT NULL";
-                    // array_push($sertype,'922');
-                    // return $sertype;
-                    // return $sql; 
-                $res=Db::secure_fetchall($sql,$sertype);
-            break;
+                // array_push($sertype,'922');
+                // return $sertype;
+                // return $sql; 
+                $res = Db::secure_fetchall($sql, $sertype);
+                break;
             case __MODIRUSERTYPE__:
             case __MODIR2USERTYPE__:
             case __OPERATORUSERTYPE__:
             case __OPERATOR2USERTYPE__:
-                $sql.=" AND (f.emkanat_id IS NOT NULL OR f.emkanat_id <> '')
+                $sql .= " AND (f.emkanat_id IS NOT NULL OR f.emkanat_id <> '')
                     AND (f.type IS NOT NULL OR f.type <> '')
                     AND (f.subscriber_id IS NOT NULL OR f.subscriber_id <> '')
                     AND f.tasvie_shode = 1
@@ -2869,32 +2922,136 @@ class Helper
                         GROUP BY f.subscriber_id,f.type,f.emkanat_id) tmp
                         )tmp2
                     WHERE ibsusername <> '' AND ibsusername IS NOT NULL";
-                    array_push($sertype,$_SESSION['branch_id']);
-                $res=Db::secure_fetchall($sql,$sertype);
-            break;
+                array_push($sertype, $_SESSION['branch_id']);
+                $res = Db::secure_fetchall($sql, $sertype);
+                break;
             case __MOSHTARAKUSERTYPE__:
-                $sql.=" AND (f.emkanat_id IS NOT NULL OR f.emkanat_id <> '')
+                $sql .= " AND (f.emkanat_id IS NOT NULL OR f.emkanat_id <> '')
                     AND (f.type IS NOT NULL OR f.type <> '')
                     AND (f.subscriber_id IS NOT NULL OR f.subscriber_id <> '')
                     AND f.tasvie_shode = 1
                     AND f.subscriber_id = ?
                     GROUP BY f.subscriber_id,f.type,f.emkanat_id) tmp )tmp2
                     WHERE ibsusername <> '' AND ibsusername IS NOT NULL";
-                array_push($sertype,$_SESSION['user_id']);
-                $res=Db::secure_fetchall($sql,$sertype);
-            break;
+                array_push($sertype, $_SESSION['user_id']);
+                $res = Db::secure_fetchall($sql, $sertype);
+                break;
             default:
                 return false;
-            break;
+                break;
         }
-        if(! $res){
+        if (!$res) {
             return false;
         }
         return $res;
     }
-    public static function getServiceInfoByServiceTypeAndSubid($subid, $sertype){
-        $res=false;
-        $sql="SELECT * FROM (
+    public static function getServiceInfoBySertypeOstanShahr(array $sertype, $ostan, $shahr, $fd, $td, int $status)
+    {
+
+        $res = false;
+        $sql = "SELECT * FROM (
+            SELECT fid,emkanat_id,fsertype,sertype,telephone1,code_meli,noe_moshtarak,shenase_meli,ssid,reallegal_name,
+            subid,telephone_hamrah,branch_id,general_sertype,serstatus,ostane_sokonat_name_fa,shahre_sokonat_name_fa,
+            tarikhe_tasvie_shode,tarikhe_payane_service,serstatus_fa,tts_formatted,tps_formatted,
+            CASE 
+                WHEN adslvdsl_ibsu THEN adslvdsl_ibsu
+                WHEN bitasiatech_ibsu THEN bitasiatech_ibsu
+                WHEN wireless_ibsu THEN IF(noe_moshtarak='real', CONCAT('w-', ssid, '-', code_meli),CONCAT('w-', ssid, '-', shenase_meli))
+                WHEN tdlte_ibsu THEN tdlte_ibsu
+                WHEN voip_ibsu THEN voip_ibsu
+                ELSE Null
+                END AS ibsusername
+            FROM
+                (SELECT
+                    sub.telephone1,
+                    sub.id subid,
+                    sub.branch_id,
+                    sub.telephone_hamrah,
+                    sub.code_meli,
+                    sub.noe_moshtarak,
+                    sub.shenase_meli,
+                    osokonat.name ostane_sokonat_name_fa,
+                    ssokonat.name shahre_sokonat_name_fa,
+                    IF(sub.noe_moshtarak='real',CONCAT(sub.name,' ',sub.f_name),sub.name_sherkat) reallegal_name,
+                    sub.name name,
+                    sub.f_name,
+                    sub.name_sherkat,
+                    f.id fid,
+                    f.emkanat_id,
+                    f.type fsertype,
+                    IF(DATE(f.tarikhe_payane_service)>DATE(NOW()), 1,2) serstatus,
+                    IF(DATE(f.tarikhe_payane_service)>DATE(NOW()), 'فعال','غیر فعال') serstatus_fa,
+                    f.tarikhe_tasvie_shode,
+                    DATE_FORMAT(f.tarikhe_tasvie_shode,'%Y-%m-%d %H:%i') tts_formatted,
+                    f.tarikhe_payane_service,
+                    DATE_FORMAT(f.tarikhe_payane_service,'%Y-%m-%d %H:%i') tps_formatted,
+                    ss.id ssid,
+                    ser.type sertype,
+                    IF(ser.noe_khadamat='BITSTREAM_ADSL','adsl',IF(ser.noe_khadamat='BITSTREAM_VDSL','vdsl',ser.type)) general_sertype,
+                    IF(ports.telephone=1, sub.telephone1,IF(ports.telephone=2, sub.telephone2, IF(ports.telephone=3, sub.telephone3,NULL))) adslvdsl_ibsu,
+                    IF(oss.telephone=1, sub.telephone1, IF(oss.telephone=2, sub.telephone2, IF(oss.telephone=3, sub.telephone3, false))) bitasiatech_ibsu,
+                    IF(ser.type='wireless',111,null) wireless_ibsu,
+                    lte.tdlte_number tdlte_ibsu,
+                    CASE WHEN ser.type = 'voip' THEN IF(f.emkanat_id=1,sub.telephone1,IF(f.emkanat_id=2,sub.telephone2, IF(f.emkanat_id=3,sub.telephone3,NULL)))
+                    ELSE NULL
+                    END AS voip_ibsu
+                FROM
+                    bnm_factor f
+                    INNER JOIN bnm_subscribers sub ON f.subscriber_id = sub.id
+                    INNER JOIN bnm_services ser ON ser.id = f.service_id 
+                    INNER JOIN bnm_ostan osokonat ON osokonat.id= sub.ostane_sokonat
+                    INNER JOIN bnm_shahr ssokonat ON ssokonat.id= sub.shahre_sokonat
+                    LEFT JOIN bnm_port ports ON f.emkanat_id = ports.id AND ser.type IN ('adsl','vdsl') AND ports.user_id = sub.id
+                    LEFT JOIN bnm_oss_subscribers oss ON oss.user_id=f.subscriber_id AND ser.type IN ('bitstream')
+                    LEFT JOIN bnm_sub_station ss ON ss.id = f.emkanat_id AND ss.sub_id= f.subscriber_id AND ser.type IN ('wireless')
+                    LEFT JOIN bnm_tdlte_sim lte ON lte.id = f.emkanat_id AND lte.subscriber_id = f.subscriber_id AND ser.type IN ('tdlte')
+                WHERE
+                    f.type IN (";
+        for ($i = 0; $i < count($sertype); $i++) {
+            if ($i < count($sertype) && isset($sertype[$i + 1])) {
+                $sql .= '?' . ",";
+            } else {
+                $sql .= '?' . ")";
+            }
+        }
+        if ($status !== 0) {
+            if ($status === 1) {
+                // faal
+                $sql .= " AND DATE(f.tarikhe_payane_service)>DATE(NOW())";
+            } else {
+                //expire
+                $sql .= " AND DATE(f.tarikhe_payane_service)<=DATE(NOW())";
+            }
+        }
+        $sql .= " AND DATE(f.tarikhe_tasvie_shode) >= ?
+                AND DATE(f.tarikhe_tasvie_shode) <= ?
+                AND sub.shahre_sokonat = ?
+                AND sub.ostane_sokonat = ?
+                AND (f.emkanat_id IS NOT NULL OR f.emkanat_id <> '')
+                AND (f.type IS NOT NULL OR f.type <> '')
+                AND (f.subscriber_id IS NOT NULL OR f.subscriber_id <> '')
+                AND f.tasvie_shode = ?) tmp )tmp2
+                WHERE ibsusername <> '' AND ibsusername IS NOT NULL";
+        //-- GROUP BY f.subscriber_id, f.type, f.emkanat_id
+        $params = [];
+        foreach ($sertype as $key => $value) {
+            $params[] = $value;
+        }
+        $params[] = $fd;
+        $params[] = $td;
+        $params[] = $shahr;
+        $params[] = $ostan;
+        $params[] = 1;
+        $res = Db::secure_fetchall($sql, $params);
+        if (!$res) {
+            return false;
+        }
+        return $res;
+    }
+    public static function getServiceInfoByServiceTypeAndSubid($subid, $sertype)
+    {
+        $res = false;
+        $sql = "SELECT * FROM (
             SELECT fid,emkanat_id,fsertype,sertype,telephone1,code_meli,noe_moshtarak,shenase_meli,ssid,reallegal_name,
             subid,telephone_hamrah,branch_id,general_sertype,
             CASE 
@@ -2945,20 +3102,20 @@ class Helper
         switch ($_SESSION['user_type']) {
             case __ADMINUSERTYPE__:
             case __ADMINOPERATORUSERTYPE__:
-                $sql.=" AND (f.emkanat_id IS NOT NULL OR f.emkanat_id <> '')
+                $sql .= " AND (f.emkanat_id IS NOT NULL OR f.emkanat_id <> '')
                     AND (f.type IS NOT NULL OR f.type <> '')
                     AND (f.subscriber_id IS NOT NULL OR f.subscriber_id <> '')
                     AND f.tasvie_shode = 1
                         GROUP BY f.subscriber_id, f.type, f.emkanat_id) tmp
                         )tmp2
                     WHERE ibsusername <> '' AND ibsusername IS NOT NULL";
-                $res=Db::secure_fetchall($sql,[$sertype, $subid]);
-            break;
+                $res = Db::secure_fetchall($sql, [$sertype, $subid]);
+                break;
             case __MODIRUSERTYPE__:
             case __MODIR2USERTYPE__:
             case __OPERATORUSERTYPE__:
             case __OPERATOR2USERTYPE__:
-                $sql.=" AND (f.emkanat_id IS NOT NULL OR f.emkanat_id <> '')
+                $sql .= " AND (f.emkanat_id IS NOT NULL OR f.emkanat_id <> '')
                     AND (f.type IS NOT NULL OR f.type <> '')
                     AND (f.subscriber_id IS NOT NULL OR f.subscriber_id <> '')
                     AND f.tasvie_shode = 1
@@ -2966,33 +3123,34 @@ class Helper
                         GROUP BY f.subscriber_id,f.type,f.emkanat_id) tmp
                         )tmp2
                     WHERE ibsusername <> '' AND ibsusername IS NOT NULL";
-                $res=Db::secure_fetchall($sql,[$sertype, $subid, $_SESSION['branch_id']]);
-            break;
+                $res = Db::secure_fetchall($sql, [$sertype, $subid, $_SESSION['branch_id']]);
+                break;
             case __MOSHTARAKUSERTYPE__:
-                $sql.=" AND (f.emkanat_id IS NOT NULL OR f.emkanat_id <> '')
+                $sql .= " AND (f.emkanat_id IS NOT NULL OR f.emkanat_id <> '')
                     AND (f.type IS NOT NULL OR f.type <> '')
                     AND (f.subscriber_id IS NOT NULL OR f.subscriber_id <> '')
                     AND f.tasvie_shode = 1
                     AND f.subscriber_id = ?
                     GROUP BY f.subscriber_id,f.type,f.emkanat_id) tmp )tmp2
                     WHERE ibsusername <> '' AND ibsusername IS NOT NULL";
-                $res=Db::secure_fetchall($sql,[$sertype, $_SESSION['user_id'], $_SESSION['user_id']]);
-            break;
+                $res = Db::secure_fetchall($sql, [$sertype, $_SESSION['user_id'], $_SESSION['user_id']]);
+                break;
             default:
                 return false;
-            break;
+                break;
         }
-        if(! $res){
+        if (!$res) {
             return false;
         }
         return $res;
     }
 
-    public static function getInternetUsersServicesInfo(){
+    public static function getInternetUsersServicesInfo()
+    {
         switch ($_SESSION['user_type']) {
             case __ADMINUSERTYPE__:
             case __ADMINOPERATORUSERTYPE__:
-                $sql="SELECT * FROM (
+                $sql = "SELECT * FROM (
                     SELECT fid,emkanat_id,fsertype,sertype,telephone1,code_meli,noe_moshtarak,shenase_meli,ssid,reallegal_name,
                     subid,telephone_hamrah,branch_id,name_sherkat,general_sertype,
                     CASE 
@@ -3049,13 +3207,13 @@ class Helper
                             f.emkanat_id) tmp
                             )tmp2
                         WHERE ibsusername <> '' AND ibsusername IS NOT NULL";
-                        $res=Db::fetchall_Query($sql);
-            break;
+                $res = Db::fetchall_Query($sql);
+                break;
             case __MODIRUSERTYPE__:
             case __MODIR2USERTYPE__:
             case __OPERATORUSERTYPE__:
             case __OPERATOR2USERTYPE__:
-                $sql="SELECT * FROM (
+                $sql = "SELECT * FROM (
                     SELECT fid,emkanat_id,fsertype,sertype,telephone1,code_meli,noe_moshtarak,shenase_meli,ssid,reallegal_name,
                     subid,telephone_hamrah,branch_id,
                     CASE 
@@ -3106,7 +3264,7 @@ class Helper
                             AND (f.type IS NOT NULL OR f.type <> '')
                             AND (f.subscriber_id IS NOT NULL OR f.subscriber_id <> '')
                             AND f.tasvie_shode = 1 ";
-                            $sql.="
+                $sql .= "
                             AND sub.branch_id = ?
                         GROUP BY
                             f.subscriber_id,
@@ -3114,10 +3272,10 @@ class Helper
                             f.emkanat_id) tmp
                             )tmp2
                         WHERE ibsusername <> '' AND ibsusername IS NOT NULL";
-                        $res=Db::secure_fetchall($sql,[$_SESSION['branch_id']]);
-            break;
+                $res = Db::secure_fetchall($sql, [$_SESSION['branch_id']]);
+                break;
             case __MOSHTARAKUSERTYPE__:
-                $sql="SELECT * FROM (
+                $sql = "SELECT * FROM (
                     SELECT fid,emkanat_id,fsertype,sertype,telephone1,code_meli,noe_moshtarak,shenase_meli,ssid,reallegal_name,
                     subid,telephone_hamrah,branch_id,
                     CASE 
@@ -3168,7 +3326,7 @@ class Helper
                             AND (f.type IS NOT NULL OR f.type <> '')
                             AND (f.subscriber_id IS NOT NULL OR f.subscriber_id <> '')
                             AND f.tasvie_shode = 1 ";
-                            $sql.="
+                $sql .= "
                             AND sub.branch_id = ?
                             AND sub.id = ?
                             AND f.subscriber_id = ?
@@ -3178,20 +3336,21 @@ class Helper
                             f.emkanat_id) tmp
                             )tmp2
                         WHERE ibsusername <> '' AND ibsusername IS NOT NULL";
-                        $res=Db::secure_fetchall($sql,[$_SESSION['branch_id'], $_SESSION['user_id'], $_SESSION['user_id']]);
-            break;
+                $res = Db::secure_fetchall($sql, [$_SESSION['branch_id'], $_SESSION['user_id'], $_SESSION['user_id']]);
+                break;
             default:
                 return false;
-            break;
+                break;
         }
 
-                if(! $res){
-                    return false;
-                }
-                return $res;
+        if (!$res) {
+            return false;
+        }
+        return $res;
     }
-    public static function getInternetServicesInfoWithIbsusernameNoAuth($username){
-        $sql="SELECT * FROM (
+    public static function getInternetServicesInfoWithIbsusernameNoAuth($username)
+    {
+        $sql = "SELECT * FROM (
             SELECT fid,emkanat_id,fsertype,sertype,telephone1,code_meli,noe_moshtarak,shenase_meli,ssid,reallegal_name,
             subid,telephone_hamrah,branch_id,name_sherkat,general_sertype,siam_tarikhe_tasvie_shode,
             CASE 
@@ -3249,13 +3408,14 @@ class Helper
                     f.emkanat_id) tmp
                     )tmp2
                 WHERE ibsusername <> '' AND ibsusername IS NOT NULL AND ibsusername like '%$username'";
-                $res=Db::fetchall_Query($sql);
-                if(! isset($res)) return false;
-                if(! $res) return false;
-                return $res;
+        $res = Db::fetchall_Query($sql);
+        if (!isset($res)) return false;
+        if (!$res) return false;
+        return $res;
     }
-    public static function getInternetUsersServicesInfoWithoutLogincheck(){
-        $sql="SELECT * FROM (
+    public static function getInternetUsersServicesInfoWithoutLogincheck()
+    {
+        $sql = "SELECT * FROM (
             SELECT fid,emkanat_id,fsertype,sertype,telephone1,code_meli,noe_moshtarak,shenase_meli,ssid,reallegal_name,
             subid,telephone_hamrah,branch_id,name_sherkat,general_sertype,
             CASE 
@@ -3312,12 +3472,13 @@ class Helper
                     f.emkanat_id) tmp
                     )tmp2
                 WHERE ibsusername <> '' AND ibsusername IS NOT NULL";
-                $res=Db::fetchall_Query($sql);
-                if(! $res) return false;
-                return $res;
+        $res = Db::fetchall_Query($sql);
+        if (!$res) return false;
+        return $res;
     }
-    public static function getInternetUsersServicesInfoWithoutLogincheckAndDynamicSelect($in){
-        $sql="SELECT * FROM (
+    public static function getInternetUsersServicesInfoWithoutLogincheckAndDynamicSelect($in)
+    {
+        $sql = "SELECT * FROM (
             SELECT fid,emkanat_id,fsertype,sertype,telephone1,code_meli,noe_moshtarak,shenase_meli,ssid,reallegal_name,
             subid,telephone_hamrah,branch_id,name_sherkat,general_sertype,
             CASE 
@@ -3374,12 +3535,13 @@ class Helper
                     f.emkanat_id) tmp
                     )tmp2
                 WHERE ibsusername <> '' AND ibsusername IS NOT NULL";
-                $res=Db::fetchall_Query($sql);
-                if(! $res) return false;
-                return $res;
+        $res = Db::fetchall_Query($sql);
+        if (!$res) return false;
+        return $res;
     }
-    public static function getAllInternetUsersServicesInfoNoAuth(){
-        $sql="SELECT * FROM (
+    public static function getAllInternetUsersServicesInfoNoAuth()
+    {
+        $sql = "SELECT * FROM (
             SELECT fid,emkanat_id,fsertype,sertype,telephone1,code_meli,noe_moshtarak,shenase_meli,ssid,reallegal_name,
             subid,telephone_hamrah,branch_id,general_sertype,hadeaxar_sorat_daryaft,siam_tarikhe_tasvie_shode,crm_tarikhe_tasvie_shode,
             CASE 
@@ -3440,17 +3602,18 @@ class Helper
                     f.emkanat_id) tmp
                     )tmp2
                 WHERE ibsusername <> '' AND ibsusername IS NOT NULL";
-                $res=Db::fetchall_Query($sql);
-                if(! $res){
-                    return false;
-                }
-                return $res;
+        $res = Db::fetchall_Query($sql);
+        if (!$res) {
+            return false;
+        }
+        return $res;
     }
-    public static function getAllUsersServicesInfo(){
+    public static function getAllUsersServicesInfo()
+    {
         switch ($_SESSION['user_type']) {
             case __ADMINUSERTYPE__:
             case __ADMINOPERATORUSERTYPE__:
-                $sql="SELECT * FROM (
+                $sql = "SELECT * FROM (
                     SELECT fid,emkanat_id,fsertype,sertype,telephone1,code_meli,noe_moshtarak,shenase_meli,ssid,reallegal_name,
                     subid,telephone_hamrah,branch_id,
                     CASE 
@@ -3507,13 +3670,13 @@ class Helper
                             f.emkanat_id) tmp
                             )tmp2
                         WHERE ibsusername <> '' AND ibsusername IS NOT NULL";
-                        $res=Db::fetchall_Query($sql);
-            break;
+                $res = Db::fetchall_Query($sql);
+                break;
             case __MODIRUSERTYPE__:
             case __MODIR2USERTYPE__:
             case __OPERATORUSERTYPE__:
             case __OPERATOR2USERTYPE__:
-                $sql="SELECT * FROM (
+                $sql = "SELECT * FROM (
                     SELECT fid,emkanat_id,fsertype,sertype,telephone1,code_meli,noe_moshtarak,shenase_meli,ssid,reallegal_name,
                     subid,telephone_hamrah,branch_id,
                     CASE 
@@ -3563,7 +3726,7 @@ class Helper
                             AND (f.type IS NOT NULL OR f.type <> '')
                             AND (f.subscriber_id IS NOT NULL OR f.subscriber_id <> '')
                             AND f.tasvie_shode = 1 ";
-                            $sql.="
+                $sql .= "
                             AND sub.branch_id = ?
                         GROUP BY
                             f.subscriber_id,
@@ -3571,10 +3734,10 @@ class Helper
                             f.emkanat_id) tmp
                             )tmp2
                         WHERE ibsusername <> '' AND ibsusername IS NOT NULL";
-                        $res=Db::secure_fetchall($sql,[$_SESSION['branch_id']]);
-            break;
+                $res = Db::secure_fetchall($sql, [$_SESSION['branch_id']]);
+                break;
             case __MOSHTARAKUSERTYPE__:
-                $sql="SELECT * FROM (
+                $sql = "SELECT * FROM (
                     SELECT fid,emkanat_id,fsertype,sertype,telephone1,code_meli,noe_moshtarak,shenase_meli,ssid,reallegal_name,
                     subid,telephone_hamrah,branch_id,
                     CASE 
@@ -3624,7 +3787,7 @@ class Helper
                             AND (f.type IS NOT NULL OR f.type <> '')
                             AND (f.subscriber_id IS NOT NULL OR f.subscriber_id <> '')
                             AND f.tasvie_shode = 1 ";
-                            $sql.="
+                $sql .= "
                             AND sub.branch_id = ?
                             AND sub.id = ?
                             AND f.subscriber_id = ?
@@ -3634,23 +3797,24 @@ class Helper
                             f.emkanat_id) tmp
                             )tmp2
                         WHERE ibsusername <> '' AND ibsusername IS NOT NULL";
-                        $res=Db::secure_fetchall($sql,[$_SESSION['branch_id'], $_SESSION['user_id'], $_SESSION['user_id']]);
-            break;
+                $res = Db::secure_fetchall($sql, [$_SESSION['branch_id'], $_SESSION['user_id'], $_SESSION['user_id']]);
+                break;
             default:
                 return false;
-            break;
+                break;
         }
 
-                if(! $res){
-                    return false;
-                }
-                return $res;
+        if (!$res) {
+            return false;
+        }
+        return $res;
     }
-    public static function getAllUsersAllServices($servicegroup="all"){
+    public static function getAllUsersAllServices($servicegroup = "all")
+    {
         //gereftane tamame user ha ba tamame service ha shoon
-        $res=false;
-        if($servicegroup==="all"){
-            $sql="SELECT
+        $res = false;
+        if ($servicegroup === "all") {
+            $sql = "SELECT
             f.id fid,
                 f.emkanat_id,
                 f.type fsertype,
@@ -3664,10 +3828,9 @@ class Helper
             INNER JOIN bnm_services ser ON ser.id = f.service_id
             WHERE ser.type IN ('bitstream', 'adsl', 'vdsl', 'wireless', 'tdlte', 'voip')
             GROUP BY f.subscriber_id, ser.type,f.emkanat_id";
-            $res=Db::fetchall_Query($sql);
-
-        }elseif($servicegroup==="internet"){
-            $sql="SELECT
+            $res = Db::fetchall_Query($sql);
+        } elseif ($servicegroup === "internet") {
+            $sql = "SELECT
                 f.id fid,
                 f.emkanat_id,
                 f.type fsertype,
@@ -3681,9 +3844,9 @@ class Helper
                 INNER JOIN bnm_services ser ON ser.id = f.service_id
                 WHERE ser.type IN ('bitstream', 'adsl', 'vdsl', 'wireless', 'tdlte')
                 GROUP BY f.subscriber_id, ser.type,f.emkanat_id";
-            $res=Db::fetchall_Query($sql);
-        }elseif($servicegroup==="voip"){
-                $sql="SELECT
+            $res = Db::fetchall_Query($sql);
+        } elseif ($servicegroup === "voip") {
+            $sql = "SELECT
                 f.id fid,
                 f.emkanat_id,
                 f.type fsertype,
@@ -3697,31 +3860,31 @@ class Helper
                 INNER JOIN bnm_services ser ON ser.id = f.service_id
                 WHERE ser.type IN ('voip')
                 GROUP BY f.subscriber_id, ser.type,f.emkanat_id";
-            $res=Db::fetchall_Query($sql);
-        }else{
+            $res = Db::fetchall_Query($sql);
+        } else {
             return false;
         }
-        if(! $res) return false;
-        for ($i=0; $i < $res; $i++) { 
-            $ibsusername=self::getIbsUsername($res[0]['subid'], $res[0]['sertype'], $res[0]['emkanat_id']);
-            
-            if($ibsusername){
-                if($ibsusername[0]['ibsusername']){
-                    $res[$i]['ibsusername']=$ibsusername[0]['ibsusername'];
-                }else{
-                    $res[$i]['ibsusername']='';    
+        if (!$res) return false;
+        for ($i = 0; $i < $res; $i++) {
+            $ibsusername = self::getIbsUsername($res[0]['subid'], $res[0]['sertype'], $res[0]['emkanat_id']);
+
+            if ($ibsusername) {
+                if ($ibsusername[0]['ibsusername']) {
+                    $res[$i]['ibsusername'] = $ibsusername[0]['ibsusername'];
+                } else {
+                    $res[$i]['ibsusername'] = '';
                 }
-            }else{
-                $res[$i]['ibsusername']='';
+            } else {
+                $res[$i]['ibsusername'] = '';
             }
         }
         return $res;
-
     }
-    public static function getAllIbsusername($username=false, $isinternet= true){
-        if($isinternet){
+    public static function getAllIbsusername($username = false, $isinternet = true)
+    {
+        if ($isinternet) {
             //internet
-                $sql="SELECT
+            $sql = "SELECT
                     fa.id fid,
                     fa.subscriber_id subid,
                     fa.emkanat_id,
@@ -3733,10 +3896,10 @@ class Helper
                 INNER JOIN bnm_subscribers sub ON sub.id = fa.subscriber_id
                 WHERE ser.type <> ?
                 GROUP BY ser.type, fa.emkanat_id, fa.subscriber_id";
-            $res= Db::secure_fetchall($sql, ['voip']);
-        }else{
+            $res = Db::secure_fetchall($sql, ['voip']);
+        } else {
             //voip
-            $sql="SELECT
+            $sql = "SELECT
             fa.id fid,
             fa.subscriber_id subid,
             fa.emkanat_id,
@@ -3747,39 +3910,40 @@ class Helper
             INNER JOIN bnm_services ser ON ser.id = fa.service_id
             INNER JOIN bnm_subscribers sub ON sub.id = fa.subscriber_id
             GROUP BY ser.type, fa.emkanat_id, fa.subscriber_id";
-            $res= Db::fetchall_Query($sql);
+            $res = Db::fetchall_Query($sql);
         }
         // return $res;
-            $rc=count($res);
-        if($username){
-            for ($i=0; $i <$rc ; $i++) { 
-                $ibsusername=self::getIbsUsername($res[$i]['subid'], $res[$i]['type'], $res[$i]['emkanat_id']);
-                if($ibsusername[0]['ibsusername']==$username){
-                    if(isset($ibsusername[0]['ibsusername'])){
-                        $res[$i]['ibsusername']=$ibsusername[0]['ibsusername'];
+        $rc = count($res);
+        if ($username) {
+            for ($i = 0; $i < $rc; $i++) {
+                $ibsusername = self::getIbsUsername($res[$i]['subid'], $res[$i]['type'], $res[$i]['emkanat_id']);
+                if ($ibsusername[0]['ibsusername'] == $username) {
+                    if (isset($ibsusername[0]['ibsusername'])) {
+                        $res[$i]['ibsusername'] = $ibsusername[0]['ibsusername'];
                     }
                     return $res[$i];
                 }
             }
             return false;
-        }else{
+        } else {
             return $res;
         }
     }
-    public static function getIbsUsernameByFactorid($factorid){
-        $sql="SELECT f.emkanat_id, ser.type sertype, sub.id subid FROM bnm_factor f 
+    public static function getIbsUsernameByFactorid($factorid)
+    {
+        $sql = "SELECT f.emkanat_id, ser.type sertype, sub.id subid FROM bnm_factor f 
         INNER JOIN bnm_services ser ON ser.id = f.service_id
         INNER JOIN bnm_subscribers sub ON sub.id = f.subscriber_id
         WHERE f.id = ? ";
-        $factor=Db::secure_fetchall($sql,[$factorid]);
-        if(! $factor){
+        $factor = Db::secure_fetchall($sql, [$factorid]);
+        if (!$factor) {
             return false;
         }
-        $res=self::getIbsUsername($factor[0]['subid'], $factor[0]['sertype'], $factor[0]['emkanat_id']);
-        if(! $res) return false;
+        $res = self::getIbsUsername($factor[0]['subid'], $factor[0]['sertype'], $factor[0]['emkanat_id']);
+        if (!$res) return false;
         return $res;
     }
-    public static function getIbsUsername($userid, $servicetype, $emkanatid=false)
+    public static function getIbsUsername($userid, $servicetype, $emkanatid = false)
     {
         switch ($servicetype) {
             case 'bitstream':
@@ -3801,7 +3965,7 @@ class Helper
                 $res = Db::secure_fetchall($sql, [$userid, $emkanatid]);
                 break;
             case 'wireless':
-                if($emkanatid){
+                if ($emkanatid) {
                     $sql = "SELECT
                                 ss.id,
                                 IF(sub.noe_moshtarak='real', CONCAT('w-', ss.id, '-', sub.code_meli),CONCAT('w-', ss.id, '-', sub.shenase_meli))AS ibsusername,
@@ -3818,7 +3982,7 @@ class Helper
                                 AND fa.subscriber_id = ?
                                 ";
                     $res = Db::secure_fetchall($sql, [$emkanatid, $servicetype, $userid]);
-                }else{
+                } else {
                     $sql = "SELECT
                             ss.id,
                             'wirelless' type,
@@ -3864,7 +4028,6 @@ class Helper
         } else {
             return false;
         }
-
     }
 
     public static function checkNoeService($noekhadamat)
@@ -3963,7 +4126,6 @@ class Helper
         if (!$res)
             return false;
         return $res;
-
     }
 
     public static function subIsIrani($subid)
@@ -4022,50 +4184,51 @@ class Helper
         }
     }
 
-    public static function getSubInfoByTelephone($telephone, $nozero=true)
-    {   
+    public static function getSubInfoByTelephone($telephone, $nozero = true)
+    {
 
-        if(! $telephone){
+        if (!$telephone) {
             return false;
         }
-        $sql="SELECT *,1 AS telid FROM bnm_subscribers WHERE telephone1= ?";
-        $res= Db::secure_fetchall($sql, [$telephone]);
-        if(! $res){
-            $sql="SELECT *,2 AS telid FROM bnm_subscribers WHERE telephone2= ?";
-            $res= Db::secure_fetchall($sql, [$telephone]);
-            if(! $res){
-                $sql="SELECT *,3 AS telid FROM bnm_subscribers WHERE telephone3= ?";
-                $res= Db::secure_fetchall($sql, [$telephone]);
-                if(! $res){
+        $sql = "SELECT *,1 AS telid FROM bnm_subscribers WHERE telephone1= ?";
+        $res = Db::secure_fetchall($sql, [$telephone]);
+        if (!$res) {
+            $sql = "SELECT *,2 AS telid FROM bnm_subscribers WHERE telephone2= ?";
+            $res = Db::secure_fetchall($sql, [$telephone]);
+            if (!$res) {
+                $sql = "SELECT *,3 AS telid FROM bnm_subscribers WHERE telephone3= ?";
+                $res = Db::secure_fetchall($sql, [$telephone]);
+                if (!$res) {
                     return false;
-                }else{
+                } else {
                     return $res;
                 }
             }
         }
-        
-        if($res){
+
+        if ($res) {
             return $res;
-        }else{
+        } else {
             return false;
         }
     }
     public static function getSubInfoByMobile($mobile)
-    {   
-        if(! $mobile){
+    {
+        if (!$mobile) {
             return false;
         }
-        $sql="SELECT * FROM bnm_subscribers WHERE SUBSTR(telephone_hamrah,2)= ?";
-        $res= Db::secure_fetchall($sql, [$mobile]);
-        
-        if($res){
+        $sql = "SELECT * FROM bnm_subscribers WHERE SUBSTR(telephone_hamrah,2)= ?";
+        $res = Db::secure_fetchall($sql, [$mobile]);
+
+        if ($res) {
             return $res;
-        }else{
+        } else {
             return false;
         }
     }
 
-    public static function getServiceInfoLastFactorWithSubidEmkanatSertypeNoAuth($subid, $emkanatid, $servicetype){
+    public static function getServiceInfoLastFactorWithSubidEmkanatSertypeNoAuth($subid, $emkanatid, $servicetype)
+    {
         $sql = "SELECT * FROM (
             SELECT fid,tarikhe_tasvie_shode,siam_tarikhe_tasvie_shode,emkanat_id,fsertype,sertype,hadeaxar_sorat_daryaft,
             telephone1,code_meli,noe_moshtarak,shenase_meli,ssid,reallegal_name,
@@ -4145,12 +4308,13 @@ class Helper
                 WHERE ibsusername <> '' AND ibsusername IS NOT NULL
                 AND subid = ? AND emkanat_id = ? AND sertype= ?";
         $res = Db::secure_fetchall($sql, [$subid, $emkanatid, $servicetype]);
-        if(! isset($res)) return false;
-        if(! $res) return false;
+        if (!isset($res)) return false;
+        if (!$res) return false;
         return $res;
     }
-    
-    public static function getAllServiceInfoLastFactorWithSubidEmkanatSertypeNoAuth($subid, $emkanatid, $servicetype){
+
+    public static function getAllServiceInfoLastFactorWithSubidEmkanatSertypeNoAuth($subid, $emkanatid, $servicetype)
+    {
         $sql = "SELECT * FROM (
             SELECT fid,tarikhe_tasvie_shode,siam_tarikhe_tasvie_shode,emkanat_id,fsertype,sertype,hadeaxar_sorat_daryaft,
             telephone1,code_meli,noe_moshtarak,shenase_meli,ssid,reallegal_name,
@@ -4230,8 +4394,8 @@ class Helper
                 WHERE ibsusername <> '' AND ibsusername IS NOT NULL
                 AND subid = ? AND emkanat_id = ? AND sertype= ?";
         $res = Db::secure_fetchall($sql, [$subid, $emkanatid, $servicetype]);
-        if(! isset($res)) return false;
-        if(! $res) return false;
+        if (!isset($res)) return false;
+        if (!$res) return false;
         return $res;
     }
     public static function getServiceInfoByLastFactorWithSubEmkanatSertype($subid, $emkanatid, $servicetype)
@@ -4252,12 +4416,13 @@ class Helper
             ORDER BY fa.tarikhe_factor DESC LIMIT 1
         ";
         $res = Db::secure_fetchall($sql, [$subid, $emkanatid, $servicetype, 1]);
-        if(! isset($res)) return false;
-        if(! $res) return false;
+        if (!isset($res)) return false;
+        if (!$res) return false;
         return $res;
     }
-    public static function getLastIpassignInfoByServiceinfo($subid, $emkanatid, $sertype){
-        $sql="SELECT
+    public static function getLastIpassignInfoByServiceinfo($subid, $emkanatid, $sertype)
+    {
+        $sql = "SELECT
         ass.*,
         ip.ip ipaddress,
         ip.gender,
@@ -4277,13 +4442,14 @@ class Helper
     ORDER BY
         ass.tarikh DESC 
         LIMIT 1";
-        $res=Db::secure_fetchall($sql,[$subid, $emkanatid, $sertype]);
-        if(! isset($res)) return false;
-        if(! $res) return false;
+        $res = Db::secure_fetchall($sql, [$subid, $emkanatid, $sertype]);
+        if (!isset($res)) return false;
+        if (!$res) return false;
         return $res;
     }
-    public static function getServiceInfoByLastFactor($subid, $emkanatid, $sertype){
-        $sql="SELECT
+    public static function getServiceInfoByLastFactor($subid, $emkanatid, $sertype)
+    {
+        $sql = "SELECT
             fa.*,
             sub.noe_moshtarak,
             sub.telephone1,
@@ -4303,23 +4469,25 @@ class Helper
         AND ser.type = ?
         AND fa.tasvie_shode = 1
         ORDER BY fa.tarikhe_factor DESC LIMIT 1";
-        $res=Db::secure_fetchall($sql,[$subid, $emkanatid, $sertype]);
-        if(! $res) return false;
+        $res = Db::secure_fetchall($sql, [$subid, $emkanatid, $sertype]);
+        if (!$res) return false;
         return $res;
     }
-    public static function checkIpExist($ip){
-        $sql="SELECT count(*) rowsnum FROM bnm_ip WHERE ip=?";
-        $res=Db::secure_fetchall($sql,[$ip]);
-        
-        if($res[0]['rowsnum']){
+    public static function checkIpExist($ip)
+    {
+        $sql = "SELECT count(*) rowsnum FROM bnm_ip WHERE ip=?";
+        $res = Db::secure_fetchall($sql, [$ip]);
+
+        if ($res[0]['rowsnum']) {
             return true;
-        }else{
+        } else {
             return false;
         }
     }
-    public static function getIpinfoByip($ip){
-        if(! $ip) return false;
-        $sql="SELECT
+    public static function getIpinfoByip($ip)
+    {
+        if (!$ip) return false;
+        $sql = "SELECT
             ass.*,
             ass.id assignid,
             ip.ip ipaddress,
@@ -4340,26 +4508,30 @@ class Helper
             ip.ip = ?
         ORDER BY
             ass.tarikh DESC LIMIT 1";
-        $res=Db::secure_fetchall($sql,[$ip]);
-        if(! isset($res)) return false;
-        if(! $res) return false;
+        $res = Db::secure_fetchall($sql, [$ip]);
+        if (!isset($res)) return false;
+        if (!$res) return false;
         return $res;
     }
-    public static function pdodbIpdrInstance(){
+    public static function pdodbIpdrInstance()
+    {
         //https://github.com/tommyknocker/pdo-database-class
-        $db = new PDODb(['type' => __IPDRDBTYPE__,
-        'host' => __IPDRDBHOST__,
-        'username' => __IPDRDBUSERNAME__, 
-        'password' => __IPDRDBPASS__,
-        'dbname'=> __IPDRDBDBNAME__,
-        'port' => __IPDRDBPORT__,
-        'prefix' => __IPDRDBPERFIX__,
-        'charset' => __IPDRDBCHARSET__]);
-        if(! $db) return false;
+        $db = new PDODb([
+            'type' => __IPDRDBTYPE__,
+            'host' => __IPDRDBHOST__,
+            'username' => __IPDRDBUSERNAME__,
+            'password' => __IPDRDBPASS__,
+            'dbname' => __IPDRDBDBNAME__,
+            'port' => __IPDRDBPORT__,
+            'prefix' => __IPDRDBPERFIX__,
+            'charset' => __IPDRDBCHARSET__
+        ]);
+        if (!$db) return false;
         return $db;
     }
-    public static function getIpinfoBySubidEmkanatSertypeNoAuth($subid, $emkanatid, $sertype){
-        $sql="SELECT
+    public static function getIpinfoBySubidEmkanatSertypeNoAuth($subid, $emkanatid, $sertype)
+    {
+        $sql = "SELECT
             ass.*,
             ass.id assignid,
             ip.ip ipaddress,
@@ -4382,9 +4554,9 @@ class Helper
             AND ass.servicetype = ?
         ORDER BY
             ass.tarikh DESC LIMIT 1";
-        $res=Db::secure_fetchall($sql,[$subid, $emkanatid, $sertype]);
-        if(! isset($res)) return false;
-        if(! $res) return false;
+        $res = Db::secure_fetchall($sql, [$subid, $emkanatid, $sertype]);
+        if (!isset($res)) return false;
+        if (!$res) return false;
         return $res;
     }
     public static function getNormalPreviousFactor($subid, $emkanatid, $servicetype)
@@ -4479,7 +4651,7 @@ class Helper
             return $arr;
         }
     }
-    
+
     public static function checkResults($result)
     {
         if (isset($result)) {
@@ -4510,12 +4682,13 @@ class Helper
         return self::checkResults($res);
     }
 
-    public static function ip_range($start, $end) {
+    public static function ip_range($start, $end)
+    {
         $start = ip2long($start);
         $end = ip2long($end);
-        return array_map('long2ip', range($start, $end) );
+        return array_map('long2ip', range($start, $end));
     }
-      
+
     public static function getBitstreamSubscribers()
     {
         switch ($_SESSION['user_type']) {
@@ -4584,11 +4757,11 @@ class Helper
 
     public static function getPortBySubAndTel($subid, $telid)
     {
-        $sql="SELECT * FROM bnm_port WHERE user_id = ? AND telephone = ?";
-        $res= Db::secure_fetchall($sql,[$subid, $telid]);
-        if($res){
+        $sql = "SELECT * FROM bnm_port WHERE user_id = ? AND telephone = ?";
+        $res = Db::secure_fetchall($sql, [$subid, $telid]);
+        if ($res) {
             return $res;
-        }else{
+        } else {
             return false;
         }
     }
@@ -4793,7 +4966,6 @@ class Helper
                 return false;
                 break;
         }
-
     }
     public static function vdslInfoByUserid(int $userid, $groupby = true)
     {
@@ -5075,7 +5247,6 @@ class Helper
             $res = Db::secure_fetchall($sql, [$factorid]);
             // return $res;
             return $sql;
-
         } else {
             //user namayande
             $sql = "SELECT
@@ -5428,23 +5599,23 @@ class Helper
             case __ADMINUSERTYPE__:
             case __ADMINOPERATORUSERTYPE__:
                 return false;
-            break;
+                break;
             case __MODIRUSERTYPE__:
             case __MODIR2USERTYPE__:
             case __OPERATORUSERTYPE__:
             case __OPERATOR2USERTYPE__:
-                $noe_user=2;
-            break;
+                $noe_user = 2;
+                break;
             case __MOSHTARAKUSERTYPE__:
-                $noe_user=1;
-            break;
+                $noe_user = 1;
+                break;
             default:
                 return false;
-            break;
+                break;
         }
         $sql = "SELECT * FROM bnm_credits WHERE user_or_branch_id = ? AND noe_user = ? ORDER BY id DESC LIMIT 1";
         $res_credit = Db::secure_fetchall($sql, array($user_id, $noe_user));
-        
+
         if ($res_credit) {
             //ghablan hesab darad
             $credit_array = array();
@@ -5555,11 +5726,9 @@ class Helper
             } else {
                 return false;
             }
-
         } else {
             return false;
         }
-
     }
     public static function readExcelFirstLine(string $file)
     {
@@ -5588,7 +5757,6 @@ class Helper
         } else {
             return false;
         }
-
     }
     public static function Custom_Msg($msg, /*1=Success,2=Error,3=Warning,4=Info*/ $msg_type = 2, $json = true)
     {
@@ -5596,16 +5764,16 @@ class Helper
         if ($json) {
             switch ($msg_type) {
                 case 1:
-                    return json_encode(array('Success' => $msg),JSON_UNESCAPED_UNICODE);
+                    return json_encode(array('Success' => $msg), JSON_UNESCAPED_UNICODE);
                     break;
                 case 2:
-                    return json_encode(array('Warning' => $msg),JSON_UNESCAPED_UNICODE);
+                    return json_encode(array('Warning' => $msg), JSON_UNESCAPED_UNICODE);
                     break;
                 case 3:
-                    return json_encode(array('Error' => $msg),JSON_UNESCAPED_UNICODE);
+                    return json_encode(array('Error' => $msg), JSON_UNESCAPED_UNICODE);
                     break;
                 case 4:
-                    return json_encode(array('Info' => $msg),JSON_UNESCAPED_UNICODE);
+                    return json_encode(array('Info' => $msg), JSON_UNESCAPED_UNICODE);
                     break;
                 default:
                     return self::Json_Message('f');
@@ -5614,7 +5782,6 @@ class Helper
         } else {
             return "<script>alert('{$msg}');</script>";
         }
-
     }
     public static function getUserIp()
     {
@@ -5785,13 +5952,13 @@ class Helper
     public static function ibsCheckUserinfoExist($res)
     {
         if (isset($res)) {
-            if(isset($res[1])){
+            if (isset($res[1])) {
                 if ($res[1]) {
                     return true;
                 } else {
                     return false;
                 }
-            }else{
+            } else {
                 return false;
             }
         } else {
@@ -5911,12 +6078,24 @@ class Helper
                     "normal_password" => 'rrttyy',
                 ),
 
-            ));
+            )
+        );
         return (json_encode($res_setuserattrs));
     }
-    public static function ibsiSetAttrsNewUser(string $type, int $ibs_id,
-        $name, $f_name, $code_meli, $ibs_username, $shomare_shenasname,
-        $city_name, $telephone_hamrah, $shahkar_status_code, $tavalode_fa, $tarikhe_payane_service) {
+    public static function ibsiSetAttrsNewUser(
+        string $type,
+        int $ibs_id,
+        $name,
+        $f_name,
+        $code_meli,
+        $ibs_username,
+        $shomare_shenasname,
+        $city_name,
+        $telephone_hamrah,
+        $shahkar_status_code,
+        $tavalode_fa,
+        $tarikhe_payane_service
+    ) {
         switch ($type) {
             case 'adsl':
             case 'vdsl':
@@ -5941,7 +6120,8 @@ class Helper
                             "normal_username" => $ibs_username,
                             "normal_password" => $code_meli,
                         ),
-                    ));
+                    )
+                );
 
                 break;
             default:
@@ -5955,9 +6135,20 @@ class Helper
             return false;
         }
     }
-    public static function ibsvSetAttrsNewUser(string $type, int $ibs_id,
-        $name, $f_name, $code_meli, $ibs_username, $shomare_shenasname,
-        $shahre_tavalod, $telephone_hamrah, $shahkar_status_code, $tavalode_fa, $tarikhe_payane_service) {
+    public static function ibsvSetAttrsNewUser(
+        string $type,
+        int $ibs_id,
+        $name,
+        $f_name,
+        $code_meli,
+        $ibs_username,
+        $shomare_shenasname,
+        $shahre_tavalod,
+        $telephone_hamrah,
+        $shahkar_status_code,
+        $tavalode_fa,
+        $tarikhe_payane_service
+    ) {
         //todo...code posti ibs bayad code shahkar bezarim
         //todo...email bayad noe service bashad(masalan adsl ya wireless ya tdlte)
         switch ($type) {
@@ -5971,7 +6162,9 @@ class Helper
                         'cell_phone' => $params['telephone_hamrah'],
                         'address' => $params['address'],
                         'postal_code' => $params['code_posti'],
-                        'normal_user_spec' => array('normal_username' => $params['ibs_username'], 'normal_password' => $params['code_meli'])));
+                        'normal_user_spec' => array('normal_username' => $params['ibs_username'], 'normal_password' => $params['code_meli'])
+                    )
+                );
 
                 break;
             default:
@@ -6018,7 +6211,6 @@ class Helper
         } else {
             return false;
         }
-
     }
     public static function ibsiGetUserByUsername($username = false)
     {
@@ -6035,7 +6227,7 @@ class Helper
             return false;
         }
     }
-    public static function getIbsinfoByUsername($username, $sertype='internet')
+    public static function getIbsinfoByUsername($username, $sertype = 'internet')
     {
         switch (strtolower($sertype)) {
             case 'internet':
@@ -6044,31 +6236,29 @@ class Helper
             case 'wireless':
             case 'tdlte':
                 $res = $GLOBALS['ibs_internet']->getUserInfoByNormalUserName($username);
-            break;
+                break;
             case 'voip':
                 $res = $GLOBALS['ibs_voip']->getUserInfoByVoipUserName($username);
-            break;
+                break;
             default:
                 return false;
                 break;
         }
 
-        if(isset($res[1])){
-            if($res[1]){
-                if($res[1][key($res[1])]){
+        if (isset($res[1])) {
+            if ($res[1]) {
+                if ($res[1][key($res[1])]) {
                     return $res[1][key($res[1])];
-                }else{
+                } else {
                     return false;
                 }
-            }else{
+            } else {
                 return false;
             }
-        }else{
+        } else {
             return false;
         }
         return $res;
-        
-        
     }
     public static function ibsvGetUserbyUsername($username = false)
     {
@@ -6176,7 +6366,6 @@ class Helper
             return false;
         }
         return $res;
-
     }
     public static function getSubInfoBySessionType($id = false)
     {
@@ -6215,7 +6404,6 @@ class Helper
         } else {
             return false;
         }
-
     }
     public static function Select_By_Id($table_name = false, $id = false)
     {
@@ -6238,7 +6426,6 @@ class Helper
                 } else {
                     $sql .= "{$keys[$i]}" . '=' . '?' . ' AND ';
                 }
-
             }
             die($sql);
             $res = Db::secure_fetchall($sql, $params, true);
@@ -6246,7 +6433,6 @@ class Helper
         } else {
             return false;
         }
-
     }
     public static function smsTimestampToDate($result)
     {
@@ -6424,7 +6610,6 @@ class Helper
         $res = $client->call('accountInfo', $arr);
         $client = null;
         return $res;
-
     }
     public static function getSentMessages($fromId = '')
     {
@@ -6485,7 +6670,6 @@ class Helper
         } else {
             return false;
         }
-
     }
     public static function Write_In_Sms_Request($receiver, $start_date, $end_date, $receiver_type, $message_id)
     {
@@ -6498,7 +6682,6 @@ class Helper
         // $arr['message_type']  = $message_type;
         $sql = self::Insert_Generator($arr, 'bnm_send_sms_requests');
         return Db::secure_insert_array($sql, $arr);
-
     }
     public static function Write_In_Sms_Queue($res)
     {
@@ -6529,11 +6712,9 @@ class Helper
                 //programming error
                 return false;
             }
-
         } else {
             return false;
         }
-
     }
     public static function Auto_Unset_By_Tbl_Name($data, $table_name = false)
     {
@@ -6549,7 +6730,6 @@ class Helper
         } else {
             return false;
         }
-
     }
     public static function Manual_Unset_Array($data, $valid_requests = false)
     {
@@ -6604,7 +6784,6 @@ class Helper
                 } else {
                     echo $key . $delimiter . $val . "<br/>";
                 }
-
             }
         } else {
             foreach ($variable as $key => $val) {
@@ -6614,7 +6793,6 @@ class Helper
                 } else {
                     echo $delimiter . $val . "<br/>";
                 }
-
             }
         }
     }
@@ -6628,7 +6806,6 @@ class Helper
         } else {
             return $result;
         }
-
     }
     public static function Tojson($data)
     {
@@ -6760,7 +6937,6 @@ class Helper
             } else {
                 return false;
             }
-
         } else {
             return false;
         }
@@ -6796,7 +6972,6 @@ class Helper
             } else {
                 return false;
             }
-
         } else {
             return false;
         }
@@ -6832,7 +7007,6 @@ class Helper
             } else {
                 return false;
             }
-
         } else {
             return false;
         }
@@ -7128,12 +7302,12 @@ class Helper
     //         $check=Db::secure_fetchall($sql, [$servicetype, $subid, $emkanatid, $status]);
     //     }
     // }
-    public static function isUserLocked($subid, $servicetype, $emkanatid){
-
+    public static function isUserLocked($subid, $servicetype, $emkanatid)
+    {
     }
-    
-    public static function isUserUnlocked($subid, $servicetype, $emkanatid){
 
+    public static function isUserUnlocked($subid, $servicetype, $emkanatid)
+    {
     }
 
     public static function logout()
@@ -7145,17 +7319,19 @@ class Helper
         unset($_SESSION['branch_id']);
         unset($_SESSION['user_id']);
     }
-    public static function Add_Or_Minus_Day_To_Date($rooz, $add_minus = '+', $date = false, $seprate_date_by=' ')
+    public static function Add_Or_Minus_Day_To_Date($rooz, $add_minus = '+', $date = false, $seprate_date_by = ' ')
     {
-        $rooz=(string) $rooz;
-        if (! $date) {
+        $rooz = (string) $rooz;
+        if (!$date) {
             return date('Y-m-d', strtotime(date('Y-m-d') . $add_minus . $rooz . ' days'));
         } else {
             //todo...
-            $arr_datetime=explode($seprate_date_by,$date);
-            if(! isset($arr_datetime[0])){return false;}
-            $newdate=date('Y-m-d', strtotime($arr_datetime[0] . $add_minus . $rooz . ' days'));
-            $newdate.=" ".$arr_datetime[1];
+            $arr_datetime = explode($seprate_date_by, $date);
+            if (!isset($arr_datetime[0])) {
+                return false;
+            }
+            $newdate = date('Y-m-d', strtotime($arr_datetime[0] . $add_minus . $rooz . ' days'));
+            $newdate .= " " . $arr_datetime[1];
             return $newdate;
 
 
@@ -7211,14 +7387,18 @@ class Helper
     {
         switch ($message_code) {
 
+            case 'nf':
+            case 'nothingfound':
+                return "موردی یافت نشد.";
+                break;
             case 'pcae':
             case 'pleasechooseanelement':
                 return "لطفا یک مورد را انتخاب کنید";
-            break;
+                break;
             case 'absnr':
             case 'asiatechbitstreamnoresponse':
                 return "پیامی دریافت نشد";
-            break;
+                break;
             case 'subauthproblem':
             case 'sap':
                 return 'احراز هویت مشترک موفق نبوده پس از بررسی و تکمیل اطلاعات هویتی مشترک مجددا تلاش کنید';
@@ -7465,7 +7645,7 @@ class Helper
             case 'snr':
             case 'shahkar_no_response':
                 return 'پاسخی از شاهکار دریافت نشد لطفا اتصال سرور را بررسی نمایید.';
-            break;
+                break;
             case 'sinr':
             case 'subscriber_info_not_right':
                 return 'اطلاعات مشترک جهت ادامه عملیات مورد نظر یافت نشد.';
@@ -7606,34 +7786,36 @@ class Helper
     }
     public static function Set_Factor_Tasvie_Shode($id)
     {
-        
+
         $arr = array();
         $arr['id'] = $id;
         $arr['tasvie_shode'] = '1';
-        $arr['tarikhe_tasvie_shode'] = self::Today_Miladi_Date()." ".self::nowTimeTehran(':', true, true);
+        $arr['tarikhe_tasvie_shode'] = self::Today_Miladi_Date() . " " . self::nowTimeTehran(':', true, true);
         $sql = self::Update_Generator($arr, 'bnm_factor', "WHERE id = :id");
         return Db::secure_update_array($sql, $arr);
     }
-    
-    public static function checkQueryResult($res){
-        if(gettype($res)==='object'){
+
+    public static function checkQueryResult($res)
+    {
+        if (gettype($res) === 'object') {
             return false;
         }
-        if(! isset($res)){
+        if (!isset($res)) {
             return false;
         }
 
-        if(! $res){
+        if (!$res) {
             return false;
         }
 
-        if(! isset($res[0])){
+        if (!isset($res[0])) {
             return false;
         }
         return $res;
     }
 
-    public static function dynamicSelect($data, $table, $exceptions=false, $andor= 'AND'){
+    public static function dynamicSelect($data, $table, $exceptions = false, $andor = 'AND')
+    {
         if ($exceptions) {
             foreach ($exceptions as $key => $val) {
                 // if (key_exists($val, $data) && $data[$val] && $data[$val] == '' || $data[$val] == ' ' || $data[$val] == null) {
@@ -7642,24 +7824,22 @@ class Helper
                 }
             }
         }
-        if(! $data){
+        if (!$data) {
             return false;
         }
         $firstKey = array_key_first($data);
         $lastkey = array_key_last($data);
-        $sql = "SELECT * FROM ".$table." WHERE ";
+        $sql = "SELECT * FROM " . $table . " WHERE ";
         foreach ($data as $key => $value) {
-            if($key === $firstKey ){
-                $sql.= $key. '= ? ';
-            }elseif ($key === $lastkey) {
-                $sql.= $andor.' '.$key.'= ?';
-            }else{
-                $sql.= $andor.' '.$key.'= ?';
+            if ($key === $firstKey) {
+                $sql .= $key . '= ? ';
+            } elseif ($key === $lastkey) {
+                $sql .= $andor . ' ' . $key . '= ?';
+            } else {
+                $sql .= $andor . ' ' . $key . '= ?';
             }
         }
         return $sql;
-
-
     }
     public static function Update_Generator($data, $table, $where, $exceptions = [])
     {
@@ -7796,20 +7976,23 @@ class Helper
         }
         return $sql;
     }
-    public static function creditFormatArray($arr, $paramname){
-        for ($i=0; $i <count($arr) ; $i++) { 
+    public static function creditFormatArray($arr, $paramname)
+    {
+        for ($i = 0; $i < count($arr); $i++) {
             // $arr[$i][$paramname]=number_format($arr[$i][$paramname],2,'.',',');
-            $arr[$i][$paramname]=str_replace('.', ',', self::byteConvert((int) self::toByteSize((string)$arr[$i][$paramname] . 'MB')));
+            $arr[$i][$paramname] = str_replace('.', ',', self::byteConvert((int) self::toByteSize((string)$arr[$i][$paramname] . 'MB')));
         }
         return $arr;
     }
-    public static function creditFormat($param){
-        $param=str_replace('.', ',', self::byteConvert((int) self::toByteSize((string)$param . 'MB')));
+    public static function creditFormat($param)
+    {
+        $param = str_replace('.', ',', self::byteConvert((int) self::toByteSize((string)$param . 'MB')));
         return $param;
     }
-    public static function numberFormatArray($arr, $paramname,int $decimals=0, string $decimals_seperator='.',string $thousends_sep=','){
-        for ($i=0; $i <count($arr) ; $i++) { 
-            $arr[$i][$paramname]=number_format($arr[$i][$paramname],$decimals, $decimals_seperator, $thousends_sep);
+    public static function numberFormatArray($arr, $paramname, int $decimals = 0, string $decimals_seperator = '.', string $thousends_sep = ',')
+    {
+        for ($i = 0; $i < count($arr); $i++) {
+            $arr[$i][$paramname] = number_format($arr[$i][$paramname], $decimals, $decimals_seperator, $thousends_sep);
         }
         return $arr;
     }
@@ -7821,16 +8004,17 @@ class Helper
         $data = htmlspecialchars($data);
         return $data;
     }
-    public static function isSeperatedDateGregorian($d){
-        if((int) $d[0] < 1800){
+    public static function isSeperatedDateGregorian($d)
+    {
+        if ((int) $d[0] < 1800) {
             return true;
-        }else{
+        } else {
             return false;
         }
     }
     public static function dateConvertInitialize($date, $seperator = '-', $digitconvert = true)
     {
-        
+
         if ($date) {
             $date_arr = array();
             $date_arr = explode($seperator, $date);
@@ -7851,10 +8035,10 @@ class Helper
             return false;
         }
     }
-    public static function tabdileTarikhIndexArray(array $arr,string $paramname,int $noe_tabdil = 1,string $dateseperator = '-',string $resultseperator = '-',$digitconvert = true)
+    public static function tabdileTarikhIndexArray(array $arr, string $paramname, int $noe_tabdil = 1, string $dateseperator = '-', string $resultseperator = '-', $digitconvert = true)
     {
-        for ($i=0; $i <count($arr) ; $i++) { 
-            $arr[$i][$paramname]=self::TabdileTarikh($arr[$i][$paramname],$noe_tabdil, $dateseperator, $resultseperator, $digitconvert);
+        for ($i = 0; $i < count($arr); $i++) {
+            $arr[$i][$paramname] = self::TabdileTarikh($arr[$i][$paramname], $noe_tabdil, $dateseperator, $resultseperator, $digitconvert);
         }
         return $arr;
     }
@@ -7870,29 +8054,29 @@ class Helper
                     $month = (int) $date_arr[1];
                     $day = (int) $date_arr[2];
                     $result = self::gregorian_to_jalali($year, $month, $day, $resultseperator);
-                    $dt=self::dateConvertInitialize($result, $resultseperator);
-                    if(isset($dt[1]) && isset($dt[2]) && isset($dt[0])){
-                        if(strlen($dt[1])<2){
+                    $dt = self::dateConvertInitialize($result, $resultseperator);
+                    if (isset($dt[1]) && isset($dt[2]) && isset($dt[0])) {
+                        if (strlen($dt[1]) < 2) {
                             $dt[1] = "0" . (string) $dt[1];
                         }
-                        if(strlen($dt[2])<2){
+                        if (strlen($dt[2]) < 2) {
                             $dt[2] = "0" . (string) $dt[2];
                         }
-                        $dt[0]=(string)$dt[0];
-                        $result= $dt[0].$resultseperator.$dt[1].$resultseperator.$dt[2];
+                        $dt[0] = (string)$dt[0];
+                        $result = $dt[0] . $resultseperator . $dt[1] . $resultseperator . $dt[2];
                     }
-                    
+
                     if (isset($alltimes[1])) {
                         $result = $result . ' ' . $alltimes[1];
                     }
-                    
+
                     return $result;
                 } else {
                     if ($digitconvert) {
                         $year = (int)self::convert_numbers($date_arr[0], false);
-                        $month =(int) self::convert_numbers($date_arr[1], false);
-                        $day =(int) self::convert_numbers($date_arr[2], false);
-                    }else{
+                        $month = (int) self::convert_numbers($date_arr[1], false);
+                        $day = (int) self::convert_numbers($date_arr[2], false);
+                    } else {
                         $year = (int) $date_arr[0];
                         $month = (int) $date_arr[1];
                         $day = (int) $date_arr[2];
@@ -7911,87 +8095,92 @@ class Helper
             return false;
         }
     }
-    
-    public static function secondsToTimeIndexArray(array $arr,string $paramname,$sep=':'){
-        for ($i=0; $i < count($arr); $i++) {
-            $arr[$i][$paramname]=self::seconds2MDH($arr[$i][$paramname]);
+
+    public static function secondsToTimeIndexArray(array $arr, string $paramname, $sep = ':')
+    {
+        for ($i = 0; $i < count($arr); $i++) {
+            $arr[$i][$paramname] = self::seconds2MDH($arr[$i][$paramname]);
         }
         return $arr;
     }
-    public static function secondsToTime($seconds, $sep=',', $spec=false) {
-        $seconds=(int) $seconds;
+    public static function secondsToTime($seconds, $sep = ',', $spec = false)
+    {
+        $seconds = (int) $seconds;
         $t = round($seconds);
-        if($spec){
-            return sprintf('%02d'.'h'.$sep.'%02d'.'m'.$sep.'%02d'.'s', ($t/3600),($t/60%60), $t%60);
-        }else{
-            return sprintf('%02d'.$sep.'%02d'.$sep.'%02d', ($t/3600),($t/60%60), $t%60);
+        if ($spec) {
+            return sprintf('%02d' . 'h' . $sep . '%02d' . 'm' . $sep . '%02d' . 's', ($t / 3600), ($t / 60 % 60), $t % 60);
+        } else {
+            return sprintf('%02d' . $sep . '%02d' . $sep . '%02d', ($t / 3600), ($t / 60 % 60), $t % 60);
         }
     }
 
-    public static function fixDateDigit($date, $sep="/", $timesep=" "){
-        $time="";
+    public static function fixDateDigit($date, $sep = "/", $timesep = " ")
+    {
+        $time = "";
         $darr   = explode($sep, $date);
-        if(! isset($darr[0]) && ! isset($darr[1]) && ! isset($darr[2])) return false;
-        $darr[0]=(string)$darr[0];
-        $darr[1]=(string)$darr[1];
-        $darr[2]=(string)$darr[2];
+        if (!isset($darr[0]) && !isset($darr[1]) && !isset($darr[2])) return false;
+        $darr[0] = (string)$darr[0];
+        $darr[1] = (string)$darr[1];
+        $darr[2] = (string)$darr[2];
         $dt     = explode($timesep, $darr[2]);
-        if(strlen($darr[1]) < 2){
-            $darr[1]="0".$darr[1];
+        if (strlen($darr[1]) < 2) {
+            $darr[1] = "0" . $darr[1];
         }
-        if(isset($dt)){
-            if($dt){
-                if(count($dt)>1){
-                    $time=$dt[1];
-                    if(strlen($dt[0]) < 2){
-                        $dt[0]="0".$dt[0];
-                        return $darr[0].$sep.$darr[1].$sep.$dt[0].$timesep.$time;
-                    }else{
-                        return $darr[0].$sep.$darr[1].$sep.$dt[0].$timesep.$time;
+        if (isset($dt)) {
+            if ($dt) {
+                if (count($dt) > 1) {
+                    $time = $dt[1];
+                    if (strlen($dt[0]) < 2) {
+                        $dt[0] = "0" . $dt[0];
+                        return $darr[0] . $sep . $darr[1] . $sep . $dt[0] . $timesep . $time;
+                    } else {
+                        return $darr[0] . $sep . $darr[1] . $sep . $dt[0] . $timesep . $time;
                     }
                 }
             }
         }
-        if(strlen($darr[2]) < 2){
-            $darr[2]="0".$darr[2];
-            return $darr[0].$sep.$darr[1].$sep.$darr[2];
+        if (strlen($darr[2]) < 2) {
+            $darr[2] = "0" . $darr[2];
+            return $darr[0] . $sep . $darr[1] . $sep . $darr[2];
         }
-        return $darr[0].$sep.$darr[1].$sep.$darr[2];
+        return $darr[0] . $sep . $darr[1] . $sep . $darr[2];
         return $date;
     }
 
     public static function Today_Shamsi_Date($seperator = '-')
     {
-        $test_date = explode($seperator, date('Y'.$seperator.'m'.$seperator.'d'));
+        $test_date = explode($seperator, date('Y' . $seperator . 'm' . $seperator . 'd'));
         $res = self::gregorian_to_jalali((int) $test_date[0], (int) $test_date[1], (int) $test_date[2], $seperator);
         return $res;
     }
 
-    public static function nowShamsiYmd($sep="-"){
-        $test_date = explode($sep, date("Y".$sep."m".$sep."d"));
+    public static function nowShamsiYmd($sep = "-")
+    {
+        $test_date = explode($sep, date("Y" . $sep . "m" . $sep . "d"));
         // return $test_date;
         return $res = self::gregorian_to_jalali((int) $test_date[0], (int) $test_date[1], (int) $test_date[2], $sep);
     }
 
-    public static function nowShamsihisv($sep=":"){
+    public static function nowShamsihisv($sep = ":")
+    {
         // $test_date = explode($sep, date("Y".$sep."m".$sep."d"));
         // return $test_date;
         $date = new DateTime("now", new DateTimeZone("Asia/Tehran"));
         // return $res = self::gregorian_to_jalali((int) $test_date[0], (int) $test_date[1], (int) $test_date[2], $sep);
-        return $date->format("H" . $sep . "i" . $sep . "s" ."."."v");
+        return $date->format("H" . $sep . "i" . $sep . "s" . "." . "v");
     }
-    
+
     public static function Today_Miladi_Date($seperator = '-')
     {
         return date('Y' . $seperator . 'm' . $seperator . 'd');
     }
-    public static function nowTimeTehran($sep = ':', $displayseconds = true, $microseconds=false)
+    public static function nowTimeTehran($sep = ':', $displayseconds = true, $microseconds = false)
     {
         $date = new DateTime("now", new DateTimeZone("Asia/Tehran"));
         if ($displayseconds) {
-            if($microseconds){
+            if ($microseconds) {
                 return $date->format("H" . $sep . "i" . $sep . "s.u");
-            }else{
+            } else {
                 return $date->format("H" . $sep . "i" . $sep . "s");
             }
         } else {
@@ -8046,7 +8235,6 @@ class Helper
             if ($days >= 365) {
                 $days++;
             }
-
         }
         $gy += 4 * ((int) ($days / 1461));
         $days %= 1461;
@@ -8064,7 +8252,7 @@ class Helper
         }
         return ($mod == '') ? array($gy, $gm, $gd) : $gy . $mod . $gm . $mod . $gd;
     }
-    
+
     public static function convert_numbers($string, $toPersian = true)
     {
         $e_num = array('0', '1', '2', '3', '4', '5', '6', '7', '8', '9');
@@ -8112,32 +8300,39 @@ class Helper
         } else {
             return false;
         }
-
     }
-    
+
     public static function datatable_handler($data)
     {
         switch ($data['request']) {
             case 'ip_assign':
                 if (self::Login_Just_Check()) {
-                            unset($data['datatable_request']);
-                            unset($data['request']);
-                            $primaryKey = 'id';
-                            $columns = array(
-                                array('db' => 'id', 'dt' => 'id'),
-                                array('db' => 'name', 'dt' => 'name'),
-                                array('db' => 'telephone', 'dt' => 'telephone'),
-                                array('db' => 'servicetype', 'dt' => 'servicetype'),
-                                array('db' => 'ip', 'dt' => 'ip'),
-                                array('db' => 'bandwidth', 'dt' => 'bandwidth'),
-                                array('db' => 'tarikhe_shoroe_ip', 'dt' => 'tarikhe_shoroe_ip'),
-                                array('db' => 'tarikhe_payane_ip', 'dt' => 'tarikhe_payane_ip'),
-                                array('db' => 'poolname', 'dt' => 'poolname'),
-                            );
-                            switch ($_SESSION['user_type']) {
-                                case __ADMINUSERTYPE__:
-                                case __ADMINOPERATORUSERTYPE__:
-                                    $table = "( SELECT
+                    unset($data['datatable_request']);
+                    unset($data['request']);
+                    $primaryKey = 'id';
+                    $columns = array(
+                        array('db' => 'id', 'dt' => 'id'),
+                        array('db' => 'name', 'dt' => 'name'),
+                        array('db' => 'telephone', 'dt' => 'telephone'),
+                        array('db' => 'servicetype', 'dt' => 'servicetype'),
+                        array('db' => 'ip', 'dt' => 'ip'),
+                        array('db' => 'bandwidth', 'dt' => 'bandwidth'),
+                        array('db' => 'tarikhe_shoroe_ip', 'dt' => 'tarikhe_shoroe_ip'),
+                        array('db' => 'tarikhe_payane_ip', 'dt' => 'tarikhe_payane_ip'),
+                        array('db' => 'poolname', 'dt' => 'poolname'),
+                    );
+                    //modify date
+                    // array(
+                    //     'db'        => 'start_date',
+                    //     'dt'        => 4,
+                    //     'formatter' => function( $d, $row ) {
+                    //         return date( 'jS M y', strtotime($d));
+                    //     }
+                    // ),
+                    switch ($_SESSION['user_type']) {
+                        case __ADMINUSERTYPE__:
+                        case __ADMINOPERATORUSERTYPE__:
+                            $table = "( SELECT
                                             ass.id,
                                             ip.ip AS ip,
                                             pool.name poolname,
@@ -8152,12 +8347,12 @@ class Helper
                                             INNER JOIN bnm_ip ip ON ip.id= ass.ip
                                             INNER JOIN bnm_ip_pool_list pool ON pool.id = ip.pool
                                     ) tmp";
-                                break;
-                                case __MODIRUSERTYPE__:
-                                case __MODIR2USERTYPE__:
-                                case __OPERATORUSERTYPE__:
-                                case __OPERATOR2USERTYPE__:
-                                    $table = "( SELECT
+                            break;
+                        case __MODIRUSERTYPE__:
+                        case __MODIR2USERTYPE__:
+                        case __OPERATORUSERTYPE__:
+                        case __OPERATOR2USERTYPE__:
+                            $table = "( SELECT
                                             ass.id,
                                             ip.ip AS ip,
                                             pool.name poolname,
@@ -8173,18 +8368,18 @@ class Helper
                                             INNER JOIN bnm_ip_pool_list pool ON pool.id = ip.pool
                                         WHERE sub.branch_id = {$_SESSION['branch_id']}
                                     ) tmp";
-                                break;
-                                default:
-                                    return false;
-                                break;                            
-                            }
-                            $where = false;
-                            return (json_encode(Db::simple($data, $table, $primaryKey, $columns, $where)));
-                            break;                    
+                            break;
+                        default:
+                            return false;
+                            break;
+                    }
+                    $where = false;
+                    return (json_encode(Db::simple($data, $table, $primaryKey, $columns, $where)));
+                    break;
                 } else {
                     die(self::Json_Message('af'));
                 }
-            break;
+                break;
             case 'speedtest_report':
                 if (self::Login_Just_Check()) {
                     switch ($_SESSION['user_type']) {
@@ -8802,55 +8997,54 @@ class Helper
                 }
 
                 break;
-                case 'pre_internal_branch':
-                    if (self::Login_Just_Check()) {
-                        switch ($_SESSION['user_type']) {
-                            case __ADMINUSERTYPE__:
-                            case __ADMINOPERATORUSERTYPE__:
-                                unset($data['datatable_request']);
-                                unset($data['request']);
-                                $table = 'bnm_prebranch';
-                                $primaryKey = 'id';
+            case 'pre_internal_branch':
+                if (self::Login_Just_Check()) {
+                    switch ($_SESSION['user_type']) {
+                        case __ADMINUSERTYPE__:
+                        case __ADMINOPERATORUSERTYPE__:
+                            unset($data['datatable_request']);
+                            unset($data['request']);
+                            $table = 'bnm_prebranch';
+                            $primaryKey = 'id';
 
-                                $columns = array(
-                                    array('db' => 'id', 'dt' => 'id'),
-                                    array('db' => 'name_sherkat', 'dt' => 'name_sherkat'),
-                                    array('db' => 'shomare_sabt', 'dt' => 'shomare_sabt'),
-                                    array('db' => 'telephone1', 'dt' => 'telephone1'),
-                                    array('db' => 'telephone2', 'dt' => 'telephone2'),
-                                    array('db' => 'address', 'dt' => 'address'),
-                                    array('db' => 'noe_sherkat', 'dt' => 'noe_sherkat'),
-                                );
-                                $where = "confirmstatus = 2";
-                                return (json_encode(Db::simple($data, $table, $primaryKey, $columns, $where)));
-                                break;
-                            case __MODIRUSERTYPE__:
-                            case __OPERATORUSERTYPE__:
-                                unset($data['datatable_request']);
-                                unset($data['request']);
-                                $table = 'bnm_prebranch';
-                                $primaryKey = 'id';
-                                $columns = array(
-                                    array('db' => 'id', 'dt' => 'id'),
-                                    array('db' => 'name_sherkat', 'dt' => 'name_sherkat'),
-                                    array('db' => 'shomare_sabt', 'dt' => 'shomare_sabt'),
-                                    array('db' => 'telephone1', 'dt' => 'telephone1'),
-                                    array('db' => 'telephone2', 'dt' => 'telephone2'),
-                                    array('db' => 'address', 'dt' => 'address'),
-                                    array('db' => 'noe_sherkat', 'dt' => 'noe_sherkat'),
-                                );
-                                $where = "id = {$_SESSION['branch_id']} AND confirmstatus = 2";
-                                return (json_encode(Db::simple($data, $table, $primaryKey, $columns, $where)));
-                                break;
-                            default:
-                                die(self::Json_Message('af'));
-                                break;
-    
-                        }
-                    } else {
-                        die(self::Json_Message('af'));
+                            $columns = array(
+                                array('db' => 'id', 'dt' => 'id'),
+                                array('db' => 'name_sherkat', 'dt' => 'name_sherkat'),
+                                array('db' => 'shomare_sabt', 'dt' => 'shomare_sabt'),
+                                array('db' => 'telephone1', 'dt' => 'telephone1'),
+                                array('db' => 'telephone2', 'dt' => 'telephone2'),
+                                array('db' => 'address', 'dt' => 'address'),
+                                array('db' => 'noe_sherkat', 'dt' => 'noe_sherkat'),
+                            );
+                            $where = "confirmstatus = 2";
+                            return (json_encode(Db::simple($data, $table, $primaryKey, $columns, $where)));
+                            break;
+                        case __MODIRUSERTYPE__:
+                        case __OPERATORUSERTYPE__:
+                            unset($data['datatable_request']);
+                            unset($data['request']);
+                            $table = 'bnm_prebranch';
+                            $primaryKey = 'id';
+                            $columns = array(
+                                array('db' => 'id', 'dt' => 'id'),
+                                array('db' => 'name_sherkat', 'dt' => 'name_sherkat'),
+                                array('db' => 'shomare_sabt', 'dt' => 'shomare_sabt'),
+                                array('db' => 'telephone1', 'dt' => 'telephone1'),
+                                array('db' => 'telephone2', 'dt' => 'telephone2'),
+                                array('db' => 'address', 'dt' => 'address'),
+                                array('db' => 'noe_sherkat', 'dt' => 'noe_sherkat'),
+                            );
+                            $where = "id = {$_SESSION['branch_id']} AND confirmstatus = 2";
+                            return (json_encode(Db::simple($data, $table, $primaryKey, $columns, $where)));
+                            break;
+                        default:
+                            die(self::Json_Message('af'));
+                            break;
                     }
-    
+                } else {
+                    die(self::Json_Message('af'));
+                }
+
                 break;
             case 'branch':
                 if (self::Login_Just_Check()) {
@@ -8894,13 +9088,12 @@ class Helper
                         default:
                             die(self::Json_Message('af'));
                             break;
-
                     }
                 } else {
                     die(self::Json_Message('af'));
                 }
 
-            break;
+                break;
             case 'upload_file':
                 if (self::Login_Just_Check()) {
                     switch ($_SESSION['user_type']) {
@@ -9074,7 +9267,6 @@ class Helper
                             $where = false;
                             return (json_encode(Db::simple($data, $table, $primaryKey, $columns, $where)));
                             break;
-
                     }
                 } else {
                     die(self::Json_Message('af'));
@@ -9220,7 +9412,6 @@ class Helper
                             die(self::Json_Message('af'));
                             break;
                     }
-
                 } else {
                     die(self::Json_Message('af'));
                 }
@@ -9297,7 +9488,6 @@ class Helper
                             die(self::Json_Message('af'));
                             break;
                     }
-
                 } else {
                     die(self::Json_Message('af'));
                 }
@@ -9331,7 +9521,6 @@ class Helper
                             die(self::Json_Message('af'));
                             break;
                     }
-
                 } else {
                     die(self::Json_Message('af'));
                 }
@@ -9346,15 +9535,15 @@ class Helper
                             unset($data['request']);
                             $primaryKey = 'id';
                             $columns = array(
-                                array( 'db' => 'id', 'dt' => 'id' ),
-                                array( 'db' => 'tername', 'dt' => 'tername' ),
-                                array( 'db' => 'tcname', 'dt' => 'tcname' ),
-                                array( 'db' => 'radif', 'dt' => 'radif' ),
-                                array( 'db' => 'tighe', 'dt' => 'tighe' ),
-                                array( 'db' => 'shoroe_etesali', 'dt' => 'shoroe_etesali' ),
+                                array('db' => 'id', 'dt' => 'id'),
+                                array('db' => 'tername', 'dt' => 'tername'),
+                                array('db' => 'tcname', 'dt' => 'tcname'),
+                                array('db' => 'radif', 'dt' => 'radif'),
+                                array('db' => 'tighe', 'dt' => 'tighe'),
+                                array('db' => 'shoroe_etesali', 'dt' => 'shoroe_etesali'),
                             );
                             // $table = 'bnm_terminal';
-                            $table= "(SELECT ter.id,ter.name tername, tc.name tcname, ter.radif, ter.tighe, ter.shoroe_etesali FROM bnm_terminal ter 
+                            $table = "(SELECT ter.id,ter.name tername, tc.name tcname, ter.radif, ter.tighe, ter.shoroe_etesali FROM bnm_terminal ter 
                             INNER JOIN bnm_telecommunications_center tc ON tc.id = ter.markaze_mokhaberati) tmp";
                             $where = false;
                             return (json_encode(Db::simple($data, $table, $primaryKey, $columns, $where)));
@@ -9364,11 +9553,10 @@ class Helper
                             die(self::Json_Message('af'));
                             break;
                     }
-
                 } else {
                     die(self::Json_Message('af'));
                 }
-            break;
+                break;
             case 'telecommunications_center':
                 if (self::Login_Just_Check()) {
                     switch ($_SESSION['user_type']) {
@@ -9379,13 +9567,13 @@ class Helper
                             $table = 'bnm_telecommunications_center';
                             $primaryKey = 'id';
                             $columns = array(
-                                array( 'db' => 'id', 'dt' => 'id' ),
-                                array( 'db' => 'name', 'dt' => 'name' ),
-                                array( 'db' => 'pish_shomare_ostan', 'dt' => 'pish_shomare_ostan' ),
-                                array( 'db' => 'shomare_tamas_markaz', 'dt' => 'shomare_tamas_markaz' ),
-                                array( 'db' => 'masire_avale_faktorha', 'dt' => 'masire_avale_faktorha' ),
-                                array( 'db' => 'masire_dovome_faktorha', 'dt' => 'masire_dovome_faktorha' ),
-                                array( 'db' => 'noe_gharardad', 'dt' => 'noe_gharardad' )
+                                array('db' => 'id', 'dt' => 'id'),
+                                array('db' => 'name', 'dt' => 'name'),
+                                array('db' => 'pish_shomare_ostan', 'dt' => 'pish_shomare_ostan'),
+                                array('db' => 'shomare_tamas_markaz', 'dt' => 'shomare_tamas_markaz'),
+                                array('db' => 'masire_avale_faktorha', 'dt' => 'masire_avale_faktorha'),
+                                array('db' => 'masire_dovome_faktorha', 'dt' => 'masire_dovome_faktorha'),
+                                array('db' => 'noe_gharardad', 'dt' => 'noe_gharardad')
                             );
                             $where = false;
                             return (json_encode(Db::simple($data, $table, $primaryKey, $columns, $where)));
@@ -9395,7 +9583,6 @@ class Helper
                             die(self::Json_Message('af'));
                             break;
                     }
-
                 } else {
                     die(self::Json_Message('af'));
                 }
@@ -9416,7 +9603,7 @@ class Helper
                             );
                             $where = false;
                             // CONCAT(tc.telecentername,' ( ',os.name,' ) ',' پیش شماره استان ',os.pish_shomare_ostan) tcname_osname_osprenum
-                            $table="(
+                            $table = "(
                                 SELECT
                                     pr.id,
                                     pr.prenumber,
@@ -9434,57 +9621,55 @@ class Helper
                             die(self::Json_Message('af'));
                             break;
                     }
-
                 } else {
                     die(self::Json_Message('af'));
                 }
 
                 break;
-                case 'port':
-                    
-                    if (self::Login_Just_Check()) {
-                        switch ($_SESSION['user_type']) {
-                            case __ADMINUSERTYPE__:
-                            case __ADMINOPERATORUSERTYPE__:
-                                unset($data['datatable_request']);
-                                unset($data['request']);
-                                $table = 'bnm_port';
-                                $primaryKey = 'id';
-                                $columns = array(
-                                    array( 'db' => 'id', 'dt' => 'id' ),
-                                    array( 'db' => 'terminal', 'dt' => 'terminal' ),
-                                    array( 'db' => 'etesal', 'dt' => 'etesal' ),
-                                    array( 'db' => 'radif', 'dt' => 'radif' ),
-                                    array( 'db' => 'tighe', 'dt' => 'tighe' ),
-                                    array( 'db' => 'dslam', 'dt' => 'dslam' ),
-                                    array( 'db' => 'kart', 'dt' => 'kart' ),
-                                    array( 'db' => 'port', 'dt' => 'port' ),
-                                    array( 'db' => 'adsl_vdsl', 'dt' => 'adsl_vdsl' ),
-                                    array( 'db' => 'status', 'dt' => 'status' ),
-                                    array( 'db' => 'telephone', 'dt' => 'telephone' ),
-                                );
-                                // $where = false;
-                                if(isset($_POST['filter'])){
-                                    $terminal=$_POST['filter'];
-                                    if($terminal!=''){
-                                        $where = "terminal = '$terminal'";
-                                    }else{
-                                        $where=false;
-                                    }
+            case 'port':
+
+                if (self::Login_Just_Check()) {
+                    switch ($_SESSION['user_type']) {
+                        case __ADMINUSERTYPE__:
+                        case __ADMINOPERATORUSERTYPE__:
+                            unset($data['datatable_request']);
+                            unset($data['request']);
+                            $table = 'bnm_port';
+                            $primaryKey = 'id';
+                            $columns = array(
+                                array('db' => 'id', 'dt' => 'id'),
+                                array('db' => 'terminal', 'dt' => 'terminal'),
+                                array('db' => 'etesal', 'dt' => 'etesal'),
+                                array('db' => 'radif', 'dt' => 'radif'),
+                                array('db' => 'tighe', 'dt' => 'tighe'),
+                                array('db' => 'dslam', 'dt' => 'dslam'),
+                                array('db' => 'kart', 'dt' => 'kart'),
+                                array('db' => 'port', 'dt' => 'port'),
+                                array('db' => 'adsl_vdsl', 'dt' => 'adsl_vdsl'),
+                                array('db' => 'status', 'dt' => 'status'),
+                                array('db' => 'telephone', 'dt' => 'telephone'),
+                            );
+                            // $where = false;
+                            if (isset($_POST['filter'])) {
+                                $terminal = $_POST['filter'];
+                                if ($terminal != '') {
+                                    $where = "terminal = '$terminal'";
+                                } else {
+                                    $where = false;
                                 }
-                                return (json_encode(Db::simple($data, $table, $primaryKey, $columns, $where)));
-                                break;
-    
-                            default:
-                                die(self::Json_Message('af'));
-                                break;
-                        }
-    
-                    } else {
-                        die(self::Json_Message('af'));
+                            }
+                            return (json_encode(Db::simple($data, $table, $primaryKey, $columns, $where)));
+                            break;
+
+                        default:
+                            die(self::Json_Message('af'));
+                            break;
                     }
-    
-                    break;
+                } else {
+                    die(self::Json_Message('af'));
+                }
+
+                break;
             case 'test':
                 if (self::Login_Just_Check()) {
                     switch ($_SESSION['user_type']) {
@@ -9515,7 +9700,6 @@ class Helper
                             die(self::Json_Message('af'));
                             break;
                     }
-
                 } else {
                     die(self::Json_Message('af'));
                 }
@@ -9550,7 +9734,6 @@ class Helper
                             die(self::Json_Message('af'));
                             break;
                     }
-
                 } else {
                     die(self::Json_Message('af'));
                 }
@@ -9642,13 +9825,12 @@ class Helper
                                         )tmp";
                                     $where = false;
                                     return (json_encode(Db::simple($data, $table, $primaryKey, $columns, $where)));
-                                break;
-                                
+                                    break;
+
                                 default:
                                     die(self::Json_Message('auth_fail'));
                                     break;
                             }
-
                         } elseif ($data['filter'] == 'namayande') {
                             switch ($_SESSION['user_type']) {
                                 case __ADMINUSERTYPE__:
@@ -9688,7 +9870,6 @@ class Helper
                             }
                         }
                     }
-
                 } else {
                     return json_encode(array('error'));
                 }
@@ -9731,34 +9912,34 @@ class Helper
                         case __MODIR2USERTYPE__:
                         case __OPERATORUSERTYPE__:
                         case __OPERATOR2USERTYPE__:
-                                $table = 'bnm_credits';
-                                $primaryKey = 'id';
-                                $columns = array(
-                                    array('db' => 'id', 'dt' => 'id'),
-                                    array('db' => 'credit', 'dt' => 'credit'),
-                                    array('db' => 'update_time', 'dt' => 'update_time'),
-                                    array('db' => 'bedehkar', 'dt' => 'bedehkar'),
-                                    array('db' => 'bestankar', 'dt' => 'bestankar'),
-                                    array('db' => 'tozihat', 'dt' => 'tozihat'),
-                                );
-                                // $table= "(
-                                //     SELECT c.id, c.credit, c.update_time, c.bedehkar, c.bestankar, c.tozihat
-                                //     FROM bnm_credits c
-                                //     WHERE noe_user = '2' AND user_or_branch_id = ".$_SESSION['user_id']." 
-                                // )tmp";
-                                // $table= "(
-                                //     SELECT 
-                                // )tmp";
-                                // $table = 
-                                // $where = "user_or_branch_id= {$data['filter2']} AND noe_user={$data['filter']}";
-                                $table = "(SELECT
+                            $table = 'bnm_credits';
+                            $primaryKey = 'id';
+                            $columns = array(
+                                array('db' => 'id', 'dt' => 'id'),
+                                array('db' => 'credit', 'dt' => 'credit'),
+                                array('db' => 'update_time', 'dt' => 'update_time'),
+                                array('db' => 'bedehkar', 'dt' => 'bedehkar'),
+                                array('db' => 'bestankar', 'dt' => 'bestankar'),
+                                array('db' => 'tozihat', 'dt' => 'tozihat'),
+                            );
+                            // $table= "(
+                            //     SELECT c.id, c.credit, c.update_time, c.bedehkar, c.bestankar, c.tozihat
+                            //     FROM bnm_credits c
+                            //     WHERE noe_user = '2' AND user_or_branch_id = ".$_SESSION['user_id']." 
+                            // )tmp";
+                            // $table= "(
+                            //     SELECT 
+                            // )tmp";
+                            // $table = 
+                            // $where = "user_or_branch_id= {$data['filter2']} AND noe_user={$data['filter']}";
+                            $table = "(SELECT
                                             id, update_time, FORMAT(credit,0) credit, FORMAT(bedehkar,0) bedehkar,
                                             FORMAT(bestankar,0) bestankar, tozihat
                                             FROM bnm_credits WHERE user_or_branch_id= {$_SESSION['user_id']} AND noe_user='2'
                                             ) tmp
                                         ";
-                                $where = false;
-                                return (json_encode(Db::simple($data, $table, $primaryKey, $columns, $where)));
+                            $where = false;
+                            return (json_encode(Db::simple($data, $table, $primaryKey, $columns, $where)));
                             break;
                         case __MOSHTARAKUSERTYPE__:
                             $table = 'bnm_credits';
@@ -9823,7 +10004,7 @@ class Helper
                     }
                     return (json_encode(Db::simple($data, $table, $primaryKey, $columns, $where)));
                 }
-            break;
+                break;
             case 'real_subscribers':
                 if (self::Login_Just_Check()) {
                     $table = 'bnm_subscribers';
@@ -9859,7 +10040,7 @@ class Helper
                     }
                     return (json_encode(Db::simple($data, $table, $primaryKey, $columns, $where)));
                 }
-            break;
+                break;
             case 'pre_internal_legal_subscribers':
                 if (self::Login_Just_Check()) {
                     $table = 'bnm_presubscribers';
@@ -9894,9 +10075,8 @@ class Helper
                             break;
                     }
                     return (json_encode(Db::simple($data, $table, $primaryKey, $columns, $where)));
-
                 }
-            break;
+                break;
             case 'legal_subscribers':
                 if (self::Login_Just_Check()) {
                     $table = 'bnm_subscribers';
@@ -9932,9 +10112,8 @@ class Helper
                             break;
                     }
                     return (json_encode(Db::simple($data, $table, $primaryKey, $columns, $where)));
-
                 }
-            break;
+                break;
             case 'factors_init':
                 if (self::Login_Just_Check()) {
                     switch ($_SESSION['user_type']) {
@@ -9992,18 +10171,18 @@ class Helper
                             $where = false;
                             return (json_encode(Db::simple($data, $table, $primaryKey, $columns, $where)));
                             break;
-                            case __MOSHTARAKUSERTYPE__:
-                                $table = 'bnm_subscribers';
-                                $primaryKey = 'id';
-                                $columns = array(
-                                    array('db' => 'id', 'dt' => 'id'),
-                                    array('db' => 'name', 'dt' => 'name'),
-                                    array('db' => 'code_meli', 'dt' => 'code_meli'),
-                                    array('db' => 'telephone1', 'dt' => 'telephone1'),
-                                    array('db' => 'telephone_hamrah', 'dt' => 'telephone_hamrah'),
-                                    array('db' => 'noe_moshtarak', 'dt' => 'noe_moshtarak'),
-                                );
-                                $table = "(
+                        case __MOSHTARAKUSERTYPE__:
+                            $table = 'bnm_subscribers';
+                            $primaryKey = 'id';
+                            $columns = array(
+                                array('db' => 'id', 'dt' => 'id'),
+                                array('db' => 'name', 'dt' => 'name'),
+                                array('db' => 'code_meli', 'dt' => 'code_meli'),
+                                array('db' => 'telephone1', 'dt' => 'telephone1'),
+                                array('db' => 'telephone_hamrah', 'dt' => 'telephone_hamrah'),
+                                array('db' => 'noe_moshtarak', 'dt' => 'noe_moshtarak'),
+                            );
+                            $table = "(
                                     SELECT
                                         sub.id,
                                         IF(sub.noe_moshtarak = 'real', CONCAT( sub.name, ' ', sub.f_name ),sub.name_sherkat) name,
@@ -10015,12 +10194,12 @@ class Helper
                                     WHERE sub.id = {$_SESSION['user_id']}
                                     ORDER BY id DESC
                                     )tmp";
-                                $where = false;
-                                return (json_encode(Db::simple($data, $table, $primaryKey, $columns, $where)));
-                                break;
-                            default:
-                                die(self::Json_Message('auth_fail'));
-                                break;
+                            $where = false;
+                            return (json_encode(Db::simple($data, $table, $primaryKey, $columns, $where)));
+                            break;
+                        default:
+                            die(self::Json_Message('auth_fail'));
+                            break;
                     }
                 } else {
                     die(self::Json_Message('auth_fail'));
@@ -10038,10 +10217,28 @@ class Helper
                                 array('db' => 'id', 'dt' => 'id'),
                                 array('db' => 'name', 'dt' => 'name'),
                                 array('db' => 'telephone1', 'dt' => 'telephone1'),
-                                array('db' => 'tarikhe_factor', 'dt' => 'tarikhe_factor'),
+                                array(
+                                    'db' => 'tarikhe_factor', 'dt' => 'tarikhe_factor',
+                                    'formatter' => function ($d, $row) {
+                                        $tmp = $d;
+                                        if ($d) {
+                                            $tmp = date("Y-m-d H:i:s", strtotime($d));
+                                        }
+                                        if (!$tmp) return $d;
+                                        return Helper::TabdileTarikh($tmp, 1, '-', '-', false);
+                                    }
+                                ),
                                 array('db' => 'tasvie_shode', 'dt' => 'tasvie_shode'),
                                 array('db' => 'onvane_service', 'dt' => 'onvane_service'),
                                 array('db' => 'mablaghe_ghabele_pardakht', 'dt' => 'mablaghe_ghabele_pardakht'),
+                                //modify date
+                                // array(
+                                //     'db'        => 'start_date',
+                                //     'dt'        => 4,
+                                //     'formatter' => function( $d, $row ) {
+                                //         return date( 'jS M y', strtotime($d));
+                                //     }
+                                // ),
                             );
                             $table = "(
                                 SELECT
@@ -10277,7 +10474,7 @@ class Helper
                 } else {
                     return self::Json_Message('af');
                 }
-            break;
+                break;
             case 'shahkar_services':
                 if (self::Login_Just_Check()) {
                     switch ($_SESSION['user_type']) {
@@ -10394,7 +10591,7 @@ class Helper
                 } else {
                     return self::Json_Message('af');
                 }
-            break;
+                break;
             case 'shahkar_operations':
                 if (self::Login_Just_Check()) {
                     switch ($_SESSION['user_type']) {
@@ -10426,12 +10623,14 @@ class Helper
                                 )tmp";
                             $where = false;
                             return (json_encode(Db::simple($data, $table, $primaryKey, $columns, $where)));
-                        break;
+                            break;
                         default:
-                            
-                        break;
-                        }
-                    } else {return self::Json_Message('af');}
+
+                            break;
+                    }
+                } else {
+                    return self::Json_Message('af');
+                }
                 break;
             case 'shahkar_estelam_log':
                 if (self::Login_Just_Check()) {
@@ -10541,7 +10740,7 @@ class Helper
                 } else {
                     return self::Json_Message('af');
                 }
-            break;
+                break;
             case 'tax':
                 if (self::Login_Just_Check()) {
                     switch ($_SESSION['user_type']) {
@@ -10550,10 +10749,10 @@ class Helper
                             $table = 'bnm_tax';
                             $primaryKey = 'id';
                             $columns = array(
-                                array( 'db' => 'id', 'dt' => 'id' ),
-                                array( 'db' => 'darsade_arzeshe_afzode', 'dt' => 'darsade_arzeshe_afzode' ),
-                                array( 'db' => 'darsade_maliate_arzeshe_afzode', 'dt' => 'darsade_maliate_arzeshe_afzode' ),
-                                array( 'db' => 'darsade_avarez_arzeshe_afzode', 'dt' => 'darsade_avarez_arzeshe_afzode' ),
+                                array('db' => 'id', 'dt' => 'id'),
+                                array('db' => 'darsade_arzeshe_afzode', 'dt' => 'darsade_arzeshe_afzode'),
+                                array('db' => 'darsade_maliate_arzeshe_afzode', 'dt' => 'darsade_maliate_arzeshe_afzode'),
+                                array('db' => 'darsade_avarez_arzeshe_afzode', 'dt' => 'darsade_avarez_arzeshe_afzode'),
                             );
                             $where = false;
                             return (json_encode(Db::simple($data, $table, $primaryKey, $columns, $where)));
@@ -10564,10 +10763,10 @@ class Helper
                 } else {
                     return self::Json_Message('af');
                 }
-            break;
+                break;
             default:
                 die(self::Json_Message('unknown_error'));
-            break;
+                break;
         }
     }
 }
