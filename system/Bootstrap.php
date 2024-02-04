@@ -7,25 +7,114 @@ class Bootstrap
     public function __construct()
     {
         $_SESSION['dashboard_menu_names'] = Helper::get_all_dashboard_menu_names();
+
+        if (isset($_POST['send_active_services'])) {
+            parse_str($_POST[key($_POST)], $_POST);
+            if(isset($_POST['ostan'])){
+                $ostan=Helper::Select_By_Id('bnm_ostan', $_POST['ostan']);
+            }
+            if(isset($_POST['shahr'])){
+                $ostan=Helper::Select_By_Id('bnm_shahr', $_POST['shahr']);
+            }
+            $td = false;
+            if (isset($_POST['timefrom']) && isset($_POST['timeto'])) {
+                $_POST['timefrom'] = Helper::regulateNumber($_POST['timefrom']);
+                $_POST['timeto'] = Helper::regulateNumber($_POST['timeto']);
+                $fd = Helper::TabdileTarikh($_POST['timefrom'], 2, '/', '-', false);
+                $td = Helper::TabdileTarikh($_POST['timeto'], 2, '/', '-', false);
+            }
+            $services = false;
+            if ($_POST['service'] === 'voip') {
+                $ids = $GLOBALS['ibs_voip']->searchUserRelExpDateTo(Helper::Add_Or_Minus_Day_To_Date("365", '+'));
+                // die(json_encode($ids));
+                // if(! $ids[1][2]) die(Helper::Json_Message('nf'));
+                $ibsinfo = Helper::ibsGetUserInfoByArrayId($ids[1][2], true, 'voip');
+                // die(json_encode($ibsinfo));
+                if (!$ibsinfo) die(Helper::Json_Message('nf'));
+                $services = Helper::getServiceInfoByMultipleServiceTypesNoAuth('voip');
+
+                foreach ($ibsinfo as $k => $v) {
+                    foreach ($services as $kk => $vv) {
+                        if (isset($v['attrs']['voip_username'])) {
+                            if ($v['attrs']['voip_username'] === $vv['ibsusername']) {
+                                if (isset($v['attrs']['nearest_exp_date']) && isset($v['attrs']['real_first_login']) && isset($v['online_status'])) {
+                                    $services[$kk]['relexpdate'] = $v['attrs']['nearest_exp_date'];
+                                    $services[$kk]['real_first_login'] = $v['attrs']['real_first_login'];
+                                    $services[$kk]['onlinestatus'] = $v['online_status'];
+                                    $res[] = $vv;
+                                }
+                            }
+                        }
+                    }
+                }
+            } else {
+                $ids = $GLOBALS['ibs_internet']->searchUserRelExpDateTo(Helper::Add_Or_Minus_Day_To_Date("365", '+'));
+                if (!$ids[1][2]) die(Helper::Json_Message('nf'));
+                $ibsinfo = Helper::ibsGetUserInfoByArrayId($ids[1][2], true, 'internet');
+                if (!$ibsinfo) die(Helper::Json_Message('nf'));
+
+                switch ($_POST['service']) {
+                    case 'dsl':
+                        $sertype = ['adsl', 'vdsl', 'bitstream'];
+                        break;
+                    case 'adsl':
+                        $sertype = ['adsl', 'bitstream'];
+                        break;
+                    case 'vdsl':
+                        $sertype = ['vdsl', 'bitstream'];
+                        break;
+                    case 'wireless':
+                        $sertype = ['wireless'];
+                        break;
+                    case 'tdlte':
+                        $sertype = ['tdlte'];
+                        break;
+                    default:
+                        die(Helper::Json_Message('e'));
+                        break;
+                }
+                $services = Helper::getServiceInfoByMultipleServiceTypesNoAuth($sertype);
+                $res = [];
+                foreach ($ibsinfo as $k => $v) {
+                    foreach ($services as $kk => $vv) {
+                        if (isset($v['attrs']['normal_username'])) {
+                            if ($v['attrs']['normal_username'] === $vv['ibsusername']) {
+                                if (isset($v['attrs']['nearest_exp_date']) && isset($v['attrs']['real_first_login']) && isset($v['online_status'])) {
+                                    $services[$kk]['relexpdate'] = $v['attrs']['nearest_exp_date'];
+                                    $services[$kk]['real_first_login'] = $v['attrs']['real_first_login'];
+                                    $services[$kk]['onlinestatus'] = $v['online_status'];
+                                    $res[] = $vv;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            if (!$services) die(Helper::Json_Message('nf'));
+            // foreach ($variable as $key => $value) {
+            //     # code...
+            // }
+            die(json_encode($res));
+        }
         if (isset($_POST['send_sold_services'])) {
             parse_str($_POST[key($_POST)], $_POST);
-            $_POST['timefrom']=Helper::regulateNumber($_POST['timefrom']);
-            $_POST['timeto']=Helper::regulateNumber($_POST['timeto']);
-            $fd=Helper::TabdileTarikh($_POST['timefrom'], 2, '/', '-', false);
-            $td=Helper::TabdileTarikh($_POST['timeto'], 2, '/', '-', false);
-            if($_POST['service']==='dsl'){
-                $sertype=['adsl', 'vdsl', 'bitstream'];
-            }elseif($_POST['service']==='adsl'){
-                $sertype=['adsl', 'bitstream'];
-            }elseif($_POST['service']==='vdsl'){
-                $sertype=['vdsl', 'bitstream'];
-            }else{
-                $sertype=[$_POST['service']];
+            $_POST['timefrom'] = Helper::regulateNumber($_POST['timefrom']);
+            $_POST['timeto'] = Helper::regulateNumber($_POST['timeto']);
+            $fd = Helper::TabdileTarikh($_POST['timefrom'], 2, '/', '-', false);
+            $td = Helper::TabdileTarikh($_POST['timeto'], 2, '/', '-', false);
+            if ($_POST['service'] === 'dsl') {
+                $sertype = ['adsl', 'vdsl', 'bitstream'];
+            } elseif ($_POST['service'] === 'adsl') {
+                $sertype = ['adsl', 'bitstream'];
+            } elseif ($_POST['service'] === 'vdsl') {
+                $sertype = ['vdsl', 'bitstream'];
+            } else {
+                $sertype = [$_POST['service']];
             }
-            $res=Helper::getServiceInfoBySertypeOstanShahr($sertype,(int) $_POST['ostan'],(int) $_POST['shahr'], $fd, $td, (int) $_POST['status']);
-            if(! $res) die(Helper::Custom_Msg(Helper::Messages('nf'), 2));
-            $res=Helper::tabdileTarikhIndexArray($res, 'tts_formatted', 1, '-', '-', true);
-            $res=Helper::tabdileTarikhIndexArray($res, 'tps_formatted', 1, '-', '-', true);
+            $res = Helper::getServiceInfoBySertypeOstanShahr($sertype, (int) $_POST['ostan'], (int) $_POST['shahr'], $fd, $td, (int) $_POST['status']);
+            if (!$res) die(Helper::Custom_Msg(Helper::Messages('nf'), 2));
+            $res = Helper::tabdileTarikhIndexArray($res, 'tts_formatted', 1, '-', '-', true);
+            $res = Helper::tabdileTarikhIndexArray($res, 'tps_formatted', 1, '-', '-', true);
             die(json_encode($res));
         }
         if (isset($_POST['send_pre_asiatech_bitstream_emkansanji'])) {
@@ -1291,7 +1380,7 @@ class Bootstrap
             if (!$res_factor) die(Helper::Custom_Msg('اطلاعات سرویس یافت نشد با پشتیبانی تماس بگیرید'));
             if (!$res_factor[0]['ibsusername']) die(Helper::Custom_Msg('اطلاعات سرویس یافت نشد با پشتیبانی تماس بگیرید'));
             // die(json_encode($res_factor));
-            $newpass='';
+            $newpass = '';
             switch ($res_factor[0]['sertype']) {
                 case 'adsl':
                 case 'vdsl':
@@ -1313,7 +1402,7 @@ class Bootstrap
                     break;
             }
             if (!$userinfo) die(Helper::Json_Message('e'));
-            $newpass=$userinfo[1][$res_usrid]['attrs']['normal_password'];
+            $newpass = $userinfo[1][$res_usrid]['attrs']['normal_password'];
             $smsmessage = __OWNER__ . " ";
             $smsmessage .= "نام کاربری سرویس:" . " ";
             $smsmessage .= $res_factor[0]['ibsusername'] . " ";

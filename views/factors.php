@@ -2,7 +2,7 @@
 <div class="content">
     <!--datatable-->
     <div class="card" style="padding: 2px;">
-        <div class="col-md-12">
+        <div class="card-body col-md-12">
             <button name="initconfirm" class="btn btn-primary col-md-auto float-md-right" id="initconfirm">جستجو<i
                         class="icon-database-edit2 ml-2"></i></button>
             <table id="view_table" class="table table-striped datatable-responsive table-hover">

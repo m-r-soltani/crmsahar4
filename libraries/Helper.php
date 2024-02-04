@@ -2945,6 +2945,78 @@ class Helper
         }
         return $res;
     }
+    public static function getServiceInfoByMultipleServiceTypesNoAuth(array $sertype)
+    {
+
+        $res = false;
+        $sql = "SELECT * FROM (
+            SELECT fid,emkanat_id,fsertype,sertype,telephone1,code_meli,noe_moshtarak,shenase_meli,ssid,reallegal_name,
+            subid,telephone_hamrah,branch_id,
+            CASE 
+                WHEN adslvdsl_ibsu THEN adslvdsl_ibsu
+                WHEN bitasiatech_ibsu THEN bitasiatech_ibsu
+                WHEN wireless_ibsu THEN IF(noe_moshtarak='real', CONCAT('w-', ssid, '-', code_meli),CONCAT('w-', ssid, '-', shenase_meli))
+                WHEN tdlte_ibsu THEN tdlte_ibsu
+                WHEN voip_ibsu THEN voip_ibsu
+                ELSE Null
+                END AS ibsusername
+            FROM
+                (SELECT
+                    sub.telephone1,
+                    sub.id subid,
+                    sub.branch_id,
+                    sub.telephone_hamrah,
+                    sub.code_meli,
+                    sub.noe_moshtarak,
+                    sub.shenase_meli,
+                    IF(sub.noe_moshtarak='real',CONCAT(sub.name,' ',sub.f_name),sub.name_sherkat) reallegal_name,
+                    sub.name name,
+                    sub.f_name,
+                    sub.name_sherkat,
+                    osokonat.name ostane_sokonat_name_fa,
+                    ssokonat.name shahre_sokonat_name_fa,
+                    f.id fid,
+                    f.emkanat_id,
+                    f.type fsertype,
+                    ss.id ssid,
+                    ser.type sertype,
+                    IF(ser.noe_khadamat='BITSTREAM_ADSL','adsl',IF(ser.noe_khadamat='BITSTREAM_VDSL','vdsl',ser.type)) general_sertype,
+                    IF(ports.telephone=1, sub.telephone1,IF(ports.telephone=2, sub.telephone2, IF(ports.telephone=3, sub.telephone3,NULL))) adslvdsl_ibsu,
+                    IF(oss.telephone=1, sub.telephone1, IF(oss.telephone=2, sub.telephone2, IF(oss.telephone=3, sub.telephone3, false))) bitasiatech_ibsu,
+                    IF(ser.type='wireless',111,null) wireless_ibsu,
+                    lte.tdlte_number tdlte_ibsu,
+                    CASE WHEN ser.type = 'voip' THEN IF(f.emkanat_id=1,sub.telephone1,IF(f.emkanat_id=2,sub.telephone2, IF(f.emkanat_id=3,sub.telephone3,NULL)))
+                    ELSE NULL
+                    END AS voip_ibsu
+                FROM
+                    bnm_factor f
+                    INNER JOIN bnm_subscribers sub ON f.subscriber_id = sub.id
+                    INNER JOIN bnm_services ser ON ser.id = f.service_id 
+                    INNER JOIN bnm_ostan osokonat ON osokonat.id= sub.ostane_sokonat
+                    INNER JOIN bnm_shahr ssokonat ON ssokonat.id= sub.shahre_sokonat
+                    LEFT JOIN bnm_port ports ON f.emkanat_id = ports.id AND ser.type IN ('adsl','vdsl') AND ports.user_id = sub.id
+                    LEFT JOIN bnm_oss_subscribers oss ON oss.user_id=f.subscriber_id AND ser.type IN ('bitstream')
+                    LEFT JOIN bnm_sub_station ss ON ss.id = f.emkanat_id AND ss.sub_id= f.subscriber_id AND ser.type IN ('wireless')
+                    LEFT JOIN bnm_tdlte_sim lte ON lte.id = f.emkanat_id AND lte.subscriber_id = f.subscriber_id AND ser.type IN ('tdlte')
+                WHERE
+                    f.type IN (";
+        for ($i = 0; $i < count($sertype); $i++) {
+            if ($i < count($sertype) && isset($sertype[$i + 1])) {
+                $sql .= '?' . ",";
+            } else {
+                $sql .= '?' . ")";
+            }
+        }
+        $sql .= " AND (f.emkanat_id IS NOT NULL OR f.emkanat_id <> '')
+        AND (f.type IS NOT NULL OR f.type <> '')
+        AND (f.subscriber_id IS NOT NULL OR f.subscriber_id <> '')
+        AND f.tasvie_shode = 1
+            GROUP BY f.subscriber_id, f.type, f.emkanat_id) tmp
+            )tmp2
+        WHERE ibsusername <> '' AND ibsusername IS NOT NULL";
+        $res = Db::secure_fetchall($sql, $sertype);
+        return $res;
+    }
     public static function getServiceInfoBySertypeOstanShahr(array $sertype, $ostan, $shahr, $fd, $td, int $status)
     {
 

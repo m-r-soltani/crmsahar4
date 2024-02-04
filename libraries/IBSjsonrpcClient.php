@@ -310,6 +310,12 @@ class IBSjsonrpcClient {
             "rel_exp_value_unit" => $date_unit
         ));
     }
+    function searchUserAbsExpDateTo($to_date, $date_unit="gregorian"){
+        return $this->searchUser(array(
+            "abs_exp_date_to" => $to_date,
+            "abs_exp_date_to_unit" => $date_unit
+        ));
+    }
     function searchUserByPhone($phone){
         return $this->searchUser(array(
             "phone" => $phone,
